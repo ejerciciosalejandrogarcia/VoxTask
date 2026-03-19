@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">VoxTask</string>
+
+    <!-- Texto interfaz -->
+
+    <!-- Iniciar sesion Screen -->
+    <string name="campo_nombre_usuario">Nombre de usuario</string>
+    <string name="campo_contrasenia">Contraseña</string>
+    <string name="btn_iniciar_sesion">Iniciar sesión</string>
+    <string name="txt_pregunta">¿No tienes cuenta?</string>
+    <string name="txt_respuesta">Regístrate</string>
+    <string name="icono_mostrar_contrasenia">Mostrar contraseña</string>
+    <string name="icono_limpiar">Limpiar</string>
+    <string name="txt_o">o</string>
+    <string name="txt_iniciar_google">Iniciar sesión con Google</string>
+
+
+    <!-- Registro Usuario Screen -->
+    <string name="btn_registrar_usuario">Crear cuenta</string>
+    <string name="campo_nombre">Su nombre</string>
+    <string name="campo_primer_ap">Su primer apellido</string>
+    <string name="campo_segundo_ap">Su segundo apellido</string>
+    <string name="campo_fecha_naci">Su fecha de nacimiento</string>
+    <string name="campo_correo">Su correo electronico</string>
+
+
+
 </resources>
