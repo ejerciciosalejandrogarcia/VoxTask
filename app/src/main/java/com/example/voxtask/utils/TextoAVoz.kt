@@ -2,41 +2,44 @@ package com.example.voxtask.utils
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import android.util.Log
+import android.speech.tts.UtteranceProgressListener
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.*
+import kotlin.coroutines.resume
 
 object TextoAVoz {
 
-    private var motorVoz: TextToSpeech? = null
-    private var listo = false
+    private var tts: TextToSpeech? = null
 
-    fun hablar(contexto: Context, texto: String) {
-        if (motorVoz == null) {
-
-            motorVoz = TextToSpeech(contexto) { estado ->
-                if (estado == TextToSpeech.SUCCESS) {
-                    motorVoz?.language = Locale("es", "MX")
-                    motorVoz?.setPitch(1.0f)
-                    motorVoz?.setSpeechRate(0.9f)
-                    listo = true
-                    motorVoz?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, null)
-                    Log.d("Voz", "✅ Hablando: $texto")
-                } else {
-                    Log.e("Voz", "❌ Error")
+    suspend fun hablar(context: Context, texto: String) {
+        // Inicializar si es necesario
+        if (tts == null) {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                tts = TextToSpeech(context) { status ->
+                    if (status == TextToSpeech.SUCCESS) {
+                        tts?.language = Locale("es", "MX")
+                        tts?.setPitch(1.0f)
+                        tts?.setSpeechRate(0.9f)
+                    }
+                    continuation.resume(Unit)
                 }
             }
-        } else if (listo) {
-            motorVoz?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, null)
-            Log.d("Voz", "✅ Hablando: $texto")
-        } else {
-            Log.d("Voz", "⏳ Motor no listo aún")
+        }
+
+        // Hablar y esperar
+        suspendCancellableCoroutine<Unit> { continuation ->
+            tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {}
+                override fun onDone(utteranceId: String?) { continuation.resume(Unit) }
+                override fun onError(utteranceId: String?) { continuation.resume(Unit) }
+            })
+            tts?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "id")
         }
     }
 
     fun liberar() {
-        motorVoz?.stop()
-        motorVoz?.shutdown()
-        motorVoz = null
-        listo = false
+        tts?.stop()
+        tts?.shutdown()
+        tts = null
     }
 }

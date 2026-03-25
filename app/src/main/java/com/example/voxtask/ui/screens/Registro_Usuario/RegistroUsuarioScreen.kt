@@ -44,6 +44,12 @@ fun RegistroUsuarioScreen(
     val contexto = LocalContext.current
     val calendario = Calendar.getInstance()
 
+    LaunchedEffect(estadoUi.registroUsuarioExitoso) {
+        if (estadoUi.registroUsuarioExitoso) {
+            alRegistroExitoso()
+        }
+    }
+
     val selectorFecha = remember {
         DatePickerDialog(
             contexto,

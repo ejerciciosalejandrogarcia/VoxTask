@@ -304,7 +304,23 @@ fun InicioSesionScreen(
                             fontSize = 13.sp
                         )
                         Text(
-                            text = stringResource(R.string.txt_respuesta),
+                            text = " "+stringResource(R.string.txt_respuesta),
+                            color = VerdePrimario,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Boton para redireccionar a la pantalla de cambiar contrasenia
+                    TextButton(onClick = { alNavegarARegistro() }) {
+                        Text(
+                            text = stringResource(R.string.txt_pregunta_contrasenia),
+                            color = TextoGris,
+                            fontSize = 13.sp
+                        )
+                        Text(
+                            text = " "+stringResource(R.string.txt_respuesta_contrasenia),
                             color = VerdePrimario,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold

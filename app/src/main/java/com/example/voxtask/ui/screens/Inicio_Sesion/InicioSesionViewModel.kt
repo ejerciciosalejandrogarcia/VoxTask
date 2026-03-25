@@ -3,6 +3,7 @@ package com.example.voxtask.ui.screens.Inicio_Sesion
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -10,10 +11,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.voxtask.R
+import com.example.voxtask.databases.dao.UsuarioDao
 import com.example.voxtask.databases.model.Usuario
+import com.example.voxtask.databases.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -25,7 +29,9 @@ data class InicioSesionUiState(
     val mensajeError: String = ""
 )
 
-class InicioSesionViewModel : ViewModel() {
+class InicioSesionViewModel(
+    private val usuarioRepository: UsuarioRepository = UsuarioDao()  // ← añadir
+) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -46,18 +52,27 @@ class InicioSesionViewModel : ViewModel() {
         val contrasena = _estadoUi.value.contrasena.trim()
 
         if (nombreUsuario.isBlank() || contrasena.isBlank()) {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = "Rellena todos los campos")
+            _estadoUi.value = _estadoUi.value.copy(
+                mensajeError = "Rellena todos los campos"
+            )
             return
         }
 
-        if (contrasena.length < 6) {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = "Mínimo 6 caracteres")
-            return
-        }
+        viewModelScope.launch {
+            val resultado = usuarioRepository.iniciarSesion(nombreUsuario, contrasena)
 
-        _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true)
+            resultado.onSuccess {
+                _estadoUi.value = _estadoUi.value.copy(
+                    inicioSesionExitoso = true,
+                    mensajeError = ""
+                )
+            }.onFailure {
+                _estadoUi.value = _estadoUi.value.copy(
+                    mensajeError = it.message ?: "Credenciales incorrectas"
+                )
+            }
+        }
     }
-
     // ── Login con Google ──────────────────────────────────────────
 
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {

@@ -82,7 +82,10 @@ fun VoxTaskApp(
 
         composable(VoxTaskScreen.Registro_Usuario.name) {
             RegistroUsuarioScreen(
-                alRegistroExitoso = { navController.navigate(VoxTaskScreen.Inicio_sesion.name) },
+                alRegistroExitoso = {             navController.navigate(VoxTaskScreen.Inicio_sesion.name) {
+                    popUpTo(VoxTaskScreen.Registro_Usuario.name) { inclusive = true }
+                }
+                },
                 modeloVista = viewModelRegistrar
             )
         }
@@ -94,3 +97,4 @@ fun VoxTaskApp(
         }
     }
 }
+

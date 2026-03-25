@@ -13,6 +13,8 @@
     <string name="icono_limpiar">Limpiar</string>
     <string name="txt_o">o</string>
     <string name="txt_iniciar_google">Iniciar sesión con Google</string>
+    <string name="txt_pregunta_contrasenia">¿No te acuerdas de la contraseña?</string>
+    <string name="txt_respuesta_contrasenia">Restablecer contraseña</string>
 
 
     <!-- Registro Usuario Screen -->
@@ -23,6 +25,15 @@
     <string name="campo_fecha_naci">Su fecha de nacimiento</string>
     <string name="campo_correo">Su correo electronico</string>
 
+    <!-- Inicio Screen -->
+    <string name="txt_contador">Iniciar un contador</string>
+    <string name="txt_correo">Redactar y enviar un correo</string>
+    <string name="txt_recordatorio">Crear un recordatorio</string>
+    <string name="txt_lista_compra">Crear una lista de la compra</string>
+    <string name="btn_hablar">Boton de hablar</string>
+    <string name="btn_ajustes">Boton de ajustes</string>
+    <string name="btn_inicio">Boton de inicio</string>
+    <string name="btn_traducir">Boton de traducir</string>
 
 
 </resources>

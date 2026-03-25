@@ -5,6 +5,12 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import com.example.voxtask.databases.dao.UsuarioDao
+import com.example.voxtask.databases.model.Usuario
+import com.example.voxtask.databases.repository.UsuarioRepository
+import kotlinx.coroutines.launch
+
 data class RegistrarUsuarioUiState(
     val nombreUsuario: String = "",
     val nombre: String = "",
@@ -17,7 +23,9 @@ data class RegistrarUsuarioUiState(
     val mensajeError: String = ""
 )
 
-class RegistroUsuarioViewModel : ViewModel() {
+class RegistroUsuarioViewModel(
+    private val repositorio: UsuarioRepository = UsuarioDao()  // ← añadir
+) : ViewModel() {
 
     private val _estadoUi = MutableStateFlow(RegistrarUsuarioUiState())
     val estadoUi: StateFlow<RegistrarUsuarioUiState> = _estadoUi.asStateFlow()
@@ -79,15 +87,29 @@ class RegistroUsuarioViewModel : ViewModel() {
                 return
             }
 
-            !fechaNacimiento.matches(Regex("""\d{4}-\d{2}-\d{2}""")) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Fecha de nacimiento inválida (YYYY-MM-DD)")
-                return
-            }
+                else -> {
+                    _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
 
-            else -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
-                _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
+                    viewModelScope.launch {
+                        val usuario = Usuario(
+                            nombre_usuario     = nombreUsuario,
+                            nombre             = nombre,
+                            primer_apellido    = primerApellido,
+                            segundo_apellido   = segundoApellido,
+                            fecha_nacimiento   = fechaNacimiento,
+                            correo_electronico = correoElectronico,
+                            contrasenia        = contrasenia
+                        )
+                        val resultado = repositorio.registrarUsuario(usuario)
+
+                        if (resultado.isSuccess) {
+                            _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
+                        } else {
+                            val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
+                            _estadoUi.value = _estadoUi.value.copy(mensajeError = msg)
+                        }
+                    }
+                }
             }
-        }
     }
 }
