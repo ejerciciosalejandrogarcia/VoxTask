@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.ads.mobile.sdk)
+    implementation(libs.androidx.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

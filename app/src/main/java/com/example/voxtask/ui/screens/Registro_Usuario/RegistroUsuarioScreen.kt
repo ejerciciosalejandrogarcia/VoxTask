@@ -28,8 +28,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionUiState
-import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionViewModel
 import com.example.voxtask.ui.theme.*
 import java.util.Calendar
 
@@ -37,9 +35,9 @@ import java.util.Calendar
 @Composable
 fun RegistroUsuarioScreen(
     alRegistroExitoso: () -> Unit,
-    modeloVista: RegistroUsuarioViewModel = viewModel()
+    viewModel: RegistroUsuarioViewModel = viewModel()
 ) {
-    val estadoUi by modeloVista.estadoUi.collectAsState()
+    val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val calendario = Calendar.getInstance()
@@ -54,7 +52,7 @@ fun RegistroUsuarioScreen(
         DatePickerDialog(
             contexto,
             { _, year, month, dayOfMonth ->
-                modeloVista.alCambiarFechaNacimiento("$dayOfMonth/${month + 1}/$year")
+                viewModel.alCambiarFechaNacimiento("$dayOfMonth/${month + 1}/$year")
             },
             calendario.get(Calendar.YEAR),
             calendario.get(Calendar.MONTH),
@@ -67,7 +65,7 @@ fun RegistroUsuarioScreen(
             .background(FondoBlanco)
     ) {
 
-        // ── Círculo grande superior izquierda ──
+        //Círculo grande superior izquierda
         Box(
             modifier = Modifier
                 .size(280.dp)
@@ -80,7 +78,7 @@ fun RegistroUsuarioScreen(
                 )
         )
 
-        // ── Círculo mediano superior derecha ──
+        //Círculo mediano superior derecha
         Box(
             modifier = Modifier
                 .size(160.dp)
@@ -94,7 +92,7 @@ fun RegistroUsuarioScreen(
                 .blur(2.dp)
         )
 
-        // ── Círculo grande inferior derecha ──
+        //Círculo grande inferior derecha
         Box(
             modifier = Modifier
                 .size(300.dp)
@@ -107,7 +105,7 @@ fun RegistroUsuarioScreen(
                 )
         )
 
-        // ── Círculo pequeño inferior izquierda ──
+        //Círculo pequeño inferior izquierda
         Box(
             modifier = Modifier
                 .size(140.dp)
@@ -162,12 +160,12 @@ fun RegistroUsuarioScreen(
                     // Campo nombre de usuario
                     OutlinedTextField(
                         value = estadoUi.nombreUsuario,
-                        onValueChange = { modeloVista.alCambiarNombreUsuario(it) },
+                        onValueChange = { viewModel.alCambiarNombreUsuario(it) },
                         label = { Text(stringResource(R.string.campo_nombre_usuario)) },
                         singleLine = true,
                         trailingIcon = {
                             if (estadoUi.nombreUsuario.isNotEmpty()) {
-                                IconButton(onClick = { modeloVista.alCambiarNombreUsuario("") }) {
+                                IconButton(onClick = { viewModel.alCambiarNombreUsuario("") }) {
                                     Icon(
                                         Icons.Default.Clear,
                                         contentDescription = stringResource(R.string.icono_limpiar),
@@ -194,12 +192,12 @@ fun RegistroUsuarioScreen(
                     // Campo nombre
                     OutlinedTextField(
                         value = estadoUi.nombre,
-                        onValueChange = { modeloVista.alCambiarNombre(it) },
+                        onValueChange = { viewModel.alCambiarNombre(it) },
                         label = { Text(stringResource(R.string.campo_nombre)) },
                         singleLine = true,
                         trailingIcon = {
                             if (estadoUi.nombre.isNotEmpty()) {
-                                IconButton(onClick = { modeloVista.alCambiarNombre("") }) {
+                                IconButton(onClick = { viewModel.alCambiarNombre("") }) {
                                     Icon(
                                         Icons.Default.Clear,
                                         contentDescription = stringResource(R.string.icono_limpiar),
@@ -226,12 +224,12 @@ fun RegistroUsuarioScreen(
                     // Campo primer apellido
                     OutlinedTextField(
                         value = estadoUi.primer_apellido,
-                        onValueChange = { modeloVista.alCambiarPrimerApellido(it) },
+                        onValueChange = { viewModel.alCambiarPrimerApellido(it) },
                         label = { Text(stringResource(R.string.campo_primer_ap)) },
                         singleLine = true,
                         trailingIcon = {
                             if (estadoUi.primer_apellido.isNotEmpty()) {
-                                IconButton(onClick = { modeloVista.alCambiarPrimerApellido("") }) {
+                                IconButton(onClick = { viewModel.alCambiarPrimerApellido("") }) {
                                     Icon(
                                         Icons.Default.Clear,
                                         contentDescription = stringResource(R.string.icono_limpiar),
@@ -260,12 +258,12 @@ fun RegistroUsuarioScreen(
                     // Campo segundo apellido
                     OutlinedTextField(
                         value = estadoUi.segundo_apellido,
-                        onValueChange = { modeloVista.alCambiarSegundoApellido(it) },
+                        onValueChange = { viewModel.alCambiarSegundoApellido(it) },
                         label = { Text(stringResource(R.string.campo_segundo_ap)) },
                         singleLine = true,
                         trailingIcon = {
                             if (estadoUi.segundo_apellido.isNotEmpty()) {
-                                IconButton(onClick = { modeloVista.alCambiarSegundoApellido("") }) {
+                                IconButton(onClick = { viewModel.alCambiarSegundoApellido("") }) {
                                     Icon(
                                         Icons.Default.Clear,
                                         contentDescription = stringResource(R.string.icono_limpiar),
@@ -319,12 +317,12 @@ fun RegistroUsuarioScreen(
                     // Campo correo electronico
                     OutlinedTextField(
                         value = estadoUi.correo_electronico,
-                        onValueChange = { modeloVista.alCambiarCorreoElectronico(it) },
+                        onValueChange = { viewModel.alCambiarCorreoElectronico(it) },
                         label = { Text(stringResource(R.string.campo_correo)) },
                         singleLine = true,
                         trailingIcon = {
                             if (estadoUi.correo_electronico.isNotEmpty()) {
-                                IconButton(onClick = { modeloVista.alCambiarCorreoElectronico("") }) {
+                                IconButton(onClick = { viewModel.alCambiarCorreoElectronico("") }) {
                                     Icon(
                                         Icons.Default.Clear,
                                         contentDescription = stringResource(R.string.icono_limpiar),
@@ -351,7 +349,7 @@ fun RegistroUsuarioScreen(
                     // Campo contraseña
                     OutlinedTextField(
                         value = estadoUi.contrasenia,
-                        onValueChange = { modeloVista.alCambiarContrasenia(it) },
+                        onValueChange = { viewModel.alCambiarContrasenia(it) },
                         label = { Text(stringResource(R.string.campo_contrasenia)) },
                         singleLine = true,
                         visualTransformation = if (contrasenaVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -392,7 +390,7 @@ fun RegistroUsuarioScreen(
 
                     // Botón crear cuenta
                     Button(
-                        onClick = { modeloVista.registrarUsuario() },
+                        onClick = { viewModel.registrarUsuario() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp),

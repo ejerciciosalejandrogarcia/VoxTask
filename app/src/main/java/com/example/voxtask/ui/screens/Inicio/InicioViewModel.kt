@@ -1,80 +1,41 @@
 package com.example.voxtask.ui.screens.Inicio
 
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.voxtask.utils.TextoAVoz
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class InicioViewModel : ViewModel() {
 
-    // Variables para guardar el texto reconocido
-    var textoReconocido: String = ""
-        private set
+    private val _textoReconocido = MutableStateFlow("")
+    val textoReconocido: StateFlow<String> = _textoReconocido
 
-    // Estado para la UI
-    var estaEscuchando = mutableStateOf(false)
-        private set
+    var abrirContador: () -> Unit = {}
 
-    var textoMostrado = mutableStateOf("")
-        private set
+    fun onTextoRecibido(texto: String) {
+        _textoReconocido.value = texto
+        procesarComando(texto)
+    }
 
-    fun procesarTextoReconocido(texto: String?, contexto: android.content.Context) {
-        estaEscuchando.value = false
-
-        if (!texto.isNullOrEmpty()) {
-            // Guardar en la variable
-            textoReconocido = texto
-            textoMostrado.value = texto
-
-            // Procesar el comando
-            procesarComandoVoz(texto, contexto)
-        } else {
-            textoMostrado.value = ""
-            viewModelScope.launch {
-                TextoAVoz.hablar(contexto, "No te entendí, por favor intenta de nuevo")
-            }
+    private fun procesarComando(texto: String) {
+        when {
+            texto.contains("contador", ignoreCase = true) -> abrirContador()
+            texto.contains("correo", ignoreCase = true) -> abrirCorreo()
+            texto.contains("recordatorio", ignoreCase = true) -> abrirRecordatorio()
+            texto.contains("lista", ignoreCase = true) -> abrirListaCompra()
         }
     }
 
-    fun iniciarEscucha() {
-        estaEscuchando.value = true
+
+    private fun abrirCorreo() {
+
     }
 
-    fun limpiarTexto() {
-        textoReconocido = ""
-        textoMostrado.value = ""
+    private fun abrirRecordatorio() {
+
     }
 
-    private fun procesarComandoVoz(comando: String, contexto: android.content.Context) {
-        val comandoConvertido = comando.lowercase()
+    private fun abrirListaCompra() {
 
-        viewModelScope.launch {
-            when {
-                comandoConvertido.contains("contador") || comandoConvertido.contains("cuenta") -> {
-                    TextoAVoz.hablar(contexto, "Abriendo el contador")
-                    // Aquí vamos al contador
-                }
-                comandoConvertido.contains("correo") || comandoConvertido.contains("email") -> {
-                    TextoAVoz.hablar(contexto, "Abriendo el correo")
-                    // Aquí vamos al correo
-                }
-                comandoConvertido.contains("alarma") || comandoConvertido.contains("alarma") -> {
-                    TextoAVoz.hablar(contexto, "Abriendo las alarmas")
-                    // Aquí vamos a alarmas
-                }
-                comandoConvertido.contains("lista") || comandoConvertido.contains("compra") -> {
-                    TextoAVoz.hablar(contexto, "Abriendo la lista de compras")
-                    // Aquí vamos a lista de compras
-                }
-                else -> {
-                    TextoAVoz.hablar(
-                        contexto,
-                        "No entendí ese comando, por favor elige una de las opciones: contador, correo, alarma o lista de compras"
-                    )
-                }
-            }
-        }
     }
 }

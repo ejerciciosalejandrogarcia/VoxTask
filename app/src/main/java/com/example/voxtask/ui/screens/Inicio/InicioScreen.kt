@@ -14,30 +14,44 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Usuario
-import com.example.voxtask.ui.theme.VerdeClaro
 import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.TextoAVoz
+import com.example.voxtask.utils.rememberVozATexto
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InicioScreen() {
+fun InicioScreen(
+    viewModel: InicioViewModel
+) {
+    //Variables
     val contexto = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val usuario = FirebaseAuth.getInstance().currentUser
     val uid = usuario?.uid
     var mostrarTextos by remember { mutableStateOf(false) }
+    val (vozState, iniciarEscucha) = rememberVozATexto()
+    val texto by viewModel.textoReconocido.collectAsState()
 
+
+    // Texto a voz a view Modal
+    LaunchedEffect(vozState.textoReconocido) {
+        if (vozState.textoReconocido.isNotEmpty()) {
+            viewModel.onTextoRecibido(vozState.textoReconocido)
+        }
+    }
+
+    //Obtener informacion del usuario logueado
     LaunchedEffect(uid) {
         val nombre = if (uid != null) {
             try {
@@ -89,11 +103,10 @@ fun InicioScreen() {
                             tint = Color.White
                         )
                     }
-                    //Boton traducir
+                    //Boton traductor
                     IconButton(
                         onClick = {
                             coroutineScope.launch {
-                                // Aquí puedes llamar a tu función de traducción o TTS
                                 TextoAVoz.hablar(contexto, "Abriendo la opción de traducir")
                             }
                         }
@@ -112,15 +125,73 @@ fun InicioScreen() {
                 containerColor = VerdePrimario,
                 contentColor = Color.White
             ) {
+                // Espacio izquierdo
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.btn_inicio)) },
-                    selected = true,
+                    icon = { },
+                    selected = false,
+                    onClick = { },
+                    enabled = false
+                )
+
+                // Botón micrófono
+                NavigationBarItem(
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(if (vozState.isListening) Color.Red else Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IconButton(
+                                onClick = { iniciarEscucha() },
+                                enabled = !vozState.isListening
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Mic,
+                                    contentDescription = stringResource(R.string.btn_hablar),
+                                    tint = VerdePrimario,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                    },
+                    selected = false,
+                    onClick = { iniciarEscucha() },
+                    enabled = !vozState.isListening
+                )
+
+                // Botón inicio
+                NavigationBarItem(
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        TextoAVoz.hablar(contexto, "Inicio")
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Home,
+                                    contentDescription = stringResource(R.string.btn_inicio),
+                                    tint = VerdePrimario,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                    },
+                    selected = false,
                     onClick = {
                         coroutineScope.launch {
                             TextoAVoz.hablar(contexto, "Inicio")
                         }
-                        // Aquí navegaremos a la pantalla de inicio
-                        // navController.navigate("inicio") { popUpTo("inicio") { inclusive = true } }
                     }
                 )
             }
@@ -161,23 +232,10 @@ fun InicioScreen() {
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    //Hacer otro dia
-                                    //La logica para que cuando pulsemos el boton traducir lo que decimos a texto
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Mic,
-                                contentDescription = stringResource(R.string.btn_hablar)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
                     }
                 }
             }
         }
+
     }
 }

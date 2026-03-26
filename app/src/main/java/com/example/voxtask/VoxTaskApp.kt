@@ -11,7 +11,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.voxtask.ui.screens.Contador.ContadorScreen
+import com.example.voxtask.ui.screens.Contador.ContadorViewModel
 import com.example.voxtask.ui.screens.Inicio.InicioScreen
+import com.example.voxtask.ui.screens.Inicio.InicioViewModel
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionScreen
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionViewModel
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioScreen
@@ -22,7 +25,8 @@ import com.google.android.gms.common.api.ApiException
 enum class VoxTaskScreen {
     Inicio_sesion,
     Registro_Usuario,
-    Inicio
+    Inicio,
+    Contador
 }
 
 @Composable
@@ -31,8 +35,9 @@ fun VoxTaskApp(
 ) {
     val navController = rememberNavController()
     val contexto = LocalContext.current
-    val viewModel: InicioSesionViewModel = viewModel()
+    val viewModelInicioSesion: InicioSesionViewModel = viewModel()
     val viewModelRegistrar: RegistroUsuarioViewModel = viewModel()
+    val viewModelInicio: InicioViewModel = viewModel()
 
     // Lanzador que recibe el resultado de la pantalla de Google
     val lanzadorGoogle = rememberLauncherForActivityResult(
@@ -46,7 +51,7 @@ fun VoxTaskApp(
             try {
                 val cuenta = tarea.getResult(ApiException::class.java)
                 Log.d("Google", "Token obtenido: ${cuenta.idToken}")
-                viewModel.autenticarConGoogle(cuenta.idToken!!)
+                viewModelInicioSesion.autenticarConGoogle(cuenta.idToken!!)
             } catch (e: ApiException) {
                 Log.e("Google", "ApiException: ${e.statusCode} - ${e.message}")
             }
@@ -59,6 +64,8 @@ fun VoxTaskApp(
         navController = navController,
         startDestination = VoxTaskScreen.Inicio_sesion.name
     ) {
+
+        //Screen Inicio Sesion
         composable(route = VoxTaskScreen.Inicio_sesion.name) {
             InicioSesionScreen(
                 alIniciarSesionExitosamente = {
@@ -72,28 +79,42 @@ fun VoxTaskApp(
                     navController.navigate(VoxTaskScreen.Registro_Usuario.name)
                 },
                 alPulsarGoogle = {
-                    // Aquí lanzamos la pantalla de Google
-                    val clienteGoogle = viewModel.obtenerClienteGoogle(contexto)
+                    // Pantalla de Google
+                    val clienteGoogle = viewModelInicioSesion.obtenerClienteGoogle(contexto)
                     lanzadorGoogle.launch(clienteGoogle.signInIntent)
                 },
-                modeloVista = viewModel
+                viewModel = viewModelInicioSesion
             )
         }
 
+        //Screen Registro
         composable(VoxTaskScreen.Registro_Usuario.name) {
             RegistroUsuarioScreen(
                 alRegistroExitoso = {             navController.navigate(VoxTaskScreen.Inicio_sesion.name) {
                     popUpTo(VoxTaskScreen.Registro_Usuario.name) { inclusive = true }
                 }
                 },
-                modeloVista = viewModelRegistrar
+                viewModel = viewModelRegistrar
             )
         }
 
-        composable(VoxTaskScreen.Inicio.name) {
-            InicioScreen(
 
+        //Screen Inicio
+        composable(VoxTaskScreen.Inicio.name) {
+            viewModelInicio.abrirContador = {
+                navController.navigate(VoxTaskScreen.Contador.name) {
+                    popUpTo(VoxTaskScreen.Inicio.name)
+                }
+            }
+            InicioScreen(
+                viewModel = viewModelInicio
             )
+        }
+
+        //Screen Contador
+        composable(VoxTaskScreen.Contador.name) {
+            val viewModelContador: ContadorViewModel = viewModel()
+            ContadorScreen(viewModel = viewModelContador)
         }
     }
 }

@@ -14,7 +14,7 @@ class UsuarioDao : UsuarioRepository {
 
     override suspend fun registrarUsuario(usuario: Usuario): Result<Usuario> {
         return try {
-            // 1. Crear cuenta en Firebase Auth
+            // Crear cuenta en Firebase Auth
             val authResult = auth
                 .createUserWithEmailAndPassword(usuario.correo_electronico, usuario.contrasenia)
                 .await()
@@ -22,7 +22,7 @@ class UsuarioDao : UsuarioRepository {
             val uid = authResult.user?.uid
                 ?: return Result.failure(Exception("No se pudo obtener el UID"))
 
-            // 2. Guardar datos extra en Firestore (sin contraseña)
+            // Guardar datos extra en Firestore
             val usuarioConId = usuario.copy(id = uid, contrasenia = "")
             coleccion.document(uid).set(usuarioConId).await()
 
@@ -50,7 +50,7 @@ class UsuarioDao : UsuarioRepository {
     ): Result<Usuario> {
         return try {
 
-            // 🔍 1. Buscar usuario por nombre_usuario
+            //Buscar usuario por nombre_usuario
             val query = coleccion
                 .whereEqualTo("nombre_usuario", nombreUsuario)
                 .get()
@@ -65,7 +65,7 @@ class UsuarioDao : UsuarioRepository {
 
             val email = usuario.correo_electronico
 
-            // 🔐 2. Login con email real
+            // Login con email real
             val authResult = auth
                 .signInWithEmailAndPassword(email, contrasena)
                 .await()

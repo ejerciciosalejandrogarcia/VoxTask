@@ -73,7 +73,7 @@ class InicioSesionViewModel(
             }
         }
     }
-    // ── Login con Google ──────────────────────────────────────────
+    // Login con cuenta Google
 
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
