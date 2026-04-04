@@ -37,6 +37,7 @@ fun RegistroUsuarioScreen(
     alRegistroExitoso: () -> Unit,
     viewModel: RegistroUsuarioViewModel = viewModel()
 ) {
+    //Variables
     val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
     val contexto = LocalContext.current

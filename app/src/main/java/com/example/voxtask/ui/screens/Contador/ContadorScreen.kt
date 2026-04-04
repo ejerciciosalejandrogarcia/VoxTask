@@ -2,6 +2,8 @@ package com.example.voxtask.ui.screens.Contador
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +34,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.ui.theme.VerdePrimario
@@ -45,7 +49,10 @@ import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContadorScreen(viewModel: ContadorViewModel) {
+fun ContadorScreen(viewModel: ContadorViewModel,
+                   Inicio: NavController
+) {
+    //Variables
     val contexto = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val (vozState, iniciarEscucha) = rememberVozATexto()
@@ -58,7 +65,7 @@ fun ContadorScreen(viewModel: ContadorViewModel) {
             TextoAVoz.hablar(contexto, "Creando e iniciando contador.")
         }
     }
-    //Obtener informacion del usuario logueado
+    //Obtengo informacion del usuario logueado
     LaunchedEffect(uid) {
         val nombre = if (uid != null) {
             try {
@@ -82,14 +89,14 @@ fun ContadorScreen(viewModel: ContadorViewModel) {
 
 
 
-    // Texto a voz a view Modal
+    // Envía el texto convertido por voz al ViewModel
     LaunchedEffect(vozState.textoReconocido) {
         if (vozState.textoReconocido.isNotEmpty()) {
             viewModel.onTextoRecibido(vozState.textoReconocido)
         }
     }
 
-    //Plantilla de la app(Reutilizar a funcion para mejorar rendimiento)
+    //Plantilla de la app
     Scaffold(
         topBar = {
             TopAppBar(
@@ -131,8 +138,16 @@ fun ContadorScreen(viewModel: ContadorViewModel) {
                                 .background(if (vozState.isListening) Color.Red else Color.White),
                             contentAlignment = Alignment.Center
                         ) {
-                            IconButton(onClick = { iniciarEscucha() }, enabled = !vozState.isListening) {
-                                Icon(Icons.Default.Mic, contentDescription = stringResource(R.string.btn_hablar), tint = VerdePrimario, modifier = Modifier.size(28.dp))
+                            IconButton(
+                                onClick = { iniciarEscucha() },
+                                enabled = !vozState.isListening
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Mic,
+                                    contentDescription = stringResource(R.string.btn_hablar),
+                                    tint = VerdePrimario,
+                                    modifier = Modifier.size(28.dp)
+                                )
                             }
                         }
                     },
@@ -148,7 +163,8 @@ fun ContadorScreen(viewModel: ContadorViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             IconButton(onClick = {
-                                coroutineScope.launch { TextoAVoz.hablar(contexto, "Inicio") }
+                                coroutineScope.launch { TextoAVoz.hablar(contexto, "Inicio")}
+                                Inicio.navigate("Inicio")
                             }) {
                                 Icon(Icons.Default.Home, contentDescription = stringResource(R.string.btn_inicio), tint = VerdePrimario, modifier = Modifier.size(28.dp))
                             }
@@ -166,13 +182,26 @@ fun ContadorScreen(viewModel: ContadorViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AnimatedVisibility(visible = viewModel.mostrarContador) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    //Mostrar el contador aqui
-
-                        Text(
-                            text = viewModel.tiempoFormato,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(220.dp)
+                                .clip(CircleShape)
+                                .background(VerdePrimario.copy(alpha = 0.1f))
+                                .border(3.dp, VerdePrimario, CircleShape)
+                        ) {
+                            //Contador
+                            Text(
+                                text = viewModel.tiempoFormato,
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = VerdePrimario
+                            )
+                        }
                     }
                 }
             }

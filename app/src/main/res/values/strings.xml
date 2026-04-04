@@ -38,4 +38,35 @@
 
     <!-- Contador Screen -->
 
+
+    <!-- Lista Compra Screen -->
+    <string name="icono_eliminar_producto">Eliminar producto</string>
+    <string name="txt_sin_producto_lista_compra">Di un producto para agregarlo</string>
+    <string name="txt_titulo_mensaje_confirmacion_producto">Eliminar producto</string>
+    <string name="txt_mensaje_confirmacion_producto">¿Estás seguro de que quieres eliminar %s?</string>
+    <string name="btn_eliminar_producto">Eliminar</string>
+    <string name="btn_cancelar_producto">Cancelar</string>
+
+
+    <!-- Recordatorio Screen -->
+    <string name="icono_mes_anterior">Mes anterior</string>
+    <string name="icono_mes_siguiente">Mes anterior</string>
+    <string-array name="dias_semana">
+        <item>Lun</item>
+        <item>Mar</item>
+        <item>Mié</item>
+        <item>Jue</item>
+        <item>Vie</item>
+        <item>Sáb</item>
+        <item>Dom</item>
+    </string-array>
+    <string name="icono_eliminar_evento">Eliminar evento</string>
+    <string name="txt_sin_eventos_dia_seleccionado">No hay eventos este día</string>
+    <string name="txt_eventos_dia_seleccionado">Eventos del %1$d de %2$s</string>
+
+
+
+
+
+
 </resources>

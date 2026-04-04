@@ -13,10 +13,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.voxtask.ui.screens.Contador.ContadorScreen
 import com.example.voxtask.ui.screens.Contador.ContadorViewModel
+import com.example.voxtask.ui.screens.Lista_Compra.ListaCompraScreen
+import com.example.voxtask.ui.screens.Lista_Compra.ListaCompraViewModel
 import com.example.voxtask.ui.screens.Inicio.InicioScreen
 import com.example.voxtask.ui.screens.Inicio.InicioViewModel
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionScreen
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionViewModel
+import com.example.voxtask.ui.screens.Recordatorio.RecordatorioScreen
+import com.example.voxtask.ui.screens.Recordatorio.RecordatorioViewModel
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioScreen
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -26,7 +30,9 @@ enum class VoxTaskScreen {
     Inicio_sesion,
     Registro_Usuario,
     Inicio,
-    Contador
+    Contador,
+    ListaCompra,
+    Recordatorio
 }
 
 @Composable
@@ -106,6 +112,16 @@ fun VoxTaskApp(
                     popUpTo(VoxTaskScreen.Inicio.name)
                 }
             }
+            viewModelInicio.abrirListaCompra = {
+                navController.navigate(VoxTaskScreen.ListaCompra.name) {
+                    popUpTo(VoxTaskScreen.Inicio.name)
+                }
+            }
+            viewModelInicio.abrirRecordatorio = {
+                navController.navigate(VoxTaskScreen.Recordatorio.name) {
+                    popUpTo(VoxTaskScreen.Inicio.name)
+                }
+            }
             InicioScreen(
                 viewModel = viewModelInicio
             )
@@ -114,7 +130,27 @@ fun VoxTaskApp(
         //Screen Contador
         composable(VoxTaskScreen.Contador.name) {
             val viewModelContador: ContadorViewModel = viewModel()
-            ContadorScreen(viewModel = viewModelContador)
+            ContadorScreen(viewModel = viewModelContador,navController)
+        }
+
+
+        //Screen Lista de la Compra
+        composable(VoxTaskScreen.ListaCompra.name) {
+            val viewModelListaCompra: ListaCompraViewModel = viewModel()
+            ListaCompraScreen(
+                viewModel = viewModelListaCompra,
+                navController = navController
+            )
+        }
+
+
+        //Screen Recordatorio
+        composable(VoxTaskScreen.Recordatorio.name) {
+            val viewModelRecordatorio: RecordatorioViewModel = viewModel()
+            RecordatorioScreen(
+                viewModel = viewModelRecordatorio,
+                navController = navController
+            )
         }
     }
 }
