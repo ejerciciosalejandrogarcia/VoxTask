@@ -15,10 +15,10 @@ class ProductoRepository : ProductoDao {
         db.collection("usuarios")
             .document(usuarioId)
             .collection("lista_compra")
-            .add(producto)
+            .document(producto.id)
+            .set(producto)
             .await()
     }
-
     override suspend fun eliminar(usuarioId: String, productoId: String) {
         db.collection("usuarios")
             .document(usuarioId)

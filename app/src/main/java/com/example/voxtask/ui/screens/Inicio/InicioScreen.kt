@@ -1,10 +1,13 @@
 package com.example.voxtask.ui.screens.Inicio
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Translate
@@ -27,14 +30,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import androidx.compose.runtime.collectAsState
+import androidx.navigation.NavController
+import com.example.voxtask.VoxTaskScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioScreen(
-    viewModel: InicioViewModel
+    viewModel: InicioViewModel,
+    navController: NavController
 ) {
     //Variables
     val contexto = LocalContext.current
+    val actividad = contexto as Activity
     val coroutineScope = rememberCoroutineScope()
     val usuario = FirebaseAuth.getInstance().currentUser
     val uid = usuario?.uid
@@ -102,6 +109,23 @@ fun InicioScreen(
                             tint = Color.White
                         )
                     }
+
+                    //Boton cerrar sesion
+                    IconButton(
+                        onClick = {
+                            viewModel.cerrarSesion(contexto,actividad) {
+                                navController.navigate(VoxTaskScreen.Inicio_sesion.name) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Cerrar sesión",
+                            tint = Color.White
+                        )
+                    }
                 }
             )
         },
@@ -125,6 +149,8 @@ fun InicioScreen(
                                     coroutineScope.launch {
                                         TextoAVoz.hablar(contexto, "Abriendo ajustes")
                                     }
+                                    navController.navigate("ajustes")
+
                                 }
                             ) {
                                 Icon(

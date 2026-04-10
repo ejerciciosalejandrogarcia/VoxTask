@@ -1,10 +1,13 @@
 package com.example.voxtask.ui.screens.Contador
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.services.ContadorService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,18 +23,16 @@ class ContadorViewModel : ViewModel() {
     var mostrarContador by mutableStateOf(false)
     private var countdownJob: Job? = null
 
-    //Funcion que recibe el texto transformado por voz y lo convierte a minusculas y elimina espacios
-    fun onTextoRecibido(texto: String) {
+    fun onTextoRecibido(texto: String, contexto: Context) {
         _textoReconocido.value = texto
-        procesarComando(texto)
+        procesarComando(texto, contexto)
     }
 
-    //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
-    private fun procesarComando(texto: String) {
+    private fun procesarComando(texto: String, contexto: Context) {
         android.util.Log.d("CONTADOR", "Texto recibido: $texto")
 
         val textoNormalizado = normalizarNumeros(texto.lowercase().trim())
-            .replace(" y ", " ") // eliminar "y" para que no interfiera
+            .replace(" y ", " ")
         android.util.Log.d("CONTADOR", "Texto normalizado: $textoNormalizado")
 
         val partes = textoNormalizado.split("\\s+".toRegex())
@@ -40,7 +41,6 @@ class ContadorViewModel : ViewModel() {
         partes.forEachIndexed { index, parte ->
             val numero = parte.toIntOrNull()
             if (numero != null) {
-                // Buscar unidad en las siguientes 2 palabras (por si hay palabras intermedias)
                 val sig1 = partes.getOrNull(index + 1)?.lowercase() ?: ""
                 val sig2 = partes.getOrNull(index + 2)?.lowercase() ?: ""
                 val unidad = if (sig1.toIntOrNull() != null) sig2 else sig1
@@ -55,9 +55,19 @@ class ContadorViewModel : ViewModel() {
         }
 
         android.util.Log.d("CONTADOR", "Total segundos calculados: $totalSegundos")
-        if (totalSegundos > 0) iniciarContador(totalSegundos)
+        if (totalSegundos > 0) {
+            iniciarContadorConServicio(contexto, totalSegundos)
+            iniciarContador(totalSegundos)
+        }
     }
-    //Funcion para convertir los numeros de voz a texto
+
+    private fun iniciarContadorConServicio(contexto: Context, totalSegundos: Int) {
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            putExtra(ContadorService.EXTRA_SEGUNDOS, totalSegundos)
+        }
+        contexto.startForegroundService(intent)
+    }
+
     private fun normalizarNumeros(texto: String): String {
         val reemplazos = linkedMapOf(
             "cincuenta y uno" to "51",
@@ -107,7 +117,6 @@ class ContadorViewModel : ViewModel() {
         return resultado
     }
 
-    //Funcion para crear el contador
     private fun iniciarContador(totalSegundos: Int) {
         mostrarContador = true
         countdownJob?.cancel()
@@ -124,7 +133,7 @@ class ContadorViewModel : ViewModel() {
             }
         }
     }
-    //Funcion para cancelar el temporizador al destruirse el viewModel
+
     override fun onCleared() {
         super.onCleared()
         countdownJob?.cancel()

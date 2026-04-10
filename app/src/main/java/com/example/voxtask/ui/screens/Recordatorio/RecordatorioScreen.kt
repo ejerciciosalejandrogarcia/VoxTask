@@ -35,6 +35,7 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 import com.example.voxtask.R
+import com.example.voxtask.utils.PlantillaBaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RecordatorioScreen(
+    viewModelPlantilla: PlantillaBaseViewModel,
     viewModel: RecordatorioViewModel,
     navController: NavController
 ) {
@@ -58,6 +60,7 @@ fun RecordatorioScreen(
         }
     }
     PlantillaBase(
+        viewModel = viewModelPlantilla,
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->

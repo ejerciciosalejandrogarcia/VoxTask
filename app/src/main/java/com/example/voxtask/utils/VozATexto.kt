@@ -38,14 +38,13 @@ fun rememberVozATexto(): Pair<VozATextoState, () -> Unit> {
             }
 
             override fun onError(error: Int) {
-                // 👇 Esto te dirá exactamente qué falla en el Logcat
                 android.util.Log.e("VOZ", "Error código: $error")
                 state.error = "Error: $error"
                 state.isListening = false
             }
 
             override fun onReadyForSpeech(params: Bundle?) {
-                android.util.Log.d("VOZ", "Listo para escuchar") // 👈 verás esto en Logcat
+                android.util.Log.d("VOZ", "Listo para escuchar")
             }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
@@ -75,7 +74,7 @@ fun rememberVozATexto(): Pair<VozATextoState, () -> Unit> {
             }
             speechRecognizer.startListening(intent)
         } else {
-            android.util.Log.e("VOZ", "❌ No hay permiso de micrófono")
+            android.util.Log.e("VOZ", "No hay permiso de micrófono")
             state.error = "Sin permiso de micrófono"
         }
     }

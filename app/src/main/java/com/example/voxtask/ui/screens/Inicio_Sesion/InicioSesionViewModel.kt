@@ -14,6 +14,7 @@ import com.example.voxtask.R
 import com.example.voxtask.databases.dao.UsuarioDao
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.repository.UsuarioRepository
+import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +27,8 @@ data class InicioSesionUiState(
     val nombreUsuario: String = "",
     val contrasena: String = "",
     val inicioSesionExitoso: Boolean = false,
-    val mensajeError: String = ""
+    val mensajeError: String = "",
+    val gmailAuthCode: String = ""
 )
 
 class InicioSesionViewModel(
@@ -78,26 +80,31 @@ class InicioSesionViewModel(
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(contexto.getString(R.string.default_web_client_id))
+            .requestServerAuthCode(contexto.getString(R.string.default_web_client_id)) // ← AÑADIR
             .requestEmail()
+            .requestScopes(Scope("https://www.googleapis.com/auth/gmail.readonly")) // ← AÑADIR
             .build()
         return GoogleSignIn.getClient(contexto, opciones)
     }
-
-    fun autenticarConGoogle(tokenGoogle: String) {
-        Log.d("Firestore", "Token recibido: $tokenGoogle")
+    fun autenticarConGoogle(tokenGoogle: String, serverAuthCode: String? = null) {
         val credencial = GoogleAuthProvider.getCredential(tokenGoogle, null)
 
         auth.signInWithCredential(credencial)
             .addOnCompleteListener { tarea ->
                 if (tarea.isSuccessful) {
                     val usuarioFirebase = auth.currentUser
-                    Log.d("Firestore", "Auth exitoso. UID: ${usuarioFirebase?.uid}")
-                    Log.d("Firestore", "Nombre: ${usuarioFirebase?.displayName}")
-                    Log.d("Firestore", "Email: ${usuarioFirebase?.email}")
+                    if (usuarioFirebase == null) return@addOnCompleteListener
 
-                    if (usuarioFirebase == null) {
-                        Log.e("Firestore", "❌ currentUser es null después del login")
-                        return@addOnCompleteListener
+                    if (serverAuthCode != null) {
+                        firestore.collection("usuarios")
+                            .document(usuarioFirebase.uid)
+                            .update("gmailAuthCode", serverAuthCode)
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "✅ gmailAuthCode guardado")
+                            }
+                            .addOnFailureListener {
+                                Log.e("Firestore", "❌ Error guardando gmailAuthCode: ${it.message}")
+                            }
                     }
 
                     guardarOActualizarUsuarioEnFirestore(usuarioFirebase.uid) {
@@ -105,7 +112,6 @@ class InicioSesionViewModel(
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true)
                     }
                 } else {
-                    Log.e("Firestore", "❌ Auth falló: ${tarea.exception?.message}")
                     _estadoUi.value = _estadoUi.value.copy(
                         mensajeError = "Error al iniciar sesión con Google"
                     )

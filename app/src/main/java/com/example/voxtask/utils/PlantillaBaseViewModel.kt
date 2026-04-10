@@ -1,5 +1,4 @@
-package com.example.voxtask.ui.screens.Inicio
-
+package com.example.voxtask.utils
 
 import android.app.Activity
 import android.content.Context
@@ -8,41 +7,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
-class InicioViewModel : ViewModel() {
-
+class PlantillaBaseViewModel : ViewModel() {
 
     //Variables
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
-    private val _textoReconocido = MutableStateFlow("")
-    val textoReconocido: StateFlow<String> = _textoReconocido
-    var abrirContador: () -> Unit = {}
-    var abrirListaCompra: () -> Unit = {}
-    var abrirRecordatorio: () -> Unit = {}
-    var abrirCorreo: () -> Unit = {}
-
-
-    //Funcion que recibe el texto transformado por voz y lo convierte a minusculas y elimina espacios
-    fun onTextoRecibido(texto: String) {
-        _textoReconocido.value = texto
-        procesarComando(texto)
-    }
-
-    //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
-    private fun procesarComando(texto: String) {
-        when {
-            texto.contains("contador", ignoreCase = true) -> abrirContador()
-            texto.contains("correo", ignoreCase = true) -> abrirCorreo()
-            texto.contains("recordatorio", ignoreCase = true) -> abrirRecordatorio()
-            texto.contains("lista", ignoreCase = true) -> abrirListaCompra()
-        }
-    }
-
-
+    //Funcion que cierra sesion del usuario logueado y cierra la aplicacion
     fun cerrarSesion(contexto: Context, actividad: Activity, alCerrar: () -> Unit) {
         val uid = auth.currentUser?.uid
 

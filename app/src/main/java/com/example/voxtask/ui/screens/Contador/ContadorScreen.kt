@@ -1,5 +1,8 @@
 package com.example.voxtask.ui.screens.Contador
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,16 +44,17 @@ import com.example.voxtask.R
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.TextoAVoz
-import kotlinx.coroutines.launch
 import com.example.voxtask.utils.rememberVozATexto
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContadorScreen(viewModel: ContadorViewModel,
-                   Inicio: NavController
+fun ContadorScreen(
+    viewModel: ContadorViewModel,
+    Inicio: NavController
 ) {
     //Variables
     val contexto = LocalContext.current
@@ -60,12 +64,23 @@ fun ContadorScreen(viewModel: ContadorViewModel,
     val uid = usuario?.uid
     val mostrarContador = viewModel.mostrarContador
 
+    // Pedir permiso de notificaciones
+    val lanzadorPermiso = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            lanzadorPermiso.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     LaunchedEffect(mostrarContador) {
         if (mostrarContador) {
             TextoAVoz.hablar(contexto, "Creando e iniciando contador.")
         }
     }
-    //Obtengo informacion del usuario logueado
+
     LaunchedEffect(uid) {
         val nombre = if (uid != null) {
             try {
@@ -82,21 +97,16 @@ fun ContadorScreen(viewModel: ContadorViewModel,
         } else {
             "Usuario"
         }
-
         TextoAVoz.hablar(contexto, "¿Okey $nombre cuanto tiempo quieres poner al contador?.")
-
     }
-
-
 
     // Envía el texto convertido por voz al ViewModel
     LaunchedEffect(vozState.textoReconocido) {
         if (vozState.textoReconocido.isNotEmpty()) {
-            viewModel.onTextoRecibido(vozState.textoReconocido)
+            viewModel.onTextoRecibido(vozState.textoReconocido, contexto)
         }
     }
 
-    //Plantilla de la app
     Scaffold(
         topBar = {
             TopAppBar(
@@ -104,7 +114,7 @@ fun ContadorScreen(viewModel: ContadorViewModel,
                     Text(
                         text = stringResource(R.string.app_name),
                         color = Color.White,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        fontWeight = FontWeight.Bold
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -163,7 +173,7 @@ fun ContadorScreen(viewModel: ContadorViewModel,
                             contentAlignment = Alignment.Center
                         ) {
                             IconButton(onClick = {
-                                coroutineScope.launch { TextoAVoz.hablar(contexto, "Inicio")}
+                                coroutineScope.launch { TextoAVoz.hablar(contexto, "Inicio") }
                                 Inicio.navigate("Inicio")
                             }) {
                                 Icon(Icons.Default.Home, contentDescription = stringResource(R.string.btn_inicio), tint = VerdePrimario, modifier = Modifier.size(28.dp))
@@ -194,7 +204,6 @@ fun ContadorScreen(viewModel: ContadorViewModel,
                                 .background(VerdePrimario.copy(alpha = 0.1f))
                                 .border(3.dp, VerdePrimario, CircleShape)
                         ) {
-                            //Contador
                             Text(
                                 text = viewModel.tiempoFormato,
                                 style = MaterialTheme.typography.displayMedium,

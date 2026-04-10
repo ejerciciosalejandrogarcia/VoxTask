@@ -3,6 +3,7 @@ package com.example.voxtask.utils
 import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.*
 import kotlin.coroutines.resume
@@ -10,23 +11,39 @@ import kotlin.coroutines.resume
 object TextoAVoz {
 
     private var tts: TextToSpeech? = null
+    var vozElegida: String? = null
+
+    // Devuelve la lista de voces que tiene instaladas el movil
+    fun obtenerVoces(): List<Voice> {
+        return tts?.voices?.toList() ?: emptyList()
+    }
+
+    // Cambia la voz por la que el usuario ha elegido
+    fun cambiarVoz(nombreVoz: String) {
+        vozElegida = nombreVoz
+        val voz = tts?.voices?.find { it.name == nombreVoz }
+        if (voz != null) tts?.voice = voz
+    }
 
     suspend fun hablar(context: Context, texto: String) {
-        // Inicializar si es necesario
         if (tts == null) {
             suspendCancellableCoroutine<Unit> { continuation ->
                 tts = TextToSpeech(context) { status ->
                     if (status == TextToSpeech.SUCCESS) {
                         tts?.language = Locale("es", "MX")
+                        tts?.setSpeechRate(0.95f)
                         tts?.setPitch(1.0f)
-                        tts?.setSpeechRate(0.9f)
+
+                        vozElegida?.let { nombre ->
+                            val voz = tts?.voices?.find { it.name == nombre }
+                            if (voz != null) tts?.voice = voz
+                        }
                     }
                     continuation.resume(Unit)
                 }
             }
         }
 
-        // Hablar y esperar
         suspendCancellableCoroutine<Unit> { continuation ->
             tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) {}

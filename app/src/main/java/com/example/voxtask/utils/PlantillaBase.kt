@@ -1,11 +1,13 @@
 package com.example.voxtask.utils
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
@@ -30,11 +32,14 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantillaBase(
+    viewModel: PlantillaBaseViewModel,
     navController: NavController,
     onTextoReconocido: (String) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     val contexto = LocalContext.current
+    val actividad = contexto as Activity
+
     val coroutineScope = rememberCoroutineScope()
     val (vozState, iniciarEscucha) = rememberVozATexto()
 
@@ -66,6 +71,20 @@ fun PlantillaBase(
                     }) {
                         Icon(Icons.Default.Translate, contentDescription = stringResource(R.string.btn_traducir), tint = Color.White)
                     }
+                    //Boton cerrar sesion
+                    IconButton(
+                        onClick = {
+                            viewModel.cerrarSesion(actividad, actividad) {
+
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Cerrar sesión",
+                            tint = Color.White
+                        )
+                    }
                 }
             )
         },
@@ -85,7 +104,9 @@ fun PlantillaBase(
                                 onClick = {
                                     coroutineScope.launch {
                                         TextoAVoz.hablar(contexto, "Abriendo ajustes")
-                                    }
+                                      }
+                                    navController.navigate("ajustes")
+
                                 }
                             ) {
                                 Icon(
@@ -98,11 +119,7 @@ fun PlantillaBase(
                         }
                     },
                     selected = false,
-                    onClick = {
-                        coroutineScope.launch {
-                            TextoAVoz.hablar(contexto, "Abriendo ajustes")
-                        }
-                    }
+                    onClick = { }
                 )
                 //Boton microfono
                 NavigationBarItem(

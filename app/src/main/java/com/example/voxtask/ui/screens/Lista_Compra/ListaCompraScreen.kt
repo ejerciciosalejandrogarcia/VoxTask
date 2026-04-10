@@ -24,9 +24,11 @@ import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.TextoAVoz
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Producto
+import com.example.voxtask.utils.PlantillaBaseViewModel
 
 @Composable
 fun ListaCompraScreen(
+    viewModelPlantilla: PlantillaBaseViewModel,
     viewModel: ListaCompraViewModel,
     navController: NavController
 ) {
@@ -61,6 +63,7 @@ fun ListaCompraScreen(
     }
 
     PlantillaBase(
+        viewModel = viewModelPlantilla,
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->

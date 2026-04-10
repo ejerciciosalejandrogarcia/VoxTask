@@ -1,28 +1,39 @@
 package com.example.voxtask
 
 import android.app.Activity
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.voxtask.ui.screens.Ajustes.AjustesScreen
+import com.example.voxtask.ui.screens.Ajustes.AjustesViewModel
 import com.example.voxtask.ui.screens.Contador.ContadorScreen
 import com.example.voxtask.ui.screens.Contador.ContadorViewModel
+import com.example.voxtask.ui.screens.Correo.CorreoScreen
+import com.example.voxtask.ui.screens.Correo.CorreoViewModel
 import com.example.voxtask.ui.screens.Lista_Compra.ListaCompraScreen
 import com.example.voxtask.ui.screens.Lista_Compra.ListaCompraViewModel
 import com.example.voxtask.ui.screens.Inicio.InicioScreen
 import com.example.voxtask.ui.screens.Inicio.InicioViewModel
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionScreen
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionViewModel
+import com.example.voxtask.ui.screens.Perfil.PerfilScreen
+import com.example.voxtask.ui.screens.Perfil.PerfilViewModel
 import com.example.voxtask.ui.screens.Recordatorio.RecordatorioScreen
 import com.example.voxtask.ui.screens.Recordatorio.RecordatorioViewModel
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioScreen
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioViewModel
+import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 
@@ -32,15 +43,26 @@ enum class VoxTaskScreen {
     Inicio,
     Contador,
     ListaCompra,
-    Recordatorio
+    Recordatorio,
+    Correo,
+    Ajustes,
+    Perfil
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VoxTaskApp(
     windowSize: WindowWidthSizeClass,
+    onNavControllerReady: (NavController) -> Unit = {} // ← añade esto
+
 ) {
     val navController = rememberNavController()
     val contexto = LocalContext.current
+
+    LaunchedEffect(navController) {
+        onNavControllerReady(navController)
+    }
+
     val viewModelInicioSesion: InicioSesionViewModel = viewModel()
     val viewModelRegistrar: RegistroUsuarioViewModel = viewModel()
     val viewModelInicio: InicioViewModel = viewModel()
@@ -57,12 +79,16 @@ fun VoxTaskApp(
             try {
                 val cuenta = tarea.getResult(ApiException::class.java)
                 Log.d("Google", "Token obtenido: ${cuenta.idToken}")
-                viewModelInicioSesion.autenticarConGoogle(cuenta.idToken!!)
+                Log.d("Google", "ServerAuthCode: ${cuenta.serverAuthCode}")
+                viewModelInicioSesion.autenticarConGoogle(
+                    tokenGoogle = cuenta.idToken!!,
+                    serverAuthCode = cuenta.serverAuthCode
+                )
             } catch (e: ApiException) {
                 Log.e("Google", "ApiException: ${e.statusCode} - ${e.message}")
             }
         } else {
-            Log.e("Google", "❌ El usuario canceló o hubo un error")
+            Log.e("Google", "El usuario canceló o hubo un error")
         }
     }
 
@@ -122,8 +148,14 @@ fun VoxTaskApp(
                     popUpTo(VoxTaskScreen.Inicio.name)
                 }
             }
+            viewModelInicio.abrirCorreo = {
+                navController.navigate(VoxTaskScreen.Correo.name) {
+                    popUpTo(VoxTaskScreen.Inicio.name)
+                }
+            }
             InicioScreen(
-                viewModel = viewModelInicio
+                viewModel = viewModelInicio,
+                navController = navController
             )
         }
 
@@ -137,7 +169,10 @@ fun VoxTaskApp(
         //Screen Lista de la Compra
         composable(VoxTaskScreen.ListaCompra.name) {
             val viewModelListaCompra: ListaCompraViewModel = viewModel()
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+
             ListaCompraScreen(
+                viewModelPlantilla = viewModelPlantilla,
                 viewModel = viewModelListaCompra,
                 navController = navController
             )
@@ -147,8 +182,48 @@ fun VoxTaskApp(
         //Screen Recordatorio
         composable(VoxTaskScreen.Recordatorio.name) {
             val viewModelRecordatorio: RecordatorioViewModel = viewModel()
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+
             RecordatorioScreen(
+                viewModelPlantilla = viewModelPlantilla,
                 viewModel = viewModelRecordatorio,
+                navController = navController
+            )
+        }
+
+
+
+
+        //Screen Correo
+        composable(VoxTaskScreen.Correo.name) {
+            val viewModelCorreo: CorreoViewModel = viewModel()
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+
+            CorreoScreen(
+                viewModelPlantilla = viewModelPlantilla,
+                viewModel = viewModelCorreo,
+                navController = navController
+            )
+        }
+
+
+        //Screen Ajustes
+        composable(VoxTaskScreen.Ajustes.name) {
+            val viewModelAjustes: AjustesViewModel = viewModel()
+            AjustesScreen(
+                viewModel = viewModelAjustes,
+                navController = navController
+            )
+        }
+
+
+        //Screen Perfil usuario logueado
+        composable(VoxTaskScreen.Perfil.name) {
+            val viewModelPerfil: PerfilViewModel = viewModel()
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+            PerfilScreen(
+                viewModelPlantilla = viewModelPlantilla,
+                viewModel = viewModelPerfil,
                 navController = navController
             )
         }
