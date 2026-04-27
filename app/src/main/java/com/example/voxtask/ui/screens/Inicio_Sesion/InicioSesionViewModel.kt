@@ -11,9 +11,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.voxtask.R
-import com.example.voxtask.databases.dao.UsuarioDao
-import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.repository.UsuarioRepository
+import com.example.voxtask.databases.model.Usuario
+import com.example.voxtask.databases.dao.UsuarioDao
 import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +32,7 @@ data class InicioSesionUiState(
 )
 
 class InicioSesionViewModel(
-    private val usuarioRepository: UsuarioRepository = UsuarioDao()  // ← añadir
+    private val usuarioRepository: UsuarioDao = UsuarioRepository()  // ← añadir
 ) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()

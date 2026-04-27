@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
-import com.example.voxtask.databases.dao.UsuarioDao
-import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.repository.UsuarioRepository
+import com.example.voxtask.databases.model.Usuario
+import com.example.voxtask.databases.dao.UsuarioDao
 import kotlinx.coroutines.launch
 
 data class RegistrarUsuarioUiState(
@@ -24,7 +24,7 @@ data class RegistrarUsuarioUiState(
 )
 
 class RegistroUsuarioViewModel(
-    private val repositorio: UsuarioRepository = UsuarioDao()  // ← añadir
+    private val repositorio: UsuarioDao = UsuarioRepository()  // ← añadir
 ) : ViewModel() {
 
     private val _estadoUi = MutableStateFlow(RegistrarUsuarioUiState())

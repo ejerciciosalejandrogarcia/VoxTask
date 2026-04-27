@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">VoxTask</string>
+
+    <string name="campo_nombre_usuario">Username</string>
+    <string name="campo_contrasenia">Password</string>
+    <string name="btn_iniciar_sesion">Log in</string>
+    <string name="txt_pregunta">Don\'t have an account?</string>
+    <string name="txt_respuesta">Sign up</string>
+    <string name="icono_mostrar_contrasenia">Show password</string>
+    <string name="icono_limpiar">Clear</string>
+    <string name="txt_o">or</string>
+    <string name="txt_iniciar_google">Sign in with Google</string>
+    <string name="txt_pregunta_contrasenia">Forgot your password?</string>
+    <string name="txt_respuesta_contrasenia">Reset password</string>
+
+    <string name="btn_registrar_usuario">Create account</string>
+    <string name="campo_nombre">First name</string>
+    <string name="campo_primer_ap">Last name</string>
+    <string name="campo_segundo_ap">Middle name</string>
+    <string name="campo_fecha_naci">Date of birth</string>
+    <string name="campo_correo">Email address</string>
+
+    <string name="txt_contador">Start a timer</string>
+    <string name="txt_correo">Write and send an email</string>
+    <string name="txt_recordatorio">Create a reminder</string>
+    <string name="txt_lista_compra">Create a shopping list</string>
+    <string name="btn_hablar">Speak button</string>
+    <string name="btn_ajustes">Settings button</string>
+    <string name="btn_inicio">Home button</string>
+    <string name="btn_traducir">Translate button</string>
+
+    <string name="icono_eliminar_producto">Delete product</string>
+    <string name="txt_sin_producto_lista_compra">Say a product to add it</string>
+    <string name="txt_titulo_mensaje_confirmacion_producto">Delete product</string>
+    <string name="txt_mensaje_confirmacion_producto">Are you sure you want to delete %s?</string>
+    <string name="btn_eliminar_producto">Delete</string>
+    <string name="btn_cancelar_producto">Cancel</string>
+
+    <string name="icono_mes_anterior">Previous month</string>
+    <string name="icono_mes_siguiente">Next month</string>
+    <string-array name="dias_semana">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string name="icono_eliminar_evento">Delete event</string>
+    <string name="txt_sin_eventos_dia_seleccionado">No events this day</string>
+    <string name="txt_eventos_dia_seleccionado">Events for %2$s %1$d</string>
+
+    <string name="ajustes">Settings</string>
+    <string name="cambiar_voz">Change voice</string>
+    <string name="voz_actual">Current voice</string>
+    <string name="cambiar_idioma">Change language</string>
+    <string name="idioma_actual">Current language</string>
+    <string name="mi_perfil">My profile</string>
+    <string name="ver_editar_perfil">View and edit your info</string>
+    <string name="color_interfaz">Interface color</string>
+    <string name="personaliza_colores">Customize app colors</string>
+    <string name="selecciona_voz">Select a voice</string>
+    <string name="selecciona_idioma">Select a language</string>
+    <string name="no_voces">No voices available.</string>
+    <string name="cancelar">Cancel</string>
+
+    <string name="cambiar_fondo">Change background</string>
+    <string name="personaliza_fondo">Customize the app background</string>
+    <string name="version_app">Version</string>
+    <string name="ver_version_actual">Check the current version</string>
+</resources>

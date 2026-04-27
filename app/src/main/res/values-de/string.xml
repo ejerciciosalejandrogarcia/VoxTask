@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">VoxTask</string>
+
+    <string name="campo_nombre_usuario">Benutzername</string>
+    <string name="campo_contrasenia">Passwort</string>
+    <string name="btn_iniciar_sesion">Anmelden</string>
+    <string name="txt_pregunta">Noch kein Konto?</string>
+    <string name="txt_respuesta">Registrieren</string>
+    <string name="icono_mostrar_contrasenia">Passwort anzeigen</string>
+    <string name="icono_limpiar">Löschen</string>
+    <string name="txt_o">oder</string>
+    <string name="txt_iniciar_google">Mit Google anmelden</string>
+    <string name="txt_pregunta_contrasenia">Passwort vergessen?</string>
+    <string name="txt_respuesta_contrasenia">Passwort zurücksetzen</string>
+
+    <string name="btn_registrar_usuario">Konto erstellen</string>
+    <string name="campo_nombre">Vorname</string>
+    <string name="campo_primer_ap">Nachname</string>
+    <string name="campo_segundo_ap">Zweiter Nachname</string>
+    <string name="campo_fecha_naci">Geburtsdatum</string>
+    <string name="campo_correo">E-Mail-Adresse</string>
+
+    <string name="txt_contador">Timer starten</string>
+    <string name="txt_correo">E-Mail schreiben und senden</string>
+    <string name="txt_recordatorio">Erinnerung erstellen</string>
+    <string name="txt_lista_compra">Einkaufsliste erstellen</string>
+    <string name="btn_hablar">Sprach-Button</string>
+    <string name="btn_ajustes">Einstellungen-Button</string>
+    <string name="btn_inicio">Start-Button</string>
+    <string name="btn_traducir">Übersetzungs-Button</string>
+
+    <string name="icono_eliminar_producto">Produkt löschen</string>
+    <string name="txt_sin_producto_lista_compra">Sagen Sie ein Produkt, um es hinzuzufügen</string>
+    <string name="txt_titulo_mensaje_confirmacion_producto">Produkt löschen</string>
+    <string name="txt_mensaje_confirmacion_producto">Möchten Sie %s wirklich löschen?</string>
+    <string name="btn_eliminar_producto">Löschen</string>
+    <string name="btn_cancelar_producto">Abbrechen</string>
+
+    <string name="icono_mes_anterior">Vorheriger Monat</string>
+    <string name="icono_mes_siguiente">Nächster Monat</string>
+    <string-array name="dias_semana">
+        <item>Mo</item>
+        <item>Di</item>
+        <item>Mi</item>
+        <item>Do</item>
+        <item>Fr</item>
+        <item>Sa</item>
+        <item>So</item>
+    </string-array>
+    <string name="icono_eliminar_evento">Ereignis löschen</string>
+    <string name="txt_sin_eventos_dia_seleccionado">Keine Ereignisse an diesem Tag</string>
+    <string name="txt_eventos_dia_seleccionado">Ereignisse am %1$d. %2$s</string>
+
+    <string name="ajustes">Einstellungen</string>
+    <string name="cambiar_voz">Stimme ändern</string>
+    <string name="voz_actual">Aktuelle Stimme</string>
+    <string name="cambiar_idioma">Sprache ändern</string>
+    <string name="idioma_actual">Aktuelle Sprache</string>
+    <string name="mi_perfil">Mein Profil</string>
+    <string name="ver_editar_perfil">Informationen ansehen und bearbeiten</string>
+    <string name="color_interfaz">Benutzeroberflächenfarbe</string>
+    <string name="personaliza_colores">App-Farben anpassen</string>
+    <string name="selecciona_voz">Stimme auswählen</string>
+    <string name="selecciona_idioma">Sprache auswählen</string>
+    <string name="no_voces">Keine Stimmen verfügbar.</string>
+    <string name="cancelar">Abbrechen</string>
+
+    <string name="cambiar_fondo">Hintergrund ändern</string>
+    <string name="personaliza_fondo">Passe den App-Hintergrund an</string>
+    <string name="version_app">Version</string>
+    <string name="ver_version_actual">Aktuelle Version anzeigen</string>
+</resources>

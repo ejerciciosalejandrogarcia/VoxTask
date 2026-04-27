@@ -2,6 +2,8 @@ package com.example.voxtask.ui.screens.Contador
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,18 +18,46 @@ import kotlinx.coroutines.launch
 
 class ContadorViewModel : ViewModel() {
 
-    //Variables
     private val _textoReconocido = MutableStateFlow("")
     val textoReconocido: StateFlow<String> = _textoReconocido
     var tiempoFormato by mutableStateOf("00:00:00")
     var mostrarContador by mutableStateOf(false)
     private var countdownJob: Job? = null
+    var corriendo by mutableStateOf(false)
+        private set
 
+    fun restaurarSiServicioActivo() {
+
+        if (ContadorService.segundosRestantes > 0) {
+
+            mostrarContador = true
+
+            if (ContadorService.estaActivo) {
+                // ▶️ corriendo
+                if (!corriendo) {
+                    iniciarContador(ContadorService.segundosRestantes)
+                }
+
+            } else if (ContadorService.estaPausado) {
+                // ⏸ pausado
+                corriendo = false
+
+                val h = ContadorService.segundosRestantes / 3600
+                val m = (ContadorService.segundosRestantes % 3600) / 60
+                val s = ContadorService.segundosRestantes % 60
+
+                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onTextoRecibido(texto: String, contexto: Context) {
         _textoReconocido.value = texto
         procesarComando(texto, contexto)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun procesarComando(texto: String, contexto: Context) {
         android.util.Log.d("CONTADOR", "Texto recibido: $texto")
 
@@ -61,8 +91,10 @@ class ContadorViewModel : ViewModel() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun iniciarContadorConServicio(contexto: Context, totalSegundos: Int) {
         val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_INICIAR
             putExtra(ContadorService.EXTRA_SEGUNDOS, totalSegundos)
         }
         contexto.startForegroundService(intent)
@@ -117,8 +149,9 @@ class ContadorViewModel : ViewModel() {
         return resultado
     }
 
-    private fun iniciarContador(totalSegundos: Int) {
+    fun iniciarContador(totalSegundos: Int) {
         mostrarContador = true
+        corriendo = true
         countdownJob?.cancel()
         countdownJob = viewModelScope.launch {
             var restantes = totalSegundos
@@ -131,11 +164,69 @@ class ContadorViewModel : ViewModel() {
                 delay(1000L)
                 restantes--
             }
+            corriendo = false
         }
+    }
+
+    fun iniciar() {
+        val partes = tiempoFormato.split(":")
+        val restantes = partes[0].toInt() * 3600 + partes[1].toInt() * 60 + partes[2].toInt()
+        if (restantes <= 0) return
+
+        corriendo = true
+        countdownJob?.cancel()
+        countdownJob = viewModelScope.launch {
+            var r = restantes
+            while (r >= 0) {
+                val h = r / 3600
+                val m = (r % 3600) / 60
+                val s = r % 60
+                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                if (r == 0) break
+                delay(1000L)
+                r--
+            }
+            corriendo = false
+        }
+    }
+
+    fun parar(contexto: Context) {
+        corriendo = false
+        countdownJob?.cancel()
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_PARAR
+        }
+        contexto.startService(intent)
+    }
+
+    fun cancelar(contexto: Context) {
+        corriendo = false
+        mostrarContador = false
+        countdownJob?.cancel()
+        tiempoFormato = "00:00:00"
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_CANCELAR
+        }
+        contexto.startService(intent)
     }
 
     override fun onCleared() {
         super.onCleared()
         countdownJob?.cancel()
+    }
+    fun comprobarEstadoService() {
+        viewModelScope.launch {
+            while (true) {
+
+                if (!ContadorService.estaActivo && !ContadorService.estaPausado) {
+                    mostrarContador = false
+                    corriendo = false
+                    tiempoFormato = "00:00:00"
+                    countdownJob?.cancel()
+                }
+
+                delay(300)
+            }
+        }
     }
 }

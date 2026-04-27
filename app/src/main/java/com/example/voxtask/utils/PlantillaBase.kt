@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Translate
@@ -34,6 +35,9 @@ import kotlinx.coroutines.launch
 fun PlantillaBase(
     viewModel: PlantillaBaseViewModel,
     navController: NavController,
+    mostrarBotonInfo: Boolean = true,
+    mostrarBotonSalir: Boolean = true,
+    textoInformacion: String? = null,
     onTextoReconocido: (String) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -64,26 +68,31 @@ fun PlantillaBase(
                     titleContentColor = Color.White
                 ),
                 actions = {
-                    //Boton de traducciones
-                    IconButton(onClick = {
-                        coroutineScope.launch { TextoAVoz.hablar(contexto, "Abriendo la opción de traducir") }
-                        navController.navigate("traducir")
-                    }) {
-                        Icon(Icons.Default.Translate, contentDescription = stringResource(R.string.btn_traducir), tint = Color.White)
-                    }
-                    //Boton cerrar sesion
-                    IconButton(
-                        onClick = {
-                            viewModel.cerrarSesion(actividad, actividad) {
-
+                    if (mostrarBotonInfo && !textoInformacion.isNullOrEmpty()) {
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                TextoAVoz.hablar(contexto, textoInformacion!!)
                             }
+                        }) {
+                            Icon(
+                                Icons.Default.Info,
+                                contentDescription = "Información",
+                                tint = Color.White
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ExitToApp,
-                            contentDescription = "Cerrar sesión",
-                            tint = Color.White
-                        )
+                    }
+                    if (mostrarBotonSalir) {
+                        IconButton(
+                            onClick = {
+                                viewModel.cerrarSesion(actividad, actividad) { }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ExitToApp,
+                                contentDescription = "Cerrar sesión",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             )

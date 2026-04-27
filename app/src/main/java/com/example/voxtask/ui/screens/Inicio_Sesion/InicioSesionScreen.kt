@@ -27,13 +27,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
 
 
 @Composable
 fun InicioSesionScreen(
     alIniciarSesionExitosamente: () -> Unit,
-    alNavegarARegistro: () -> Unit = {},
+    alNavegarARegistro: (String) -> Unit = {},   // ← acepta String
     alPulsarGoogle: () -> Unit,
     viewModel: InicioSesionViewModel = viewModel()
 ) {
@@ -297,7 +298,7 @@ fun InicioSesionScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Boton para redireccionar a la pantalla de registro
-                    TextButton(onClick = { alNavegarARegistro() }) {
+                    TextButton(onClick = { alNavegarARegistro(VoxTaskScreen.Registro_Usuario.name) }) {
                         Text(
                             text = stringResource(R.string.txt_pregunta),
                             color = TextoGris,
@@ -312,8 +313,7 @@ fun InicioSesionScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Boton para redireccionar a la pantalla de cambiar contrasenia
-                    TextButton(onClick = { alNavegarARegistro() }) {
+                    TextButton(onClick = { alNavegarARegistro(VoxTaskScreen.CambiarContrasenia.name) }) {
                         Text(
                             text = stringResource(R.string.txt_pregunta_contrasenia),
                             color = TextoGris,

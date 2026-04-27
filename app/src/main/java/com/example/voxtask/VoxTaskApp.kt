@@ -1,5 +1,6 @@
 package com.example.voxtask
 
+import androidx.navigation.navDeepLink
 import android.app.Activity
 import android.os.Build
 import android.util.Log
@@ -17,22 +18,29 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.voxtask.ui.screens.Ajustes.AjustesScreen
 import com.example.voxtask.ui.screens.Ajustes.AjustesViewModel
+import com.example.voxtask.ui.screens.Cambiar_contrasenia.CambiarContrasenaScreen
+import com.example.voxtask.ui.screens.Cambiar_contrasenia.CambiarContraseniaViewModel
 import com.example.voxtask.ui.screens.Contador.ContadorScreen
+import com.example.voxtask.ui.screens.VerCorreo.VerCorreoScreen
 import com.example.voxtask.ui.screens.Contador.ContadorViewModel
 import com.example.voxtask.ui.screens.Correo.CorreoScreen
 import com.example.voxtask.ui.screens.Correo.CorreoViewModel
+import com.example.voxtask.ui.screens.EnviarCorreo.EnviarCorreoScreen
+import com.example.voxtask.ui.screens.EnviarCorreo.EnviarCorreoViewModel
 import com.example.voxtask.ui.screens.Lista_Compra.ListaCompraScreen
 import com.example.voxtask.ui.screens.Lista_Compra.ListaCompraViewModel
 import com.example.voxtask.ui.screens.Inicio.InicioScreen
 import com.example.voxtask.ui.screens.Inicio.InicioViewModel
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionScreen
 import com.example.voxtask.ui.screens.Inicio_Sesion.InicioSesionViewModel
+import com.example.voxtask.ui.screens.NuevaContrasenia.NuevaContraseniaScreen
 import com.example.voxtask.ui.screens.Perfil.PerfilScreen
 import com.example.voxtask.ui.screens.Perfil.PerfilViewModel
 import com.example.voxtask.ui.screens.Recordatorio.RecordatorioScreen
 import com.example.voxtask.ui.screens.Recordatorio.RecordatorioViewModel
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioScreen
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioViewModel
+import com.example.voxtask.ui.screens.VerCorreo.VerCorreoViewModel
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -46,14 +54,19 @@ enum class VoxTaskScreen {
     Recordatorio,
     Correo,
     Ajustes,
-    Perfil
+    Perfil,
+    EnviarCorreo,
+    VerCorreo,
+    CambiarContrasenia,
+    Verificacion,
+    RegistrarNuevaContrasenia
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VoxTaskApp(
     windowSize: WindowWidthSizeClass,
-    onNavControllerReady: (NavController) -> Unit = {} // ← añade esto
+    onNavControllerReady: (NavController) -> Unit = {}
 
 ) {
     val navController = rememberNavController()
@@ -101,21 +114,19 @@ fun VoxTaskApp(
         composable(route = VoxTaskScreen.Inicio_sesion.name) {
             InicioSesionScreen(
                 alIniciarSesionExitosamente = {
-                    navController.navigate(VoxTaskScreen.Inicio.name){
-                        // Esto evita que el usuario pueda volver atrás al login
+                    navController.navigate(VoxTaskScreen.Inicio.name) {
                         popUpTo(VoxTaskScreen.Inicio_sesion.name) { inclusive = true }
-
                     }
                 },
-                alNavegarARegistro = {
-                    navController.navigate(VoxTaskScreen.Registro_Usuario.name)
+                alNavegarARegistro = { destino ->          // ← acepta destino
+                    navController.navigate(destino)
                 },
                 alPulsarGoogle = {
-                    // Pantalla de Google
                     val clienteGoogle = viewModelInicioSesion.obtenerClienteGoogle(contexto)
                     lanzadorGoogle.launch(clienteGoogle.signInIntent)
                 },
                 viewModel = viewModelInicioSesion
+
             )
         }
 
@@ -162,7 +173,12 @@ fun VoxTaskApp(
         //Screen Contador
         composable(VoxTaskScreen.Contador.name) {
             val viewModelContador: ContadorViewModel = viewModel()
-            ContadorScreen(viewModel = viewModelContador,navController)
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+
+            ContadorScreen(
+                viewModelPlantilla = viewModelPlantilla,
+                viewModel = viewModelContador,
+                navController=navController)
         }
 
 
@@ -207,6 +223,33 @@ fun VoxTaskApp(
         }
 
 
+        //Screen Enviar Correo
+        composable(VoxTaskScreen.EnviarCorreo.name) {
+            val viewModelEnviarCorreo: EnviarCorreoViewModel = viewModel()
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+
+            EnviarCorreoScreen(
+                viewModelPlantilla = viewModelPlantilla,
+                viewModel = viewModelEnviarCorreo,
+                navController = navController
+            )
+        }
+
+        //Screen Ver Correo
+        composable("${VoxTaskScreen.VerCorreo.name}/{correoId}") { backStackEntry ->
+            val viewModelVerCorreo: VerCorreoViewModel = viewModel()
+            val viewModelPlantilla: PlantillaBaseViewModel = viewModel()
+            val correoId = backStackEntry.arguments?.getString("correoId")
+
+            VerCorreoScreen(
+                viewModelPlantilla = viewModelPlantilla,
+                viewModel = viewModelVerCorreo,
+                navController = navController,
+                correoId = correoId
+
+            )
+        }
+
         //Screen Ajustes
         composable(VoxTaskScreen.Ajustes.name) {
             val viewModelAjustes: AjustesViewModel = viewModel()
@@ -227,6 +270,30 @@ fun VoxTaskApp(
                 navController = navController
             )
         }
+
+
+        //Screen cambio de contrasenia
+        composable(VoxTaskScreen.CambiarContrasenia.name) {
+            val viewModelCambiarContrasenia: CambiarContraseniaViewModel = viewModel()
+            CambiarContrasenaScreen(
+                viewModel = viewModelCambiarContrasenia,
+                navController = navController
+            )
+        }
+
+        //Screen registrar nueva contrasenia
+        composable(
+                    route = VoxTaskScreen.RegistrarNuevaContrasenia.name,
+                    deepLinks = listOf(
+                        navDeepLink { uriPattern = "voxtask://nuevacontrasena" }
+                    )
+                ) {
+                    val viewModelCambiar: CambiarContraseniaViewModel = viewModel()
+                    NuevaContraseniaScreen(
+                        navController = navController,
+                        viewModel = viewModelCambiar
+                    )
+                }
     }
 }
 

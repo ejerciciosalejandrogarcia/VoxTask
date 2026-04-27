@@ -1,7 +1,6 @@
+<!-- res/values/strings.xml -->
 <resources>
     <string name="app_name">VoxTask</string>
-
-    <!-- Texto interfaz -->
 
     <!-- Iniciar sesion Screen -->
     <string name="campo_nombre_usuario">Nombre de usuario</string>
@@ -15,7 +14,6 @@
     <string name="txt_iniciar_google">Iniciar sesión con Google</string>
     <string name="txt_pregunta_contrasenia">¿No te acuerdas de la contraseña?</string>
     <string name="txt_respuesta_contrasenia">Restablecer contraseña</string>
-
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Crear cuenta</string>
@@ -35,10 +33,6 @@
     <string name="btn_inicio">Boton de inicio</string>
     <string name="btn_traducir">Boton de traducir</string>
 
-
-    <!-- Contador Screen -->
-
-
     <!-- Lista Compra Screen -->
     <string name="icono_eliminar_producto">Eliminar producto</string>
     <string name="txt_sin_producto_lista_compra">Di un producto para agregarlo</string>
@@ -47,10 +41,9 @@
     <string name="btn_eliminar_producto">Eliminar</string>
     <string name="btn_cancelar_producto">Cancelar</string>
 
-
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mes anterior</string>
-    <string name="icono_mes_siguiente">Mes anterior</string>
+    <string name="icono_mes_siguiente">Mes siguiente</string>
     <string-array name="dias_semana">
         <item>Lun</item>
         <item>Mar</item>
@@ -64,9 +57,23 @@
     <string name="txt_sin_eventos_dia_seleccionado">No hay eventos este día</string>
     <string name="txt_eventos_dia_seleccionado">Eventos del %1$d de %2$s</string>
 
+    <!-- Ajustes Screen -->
+    <string name="ajustes">Ajustes</string>
+    <string name="cambiar_voz">Cambiar voz</string>
+    <string name="voz_actual">Voz actual</string>
+    <string name="cambiar_idioma">Cambiar idioma</string>
+    <string name="idioma_actual">Idioma actual</string>
+    <string name="mi_perfil">Mi perfil</string>
+    <string name="ver_editar_perfil">Ver y editar tu información</string>
+    <string name="color_interfaz">Color de la interfaz</string>
+    <string name="personaliza_colores">Personaliza los colores de la app</string>
+    <string name="selecciona_voz">Selecciona una voz</string>
+    <string name="selecciona_idioma">Selecciona un idioma</string>
+    <string name="no_voces">No hay voces disponibles.</string>
+    <string name="cancelar">Cancelar</string>
 
-
-
-
-
+    <string name="cambiar_fondo">Cambiar fondo</string>
+    <string name="personaliza_fondo">Personaliza el fondo de la app</string>
+    <string name="version_app">Versión</string>
+    <string name="ver_version_actual">Consulta la versión actual</string>
 </resources>

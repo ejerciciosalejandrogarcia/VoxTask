@@ -14,12 +14,28 @@ import androidx.navigation.NavController
 import com.example.voxtask.ui.theme.VoxTaskTheme
 import com.google.firebase.FirebaseApp
 import android.Manifest
-
+import android.content.Context
+import android.content.res.Configuration
+import java.util.Locale
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : ComponentActivity() {
 
     var navController: NavController? = null
 
+    //Asegura que se use el idioma elegido en ajustes cada vez que se abra la aplicacion
+    override fun attachBaseContext(newBase: Context) {
+        val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+        val idioma = prefs.getString("idioma", "es") ?: "es"
+
+        val locale = java.util.Locale(idioma)
+        java.util.Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        super.attachBaseContext(newBase.createConfigurationContext(config))
+    }
+    //Funcion para pedir permiso al usuario para acceder al microfoo del dispositivo
     private val pedirPermiso = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -54,4 +70,6 @@ class MainActivity : ComponentActivity() {
             navController?.navigate(VoxTaskScreen.Contador.name)
         }
     }
+
+
 }

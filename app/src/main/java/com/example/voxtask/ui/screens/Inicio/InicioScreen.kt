@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Translate
@@ -95,20 +96,18 @@ fun InicioScreen(
                     titleContentColor = Color.White
                 ),
                 actions = {
-                    //Boton traductor
-                    IconButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                TextoAVoz.hablar(contexto, "Abriendo la opción de traducir")
-                            }
-                        }
-                    ) {
+                    // Botón informativo
+                    IconButton(onClick = {
+                        //Implementar en un futuro que el boton informativo que explique las instrucciones al usuario
+                        coroutineScope.launch { TextoAVoz.hablar(contexto, "Elige una de las siguientes opciones y cuando estés listo mantén el botón de hablar") }
+                    }) {
                         Icon(
-                            imageVector = Icons.Default.Translate, // Ícono de traducir
-                            contentDescription = stringResource(R.string.btn_traducir),
+                            Icons.Default.Info,
+                            contentDescription = "Información",
                             tint = Color.White
                         )
                     }
+
 
                     //Boton cerrar sesion
                     IconButton(

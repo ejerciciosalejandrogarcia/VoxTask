@@ -3,17 +3,24 @@ package com.example.voxtask.ui.screens.Correo
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.voxtask.VoxTaskScreen
+import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -94,7 +101,7 @@ fun CorreoScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(estado.correos) { correo ->
-                                TarjetaCorreo(correo)
+                                TarjetaCorreo(correo,navController = navController)
                             }
                         }
                     }
@@ -107,14 +114,41 @@ fun CorreoScreen(
                     )
                 }
             }
+
+            // Botón para crear un correo
+            Button(
+                onClick = {
+                    navController.navigate("enviarcorreo")
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 8.dp, end = 4.dp)
+                    .size(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Nuevo correo",
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
         }
     }
 }
 
 @Composable
-fun TarjetaCorreo(correo: com.example.voxtask.databases.model.Correo) {
+fun TarjetaCorreo(
+    correo: com.example.voxtask.databases.model.Correo,
+    navController: NavController
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { navController.navigate("${VoxTaskScreen.VerCorreo.name}/${correo.id}") },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {

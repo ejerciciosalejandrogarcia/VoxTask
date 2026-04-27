@@ -1,6 +1,7 @@
 package com.example.voxtask.ui.screens.Ajustes
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,9 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,8 +28,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.voxtask.R
 import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
@@ -38,44 +43,44 @@ fun AjustesScreen(
     viewModel: AjustesViewModel,
     navController: NavController
 ) {
-    //Variables
     val viewModelPlantilla: PlantillaBaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val contexto = LocalContext.current
     val actividad = contexto as Activity
 
+    LaunchedEffect(Unit) {
+        viewModel.inicializarIdioma(contexto)
+    }
+
     PlantillaBase(
         viewModel = viewModelPlantilla,
+        mostrarBotonInfo = false,
         navController = navController
     ) { paddingValues ->
 
-        // Muestra las voces disponibles
+        // Selector de voz
         if (viewModel.mostrarSelectorVoz) {
-
-            // Cargamos las voces
             LaunchedEffect(Unit) {
                 viewModel.cargarVoces(contexto)
             }
 
             AlertDialog(
                 onDismissRequest = { viewModel.mostrarSelectorVoz = false },
-                title = { Text("Selecciona una voz") },
+                title = { Text(stringResource(R.string.selecciona_voz)) },
                 text = {
-                    // Si no hay voces mostramos un mensaje
                     if (viewModel.vocesDisponibles.isEmpty()) {
-                        Text("No hay voces disponibles.")
+                        Text(stringResource(R.string.no_voces))
                     } else {
-                        // Lista scrolleable con todas las voces del movil
                         LazyColumn {
                             items(viewModel.vocesDisponibles) { voz ->
                                 TextButton(
                                     onClick = { viewModel.aplicarVoz(voz.name, contexto) },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                        Text(
-                                            text = voz.locale.getDisplayName(Locale("es", "ES")),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.outline
-                                        )
+                                    Text(
+                                        text = voz.locale.getDisplayName(Locale("es", "ES")),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
                                 }
                             }
                         }
@@ -83,9 +88,43 @@ fun AjustesScreen(
                 },
                 confirmButton = {},
                 dismissButton = {
-                    //Boton cancelar
                     TextButton(onClick = { viewModel.mostrarSelectorVoz = false }) {
-                        Text("Cancelar")
+                        Text(stringResource(R.string.cancelar))
+                    }
+                }
+            )
+        }
+
+        // Selector de idioma
+        if (viewModel.mostrarSelectorIdioma) {
+            AlertDialog(
+                onDismissRequest = { viewModel.mostrarSelectorIdioma = false },
+                title = { Text(stringResource(R.string.selecciona_idioma)) },
+                text = {
+                    LazyColumn {
+                        items(viewModel.idiomasDisponibles) { (codigo, nombre) ->
+                            TextButton(
+                                onClick = {
+                                    viewModel.mostrarSelectorIdioma = false
+                                    viewModel.cargarIdiomas(contexto, codigo) {
+                                        actividad.recreate()
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = nombre,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { viewModel.mostrarSelectorIdioma = false }) {
+                        Text(stringResource(R.string.cancelar))
                     }
                 }
             )
@@ -98,56 +137,61 @@ fun AjustesScreen(
                 .padding(16.dp)
         ) {
             item {
-                //Titulo de ajustes
                 Text(
-                    text = "Ajustes",
+                    text = stringResource(R.string.ajustes),
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
-
-            //Boton de cambiar voz
             item {
                 OpcionAjuste(
                     icono = Icons.Default.RecordVoiceOver,
-                    titulo = "Cambiar voz",
-                    descripcion = "Voz actual: ${viewModel.vozActual}"
-                ) {
-                    viewModel.mostrarSelectorVoz = true
-                }
+                    titulo = stringResource(R.string.cambiar_voz),
+                    descripcion = "${stringResource(R.string.voz_actual)}: ${viewModel.vozActual}"
+                ) { viewModel.mostrarSelectorVoz = true }
             }
-
-            //Boton de cambiar idioma
             item {
                 OpcionAjuste(
                     icono = Icons.Default.Language,
-                    titulo = "Cambiar idioma",
-                    descripcion = "Selecciona el idioma de la app"
-                ) { }
+                    titulo = stringResource(R.string.cambiar_idioma),
+                    descripcion = "${stringResource(R.string.idioma_actual)}: ${viewModel.idiomaActual}"
+                ) { viewModel.mostrarSelectorIdioma = true }
             }
-
-            //Boton mi perfil
             item {
                 OpcionAjuste(
                     icono = Icons.Default.AccountCircle,
-                    titulo = "Mi perfil",
-                    descripcion = "Ver y editar tu información"
-                ) {
-                    navController.navigate("Perfil")
-                }
+                    titulo = stringResource(R.string.mi_perfil),
+                    descripcion = stringResource(R.string.ver_editar_perfil)
+                ) { navController.navigate("Perfil") }
             }
-            //Boton cambiar color de la interfaz
             item {
                 OpcionAjuste(
                     icono = Icons.Default.Palette,
-                    titulo = "Color de la interfaz",
-                    descripcion = "Personaliza los colores de la app"
+                    titulo = stringResource(R.string.color_interfaz),
+                    descripcion = stringResource(R.string.personaliza_colores)
                 ) { }
+            }
+            item {
+                OpcionAjuste(
+                    icono = Icons.Default.Wallpaper,
+                    titulo = stringResource(R.string.cambiar_fondo),
+                    descripcion = stringResource(R.string.personaliza_fondo)
+                ) {   }
+            }
+
+            item {
+                OpcionAjuste(
+                    icono = Icons.Default.Info,
+                    titulo = stringResource(R.string.version_app),
+                    descripcion = stringResource(R.string.ver_version_actual)
+                ) {
+                    Toast.makeText(contexto, "Versión: 1.0", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 }
-//Funcion que crea las opciones de los ajustes con un icono titulo y una descripcion
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OpcionAjuste(

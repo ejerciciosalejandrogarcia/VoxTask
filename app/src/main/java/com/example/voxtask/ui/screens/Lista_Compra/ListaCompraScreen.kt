@@ -64,6 +64,7 @@ fun ListaCompraScreen(
 
     PlantillaBase(
         viewModel = viewModelPlantilla,
+        textoInformacion = "Di un producto para agregarlo, o di elimina y el producto para borrarlo",
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->

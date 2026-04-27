@@ -1,0 +1,78 @@
+<!-- res/values-pt/strings.xml -->
+<resources>
+    <string name="app_name">VoxTask</string>
+
+    <!-- Ajustes Screen -->
+    <string name="ajustes">Configurações</string>
+    <string name="cambiar_voz">Alterar voz</string>
+    <string name="voz_actual">Voz atual</string>
+    <string name="cambiar_idioma">Alterar idioma</string>
+    <string name="idioma_actual">Idioma atual</string>
+    <string name="mi_perfil">Meu perfil</string>
+    <string name="ver_editar_perfil">Ver e editar suas informações</string>
+    <string name="color_interfaz">Cor da interface</string>
+    <string name="personaliza_colores">Personalize as cores do app</string>
+    <string name="selecciona_voz">Selecione uma voz</string>
+    <string name="selecciona_idioma">Selecione um idioma</string>
+    <string name="no_voces">Não há vozes disponíveis.</string>
+    <string name="cancelar">Cancelar</string>
+
+    <!-- Login Screen -->
+    <string name="campo_nombre_usuario">Nome de usuário</string>
+    <string name="campo_contrasenia">Senha</string>
+    <string name="btn_iniciar_sesion">Entrar</string>
+    <string name="txt_pregunta">Não tem uma conta?</string>
+    <string name="txt_respuesta">Cadastre-se</string>
+    <string name="icono_mostrar_contrasenia">Mostrar senha</string>
+    <string name="icono_limpiar">Limpar</string>
+    <string name="txt_o">ou</string>
+    <string name="txt_iniciar_google">Entrar com o Google</string>
+    <string name="txt_pregunta_contrasenia">Esqueceu a senha?</string>
+    <string name="txt_respuesta_contrasenia">Redefinir senha</string>
+
+    <!-- Registro Usuario Screen -->
+    <string name="btn_registrar_usuario">Criar conta</string>
+    <string name="campo_nombre">Seu nome</string>
+    <string name="campo_primer_ap">Seu primeiro sobrenome</string>
+    <string name="campo_segundo_ap">Seu segundo sobrenome</string>
+    <string name="campo_fecha_naci">Sua data de nascimento</string>
+    <string name="campo_correo">Seu endereço de e-mail</string>
+
+    <!-- Inicio Screen -->
+    <string name="txt_contador">Iniciar um contador</string>
+    <string name="txt_correo">Redigir e enviar um e-mail</string>
+    <string name="txt_recordatorio">Criar um lembrete</string>
+    <string name="txt_lista_compra">Criar uma lista de compras</string>
+    <string name="btn_hablar">Botão de falar</string>
+    <string name="btn_ajustes">Botão de configurações</string>
+    <string name="btn_inicio">Botão de início</string>
+    <string name="btn_traducir">Botão de traduzir</string>
+
+    <!-- Lista Compra Screen -->
+    <string name="icono_eliminar_producto">Remover produto</string>
+    <string name="txt_sin_producto_lista_compra">Diga um produto para adicioná-lo</string>
+    <string name="txt_titulo_mensaje_confirmacion_producto">Remover produto</string>
+    <string name="txt_mensaje_confirmacion_producto">Tem certeza que deseja remover %s?</string>
+    <string name="btn_eliminar_producto">Remover</string>
+    <string name="btn_cancelar_producto">Cancelar</string>
+
+    <!-- Recordatorio Screen -->
+    <string name="icono_mes_anterior">Mês anterior</string>
+    <string name="icono_mes_siguiente">Mês seguinte</string>
+    <string-array name="dias_semana">
+        <item>Seg</item>
+        <item>Ter</item>
+        <item>Qua</item>
+        <item>Qui</item>
+        <item>Sex</item>
+        <item>Sáb</item>
+        <item>Dom</item>
+    </string-array>
+    <string name="icono_eliminar_evento">Remover evento</string>
+    <string name="txt_sin_eventos_dia_seleccionado">Não há eventos neste dia</string>
+    <string name="txt_eventos_dia_seleccionado">Eventos do dia %1$d de %2$s</string>
+    <string name="cambiar_fondo">Alterar fundo</string>
+    <string name="personaliza_fondo">Personalize o fundo do aplicativo</string>
+    <string name="version_app">Versão</string>
+    <string name="ver_version_actual">Ver a versão atual</string>
+</resources>
