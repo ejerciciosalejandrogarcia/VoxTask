@@ -41,6 +41,8 @@ import com.example.voxtask.ui.screens.Recordatorio.RecordatorioViewModel
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioScreen
 import com.example.voxtask.ui.screens.Registro_Usuario.RegistroUsuarioViewModel
 import com.example.voxtask.ui.screens.VerCorreo.VerCorreoViewModel
+import com.example.voxtask.ui.screens.Verificacion.VerificacionScreen
+import com.example.voxtask.ui.screens.Verificacion.VerificacionViewModel
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -271,6 +273,14 @@ fun VoxTaskApp(
             )
         }
 
+        //Screen Verificacion
+        composable(VoxTaskScreen.Verificacion.name) {
+            val viewModelVerificacion: VerificacionViewModel = viewModel()
+            VerificacionScreen(
+                viewModel = viewModelVerificacion,
+                navController = navController
+            )
+        }
 
         //Screen cambio de contrasenia
         composable(VoxTaskScreen.CambiarContrasenia.name) {
