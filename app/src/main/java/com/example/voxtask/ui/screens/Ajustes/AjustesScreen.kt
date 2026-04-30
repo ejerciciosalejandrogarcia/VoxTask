@@ -2,6 +2,8 @@ package com.example.voxtask.ui.screens.Ajustes
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,28 +43,33 @@ import java.util.Locale
 @Composable
 fun AjustesScreen(
     viewModel: AjustesViewModel,
+    plantillaBaseViewModel: PlantillaBaseViewModel, // ✅ recibido, no se crea aquí
     navController: NavController
 ) {
-    val viewModelPlantilla: PlantillaBaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val contexto = LocalContext.current
     val actividad = contexto as Activity
+
+    // ✅ Callback que actualiza el fondo en el ViewModel compartido
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        plantillaBaseViewModel.actualizarFondo(uri)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.inicializarIdioma(contexto)
     }
 
     PlantillaBase(
-        viewModel = viewModelPlantilla,
+        viewModel = plantillaBaseViewModel, // ✅ usar el compartido
         mostrarBotonInfo = false,
         navController = navController
     ) { paddingValues ->
 
-        // Selector de voz
         if (viewModel.mostrarSelectorVoz) {
             LaunchedEffect(Unit) {
                 viewModel.cargarVoces(contexto)
             }
-
             AlertDialog(
                 onDismissRequest = { viewModel.mostrarSelectorVoz = false },
                 title = { Text(stringResource(R.string.selecciona_voz)) },
@@ -73,7 +80,7 @@ fun AjustesScreen(
                         LazyColumn {
                             items(viewModel.vocesDisponibles) { voz ->
                                 TextButton(
-                                    onClick = { viewModel.aplicarVoz(voz.name, contexto) },
+                                    onClick = { viewModel.aplicarVoz(voz.name, actividad) },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
@@ -95,7 +102,6 @@ fun AjustesScreen(
             )
         }
 
-        // Selector de idioma
         if (viewModel.mostrarSelectorIdioma) {
             AlertDialog(
                 onDismissRequest = { viewModel.mostrarSelectorIdioma = false },
@@ -176,9 +182,19 @@ fun AjustesScreen(
                     icono = Icons.Default.Wallpaper,
                     titulo = stringResource(R.string.cambiar_fondo),
                     descripcion = stringResource(R.string.personaliza_fondo)
-                ) {   }
+                ) {
+                    imageLauncher.launch("image/*")
+                }
             }
-
+            item {
+                OpcionAjuste(
+                    icono = Icons.Default.Wallpaper,
+                    titulo = "Quitar fondo",
+                    descripcion = "Volver al fondo por defecto"
+                ) {
+                    plantillaBaseViewModel.actualizarFondo(null)
+                }
+            }
             item {
                 OpcionAjuste(
                     icono = Icons.Default.Info,

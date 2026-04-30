@@ -20,6 +20,16 @@ data class EnviarCorreoRequest(
     val modo: String
 )
 
+data class VerificacionRequest(
+    val email: String,
+    val uid: String
+)
+
+data class VerificacionResponse(
+    val success: Boolean,
+    val codigo: String
+)
+
 interface N8nApiService {
     @GET("webhook/get-emails")
     suspend fun obtenerCorreos(
@@ -37,10 +47,16 @@ interface N8nApiService {
         @Path("id") id: String,
         @Query("token") token: String
     ): Correo
+
+    @POST("webhook/send-verification")
+    suspend fun enviarCodigoVerificacion(
+        @Body body: VerificacionRequest
+    ): VerificacionResponse
+
 }
 
 object N8nClient {
-    private const val BASE_URL = "http://192.168.1.40:5678/"
+    private const val BASE_URL = "http://192.168.1.49:5678/"
 
     val api: N8nApiService by lazy {
         val okHttpClient = OkHttpClient.Builder()

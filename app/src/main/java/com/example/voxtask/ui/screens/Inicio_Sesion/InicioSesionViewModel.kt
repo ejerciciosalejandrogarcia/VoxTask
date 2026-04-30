@@ -32,7 +32,7 @@ data class InicioSesionUiState(
 )
 
 class InicioSesionViewModel(
-    private val usuarioRepository: UsuarioDao = UsuarioRepository()  // ← añadir
+    private val usuarioRepository: UsuarioDao = UsuarioRepository()
 ) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()

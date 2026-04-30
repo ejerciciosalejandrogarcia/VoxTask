@@ -6,36 +6,38 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.navigation.NavController
 import com.example.voxtask.ui.theme.VoxTaskTheme
+import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.firebase.FirebaseApp
 import android.Manifest
 import android.content.Context
 import android.content.res.Configuration
-import java.util.Locale
+import com.example.voxtask.ui.theme.rememberThemeManager
+
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : ComponentActivity() {
 
     var navController: NavController? = null
 
-    //Asegura que se use el idioma elegido en ajustes cada vez que se abra la aplicacion
+    // ✅ Una sola instancia compartida por toda la app
+    private val plantillaBaseViewModel: PlantillaBaseViewModel by viewModels()
+
     override fun attachBaseContext(newBase: Context) {
         val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idioma = prefs.getString("idioma", "es") ?: "es"
-
         val locale = java.util.Locale(idioma)
         java.util.Locale.setDefault(locale)
-
         val config = Configuration()
         config.setLocale(locale)
-
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
-    //Funcion para pedir permiso al usuario para acceder al microfoo del dispositivo
+
     private val pedirPermiso = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -47,15 +49,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pedirPermiso.launch(Manifest.permission.RECORD_AUDIO)
-
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
         setContent {
-            VoxTaskTheme {
+            val themeManager = rememberThemeManager()
+            VoxTaskTheme(themeManager = themeManager) {
                 Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                     val windowSize = calculateWindowSizeClass(this)
                     VoxTaskApp(
                         windowSize = windowSize.widthSizeClass,
+                        plantillaBaseViewModel = plantillaBaseViewModel, // ✅
                         onNavControllerReady = { navController = it }
                     )
                 }
@@ -63,13 +66,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Cuando el usuario toca la notificación
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.action == "ABRIR_CONTADOR") {
             navController?.navigate(VoxTaskScreen.Contador.name)
         }
     }
-
-
 }

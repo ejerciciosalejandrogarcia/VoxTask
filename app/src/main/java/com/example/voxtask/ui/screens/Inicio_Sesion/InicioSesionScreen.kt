@@ -169,7 +169,9 @@ fun InicioSesionScreen(
                             focusedBorderColor = VerdeClaro,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
                             focusedLabelColor = VerdeClaro,
-                            unfocusedLabelColor = VerdeClaro,
+                            unfocusedLabelColor = TextoOscuro,
+                            focusedTextColor = TextoOscuro,
+
                             cursorColor = VerdeClaro
                         )
                     )
@@ -198,10 +200,12 @@ fun InicioSesionScreen(
                             focusedBorderColor = VerdeClaro,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
                             focusedLabelColor = VerdeClaro,
-                            unfocusedLabelColor = VerdeClaro,
+                            unfocusedLabelColor = TextoOscuro,
+                            focusedTextColor = TextoOscuro,
+
                             cursorColor = VerdeClaro
                         )
-                    )
+                        )
 
                     // Mensaje de error
                     if (estadoUi.mensajeError.isNotEmpty()) {
@@ -312,19 +316,29 @@ fun InicioSesionScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(onClick = { alNavegarARegistro(VoxTaskScreen.CambiarContrasenia.name) }) {
-                        Text(
-                            text = stringResource(R.string.txt_pregunta_contrasenia),
-                            color = TextoGris,
-                            fontSize = 13.sp
-                        )
-                        Text(
-                            text = " "+stringResource(R.string.txt_respuesta_contrasenia),
-                            color = VerdePrimario,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Botón para redireccionar a cambiar contraseña
+                    TextButton(
+                        onClick = { alNavegarARegistro(VoxTaskScreen.CambiarContrasenia.name) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Usamos Column para que el texto aparezca uno sobre otro
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = stringResource(R.string.txt_pregunta_contrasenia), // "¿No te acuerdas de la contraseña?"
+                                color = TextoGris,
+                                fontSize = 13.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp)) // Un pequeño espacio entre líneas
+                            Text(
+                                text = stringResource(R.string.txt_respuesta_contrasenia), // "Restablecer contraseña"
+                                color = VerdePrimario,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }

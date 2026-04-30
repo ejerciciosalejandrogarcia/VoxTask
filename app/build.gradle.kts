@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.compose.material3.window.size.class1)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.room.ktx)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
@@ -105,4 +106,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("com.google.apis:google-api-services-gmail:v1-rev110-1.25.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
 }
