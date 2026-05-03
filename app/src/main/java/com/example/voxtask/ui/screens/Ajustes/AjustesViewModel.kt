@@ -21,7 +21,7 @@ class AjustesViewModel : ViewModel() {
     var vozActual by mutableStateOf(TextoAVoz.vozElegida ?: "Por defecto")
     var mostrarSelectorIdioma by mutableStateOf(false)
     var idiomaActual by mutableStateOf("Español")
-
+    var mostrarSelectorColor by mutableStateOf(false)
     val idiomasDisponibles = listOf(
         Pair("es", "Español"),
         Pair("en", "English"),

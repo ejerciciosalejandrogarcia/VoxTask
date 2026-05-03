@@ -25,6 +25,10 @@ data class VerificacionRequest(
     val uid: String
 )
 
+
+data class RecuperarContraseniaRequest(
+    val email: String
+)
 data class VerificacionResponse(
     val success: Boolean,
     val codigo: String
@@ -53,10 +57,14 @@ interface N8nApiService {
         @Body body: VerificacionRequest
     ): VerificacionResponse
 
+    @POST("webhook/recuperar-contrasenia")
+    suspend fun enviarCorreoRecuperacion(
+        @Body body: RecuperarContraseniaRequest
+    ): retrofit2.Response<Unit>
 }
 
 object N8nClient {
-    private const val BASE_URL = "http://192.168.1.49:5678/"
+    private const val BASE_URL = "http://192.168.1.42:5678/"
 
     val api: N8nApiService by lazy {
         val okHttpClient = OkHttpClient.Builder()

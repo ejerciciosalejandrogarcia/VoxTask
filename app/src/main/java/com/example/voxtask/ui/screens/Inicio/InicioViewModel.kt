@@ -17,7 +17,7 @@ class InicioViewModel : ViewModel() {
     //Variables
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-
+    var bienvenidaDada = false
     private val _textoReconocido = MutableStateFlow("")
     val textoReconocido: StateFlow<String> = _textoReconocido
     var abrirContador: () -> Unit = {}

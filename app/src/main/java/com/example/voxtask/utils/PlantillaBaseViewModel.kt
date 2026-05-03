@@ -11,17 +11,23 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class PlantillaBaseViewModel : ViewModel() {
 
     //Variables
     private val auth = FirebaseAuth.getInstance()
+
     private val firestore = FirebaseFirestore.getInstance()
     // Estado para la URI del fondo personalizado
     var fondoPersonalizadoUri by mutableStateOf<Uri?>(null)
+    private val _fondoUri = MutableStateFlow<Uri?>(null)
+    val fondoUri: StateFlow<Uri?> = _fondoUri.asStateFlow()
 
-    // Función para actualizar el fondo
     fun actualizarFondo(uri: Uri?) {
+        _fondoUri.value = uri
         fondoPersonalizadoUri = uri
     }
 

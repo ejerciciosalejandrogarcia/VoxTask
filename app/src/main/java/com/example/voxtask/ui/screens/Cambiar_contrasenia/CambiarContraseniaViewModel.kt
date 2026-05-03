@@ -2,6 +2,9 @@ package com.example.voxtask.ui.screens.Cambiar_contrasenia
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.databases.network.N8nClient
+import com.example.voxtask.databases.network.RecuperarContraseniaRequest
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +34,7 @@ data class NuevaContraseniaUiState(
 )
 
 class CambiarContraseniaViewModel : ViewModel() {
-/*
+
     private val auth = FirebaseAuth.getInstance()
 
     private val _estadoUi = MutableStateFlow(CambiarContrasenaUiState())
@@ -80,37 +83,35 @@ class CambiarContraseniaViewModel : ViewModel() {
             return
         }
 
+        val actionCodeSettings = ActionCodeSettings.newBuilder()
+            .setUrl("https://voxtask-de969.web.app")
+            .setHandleCodeInApp(true)
+            .setAndroidPackageName("com.example.voxtask", true, null)
+            .build()
+
         viewModelScope.launch {
             _estadoUi.value = _estadoUi.value.copy(cargando = true, mensajeError = "")
-
             try {
-                auth.sendPasswordResetEmail(email).await()
+                auth.sendPasswordResetEmail(email, actionCodeSettings).await()
 
-                val json = JSONObject().apply { put("email", email) }
-                val body = json.toString().toRequestBody("application/json".toMediaType())
-
-                val request = Request.Builder()
-                    .url("http://192.168.1.40:5678/webhook/recuperar-contrasenia")
-                    .post(body)
-                    .build()
-
-                cliente.newCall(request).execute()
+                N8nClient.api.enviarCorreoRecuperacion(
+                    RecuperarContraseniaRequest(email = email)
+                )
 
                 _estadoUi.value = _estadoUi.value.copy(
                     cargando = false,
                     correoEnviado = true
                 )
-
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(
                     cargando = false,
-                    mensajeError = "Error de conexión. Inténtalo de nuevo"
+                    mensajeError = e.message ?: "Error. Inténtalo de nuevo"
                 )
             }
         }
     }
 
-    fun guardarNuevaContrasena() {
+    fun guardarNuevaContrasena(oobCode: String) {
         val nueva = _estadoNueva.value.nuevaContrasena
         val confirmar = _estadoNueva.value.confirmarContrasena
 
@@ -120,7 +121,6 @@ class CambiarContraseniaViewModel : ViewModel() {
             )
             return
         }
-
         if (nueva != confirmar) {
             _estadoNueva.value = _estadoNueva.value.copy(
                 mensajeError = "Las contraseñas no coinciden"
@@ -130,19 +130,18 @@ class CambiarContraseniaViewModel : ViewModel() {
 
         viewModelScope.launch {
             _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = "")
-
             try {
-                auth.currentUser?.updatePassword(nueva)?.await()
+                // ✅ Cambia la contraseña con el oobCode de Firebase
+                auth.confirmPasswordReset(oobCode, nueva).await()
 
                 _estadoNueva.value = _estadoNueva.value.copy(
                     cargando = false,
                     cambioExitoso = true
                 )
-
             } catch (e: Exception) {
                 _estadoNueva.value = _estadoNueva.value.copy(
                     cargando = false,
-                    mensajeError = "Error al cambiar la contraseña. Vuelve a iniciar sesión e inténtalo de nuevo"
+                    mensajeError = e.message ?: "Error al cambiar la contraseña"
                 )
             }
         }
@@ -151,5 +150,5 @@ class CambiarContraseniaViewModel : ViewModel() {
     fun reiniciar() {
         _estadoUi.value = CambiarContrasenaUiState()
     }
-    */
+
 }

@@ -56,10 +56,15 @@ class MainActivity : ComponentActivity() {
             VoxTaskTheme(themeManager = themeManager) {
                 Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                     val windowSize = calculateWindowSizeClass(this)
+
+                    // Captura el deep link si viene de un email
+                    val deepLinkIntent = intent
+
                     VoxTaskApp(
                         windowSize = windowSize.widthSizeClass,
-                        plantillaBaseViewModel = plantillaBaseViewModel, // ✅
-                        onNavControllerReady = { navController = it }
+                        plantillaBaseViewModel = plantillaBaseViewModel,
+                        onNavControllerReady = { navController = it },
+                        deepLinkIntent = deepLinkIntent  // ← añade esto
                     )
                 }
             }
@@ -68,8 +73,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)  // ← importante para capturar el intent nuevo
         if (intent.action == "ABRIR_CONTADOR") {
             navController?.navigate(VoxTaskScreen.Contador.name)
+        }
+        // Deep link de nueva contraseña
+        val data = intent.data
+        if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
+            val oobCode = data.getQueryParameter("oobCode") ?: ""
+            navController?.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")
         }
     }
 }

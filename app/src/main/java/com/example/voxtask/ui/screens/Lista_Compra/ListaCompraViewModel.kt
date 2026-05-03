@@ -24,9 +24,14 @@ class ListaCompraViewModel : ViewModel() {
     //Funcion para cargar los productos de la lista de la compra del usuario
     private fun cargarProductos() {
         viewModelScope.launch {
-            val listaProductos = repository.obtenerPorUsuario(usuarioId)
-            productos.clear()
-            productos.addAll(listaProductos)
+            try {
+                val listaProductos = repository.obtenerPorUsuario(usuarioId)
+                productos.clear()
+                productos.addAll(listaProductos)
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+            }
         }
     }
 

@@ -35,12 +35,14 @@ import com.example.voxtask.ui.theme.*
 @Composable
 fun NuevaContraseniaScreen(
     navController: NavController,
-    viewModel: CambiarContraseniaViewModel = viewModel()
+    viewModel: CambiarContraseniaViewModel = viewModel(),
+    oobCode: String = ""
 ) {
-    /*
+
     val estado by viewModel.estadoNueva.collectAsState()
     var verNueva by remember { mutableStateOf(false) }
     var verConfirmar by remember { mutableStateOf(false) }
+
 
     Box(modifier = Modifier.fillMaxSize().background(FondoBlanco)) {
         // Círculos decorativos
@@ -163,7 +165,7 @@ fun NuevaContraseniaScreen(
                             }
                             Spacer(modifier = Modifier.height(28.dp))
                             Button(
-                                onClick = { viewModel.guardarNuevaContrasena() },
+                                onClick = { viewModel.guardarNuevaContrasena(oobCode) },
                                 modifier = Modifier.fillMaxWidth().height(54.dp),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario),
@@ -177,5 +179,5 @@ fun NuevaContraseniaScreen(
             }
         }
     }
-    */
+
 }

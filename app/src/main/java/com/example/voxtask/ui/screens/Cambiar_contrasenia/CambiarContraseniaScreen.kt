@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
 
 @Composable
@@ -30,8 +31,9 @@ fun CambiarContrasenaScreen(
     navController: NavController,
     viewModel: CambiarContraseniaViewModel = viewModel()
 ) {
-    /*
+
     val estadoUi by viewModel.estadoUi.collectAsState()
+
 
     Box(
         modifier = Modifier
@@ -271,5 +273,5 @@ fun CambiarContrasenaScreen(
         }
     }
 
-*/
+
 }

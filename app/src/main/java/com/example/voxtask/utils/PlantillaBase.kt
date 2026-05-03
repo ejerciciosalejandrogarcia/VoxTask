@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.voxtask.R
-import com.example.voxtask.ui.theme.VerdePrimario
+import com.example.voxtask.VoxTaskScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,15 +32,14 @@ fun PlantillaBase(
     navController: NavController,
     mostrarBotonInfo: Boolean = true,
     mostrarBotonSalir: Boolean = true,
-    mostrarBotonAjustes: Boolean = true,  // Nuevo parámetro
-    mostrarBotonHome: Boolean = true,    // Nuevo parámetro (por defecto false)
+    mostrarBotonAjustes: Boolean = true,
+    mostrarBotonHome: Boolean = true,
     textoInformacion: String? = null,
     onTextoReconocido: (String) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     val contexto = LocalContext.current
     val actividad = contexto as Activity
-
     val coroutineScope = rememberCoroutineScope()
     val (vozState, iniciarEscucha) = rememberVozATexto()
 
@@ -50,10 +49,8 @@ fun PlantillaBase(
         }
     }
 
-    // Usamos un Box para que la imagen de fondo esté detrás del Scaffold
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // --- IMPLEMENTACIÓN DEL FONDO ---
         viewModel.fondoPersonalizadoUri?.let { uri ->
             AsyncImage(
                 model = uri,
@@ -62,10 +59,8 @@ fun PlantillaBase(
                 contentScale = ContentScale.Crop
             )
         }
-        // --------------------------------
 
         Scaffold(
-            // Hacemos el fondo del Scaffold transparente para ver la imagen detrás
             containerColor = if (viewModel.fondoPersonalizadoUri != null) Color.Transparent else MaterialTheme.colorScheme.background,
             topBar = {
                 TopAppBar(
@@ -77,7 +72,7 @@ fun PlantillaBase(
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = VerdePrimario,
+                        containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = Color.White
                     ),
                     actions = {
@@ -111,8 +106,10 @@ fun PlantillaBase(
                 )
             },
             bottomBar = {
-                NavigationBar(containerColor = VerdePrimario, contentColor = Color.White) {
-                    // Botón ajustes (configurable)
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                ) {
                     if (mostrarBotonAjustes) {
                         NavigationBarItem(
                             icon = {
@@ -125,16 +122,13 @@ fun PlantillaBase(
                                 ) {
                                     IconButton(
                                         onClick = {
-                                            coroutineScope.launch {
-                                                TextoAVoz.hablar(contexto, "Abriendo ajustes")
-                                            }
-                                            navController.navigate("ajustes")
+                                            navController.navigate(VoxTaskScreen.Ajustes.name)
                                         }
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Settings,
                                             contentDescription = stringResource(R.string.btn_ajustes),
-                                            tint = VerdePrimario,
+                                            tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(28.dp)
                                         )
                                     }
@@ -145,7 +139,6 @@ fun PlantillaBase(
                         )
                     }
 
-                    // Botón micrófono (siempre visible)
                     NavigationBarItem(
                         icon = {
                             Box(
@@ -162,7 +155,7 @@ fun PlantillaBase(
                                     Icon(
                                         imageVector = Icons.Default.Mic,
                                         contentDescription = stringResource(R.string.btn_hablar),
-                                        tint = VerdePrimario,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
@@ -173,22 +166,23 @@ fun PlantillaBase(
                         enabled = !vozState.isListening
                     )
 
-                    // Botón home (configurable)
                     if (mostrarBotonHome) {
                         NavigationBarItem(
                             icon = {
                                 Box(
-                                    modifier = Modifier.size(56.dp).clip(CircleShape).background(Color.White),
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     IconButton(onClick = {
-                                        coroutineScope.launch { TextoAVoz.hablar(contexto, "Inicio") }
-                                        navController.navigate("inicio")
+                                        navController.navigate(VoxTaskScreen.Inicio.name)
                                     }) {
                                         Icon(
                                             Icons.Default.Home,
                                             contentDescription = stringResource(R.string.btn_inicio),
-                                            tint = VerdePrimario,
+                                            tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(28.dp)
                                         )
                                     }
@@ -196,15 +190,13 @@ fun PlantillaBase(
                             },
                             selected = false,
                             onClick = {
-                                coroutineScope.launch { TextoAVoz.hablar(contexto, "Inicio") }
-                                navController.navigate("inicio")
+                                navController.navigate(VoxTaskScreen.Inicio.name)
                             }
                         )
                     }
                 }
             }
         ) { paddingValues ->
-            // Se envuelve el contenido en una superficie transparente para no tapar el fondo
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = Color.Transparent

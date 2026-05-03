@@ -2,6 +2,7 @@ package com.example.voxtask
 
 import androidx.navigation.navDeepLink
 import android.app.Activity
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,12 +11,14 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.voxtask.ui.screens.Ajustes.AjustesScreen
 import com.example.voxtask.ui.screens.Ajustes.AjustesViewModel
 import com.example.voxtask.ui.screens.Cambiar_contrasenia.CambiarContrasenaScreen
@@ -68,10 +71,20 @@ enum class VoxTaskScreen {
 @Composable
 fun VoxTaskApp(
     windowSize: WindowWidthSizeClass,
-    plantillaBaseViewModel: PlantillaBaseViewModel, // ✅ recibir aquí
-    onNavControllerReady: (NavController) -> Unit = {}
+    plantillaBaseViewModel: PlantillaBaseViewModel,
+    onNavControllerReady: (NavController) -> Unit = {},
+    deepLinkIntent: Intent? = null
 ) {
     val navController = rememberNavController()
+
+    LaunchedEffect(deepLinkIntent) {
+        val data = deepLinkIntent?.data
+        if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
+            val oobCode = data.getQueryParameter("oobCode") ?: ""
+            navController.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")
+        }
+    }
+
     val contexto = LocalContext.current
 
     LaunchedEffect(navController) {
@@ -161,14 +174,14 @@ fun VoxTaskApp(
             InicioScreen(
                 viewModel = viewModelInicio,
                 navController = navController,
-                plantillaBaseViewModel = plantillaBaseViewModel  // Pasar el ViewModel
+                plantillaBaseViewModel = plantillaBaseViewModel
             )
         }
 
         composable(VoxTaskScreen.Contador.name) {
             val viewModelContador: ContadorViewModel = viewModel()
             ContadorScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelContador,
                 navController = navController
             )
@@ -177,7 +190,7 @@ fun VoxTaskApp(
         composable(VoxTaskScreen.ListaCompra.name) {
             val viewModelListaCompra: ListaCompraViewModel = viewModel()
             ListaCompraScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelListaCompra,
                 navController = navController
             )
@@ -186,7 +199,7 @@ fun VoxTaskApp(
         composable(VoxTaskScreen.Recordatorio.name) {
             val viewModelRecordatorio: RecordatorioViewModel = viewModel()
             RecordatorioScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelRecordatorio,
                 navController = navController
             )
@@ -195,7 +208,7 @@ fun VoxTaskApp(
         composable(VoxTaskScreen.Correo.name) {
             val viewModelCorreo: CorreoViewModel = viewModel()
             CorreoScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelCorreo,
                 navController = navController
             )
@@ -204,7 +217,7 @@ fun VoxTaskApp(
         composable(VoxTaskScreen.EnviarCorreo.name) {
             val viewModelEnviarCorreo: EnviarCorreoViewModel = viewModel()
             EnviarCorreoScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelEnviarCorreo,
                 navController = navController
             )
@@ -214,7 +227,7 @@ fun VoxTaskApp(
             val viewModelVerCorreo: VerCorreoViewModel = viewModel()
             val correoId = backStackEntry.arguments?.getString("correoId")
             VerCorreoScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelVerCorreo,
                 navController = navController,
                 correoId = correoId
@@ -225,7 +238,7 @@ fun VoxTaskApp(
             val viewModelAjustes: AjustesViewModel = viewModel()
             AjustesScreen(
                 viewModel = viewModelAjustes,
-                plantillaBaseViewModel = plantillaBaseViewModel, // ✅
+                plantillaBaseViewModel = plantillaBaseViewModel,
                 navController = navController
             )
         }
@@ -233,7 +246,7 @@ fun VoxTaskApp(
         composable(VoxTaskScreen.Perfil.name) {
             val viewModelPerfil: PerfilViewModel = viewModel()
             PerfilScreen(
-                viewModelPlantilla = plantillaBaseViewModel, // ✅
+                viewModelPlantilla = plantillaBaseViewModel,
                 viewModel = viewModelPerfil,
                 navController = navController
             )
@@ -247,23 +260,18 @@ fun VoxTaskApp(
             )
         }
 
-        composable(VoxTaskScreen.CambiarContrasenia.name) {
-            val viewModelCambiarContrasenia: CambiarContraseniaViewModel = viewModel()
-            CambiarContrasenaScreen(
-                viewModel = viewModelCambiarContrasenia,
-                navController = navController
-            )
+        composable(VoxTaskScreen.CambiarContrasenia.name) { backStackEntry ->
+            val viewModel: CambiarContraseniaViewModel = viewModel(backStackEntry)
+            CambiarContrasenaScreen(navController, viewModel)
         }
 
         composable(
-            route = VoxTaskScreen.RegistrarNuevaContrasenia.name,
-            deepLinks = listOf(navDeepLink { uriPattern = "voxtask://nuevacontrasena" })
-        ) {
-            val viewModelCambiar: CambiarContraseniaViewModel = viewModel()
-            NuevaContraseniaScreen(
-                navController = navController,
-                viewModel = viewModelCambiar
-            )
+            route = "${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode={oobCode}",
+            arguments = listOf(navArgument("oobCode") { defaultValue = "" })
+        ) { backStackEntry ->
+            val oobCode = backStackEntry.arguments?.getString("oobCode") ?: ""
+            val viewModel: CambiarContraseniaViewModel = viewModel()
+            NuevaContraseniaScreen(navController, viewModel, oobCode)
         }
     }
 }

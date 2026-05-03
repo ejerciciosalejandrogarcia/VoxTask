@@ -24,10 +24,10 @@
     <string name="campo_correo">Su correo electronico</string>
 
     <!-- Inicio Screen -->
-    <string name="txt_contador">Iniciar un contador</string>
-    <string name="txt_correo">Redactar y enviar un correo</string>
-    <string name="txt_recordatorio">Crear un recordatorio</string>
-    <string name="txt_lista_compra">Crear una lista de la compra</string>
+    <string name="txt_contador">Contador</string>
+    <string name="txt_correo">Correo</string>
+    <string name="txt_recordatorio">Recordatorio</string>
+    <string name="txt_lista_compra">Lista de la compra</string>
     <string name="btn_hablar">Boton de hablar</string>
     <string name="btn_ajustes">Boton de ajustes</string>
     <string name="btn_inicio">Boton de inicio</string>
