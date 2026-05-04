@@ -64,9 +64,10 @@
     <string name="selecciona_idioma">Select a language</string>
     <string name="no_voces">No voices available.</string>
     <string name="cancelar">Cancel</string>
-
+    <string name="version">Version: 1.0</string>
     <string name="cambiar_fondo">Change background</string>
     <string name="personaliza_fondo">Customize the app background</string>
     <string name="version_app">Version</string>
     <string name="ver_version_actual">Check the current version</string>
+    <string name="version">Version: 1.0</string>
 </resources>

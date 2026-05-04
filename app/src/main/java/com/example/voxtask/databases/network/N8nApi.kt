@@ -46,7 +46,7 @@ interface N8nApiService {
     ): retrofit2.Response<Unit>
 
 
-    @GET("webhook/efbd4541-edb4-4dfd-bfcc-0800ad0253f9/correo/{id}")
+    @GET("webhook/d0521b1f-a7b6-4bf0-9292-940850a29e93/correo-detalle/correo/{id}")
     suspend fun obtenerCorreoPorId(
         @Path("id") id: String,
         @Query("token") token: String
@@ -64,7 +64,7 @@ interface N8nApiService {
 }
 
 object N8nClient {
-    private const val BASE_URL = "http://192.168.1.42:5678/"
+    const val BASE_URL = "http://192.168.1.47:5678/"
 
     val api: N8nApiService by lazy {
         val okHttpClient = OkHttpClient.Builder()

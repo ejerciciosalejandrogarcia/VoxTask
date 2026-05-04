@@ -68,4 +68,6 @@
     <string name="personaliza_fondo">Personalizza lo sfondo dell\'app</string>
     <string name="version_app">Versione</string>
     <string name="ver_version_actual">Visualizza la versione attuale</string>
+    <string name="version">Versione: 1.0</string>
+
 </resources>

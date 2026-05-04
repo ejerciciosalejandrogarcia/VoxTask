@@ -34,6 +34,11 @@ class ProductoRepository : ProductoDao {
             .collection("lista_compra")
             .get()
             .await()
-            .toObjects(Producto::class.java)
+            .documents.map { doc ->
+                Producto(
+                    id = doc.id,
+                    nombre = doc.getString("nombre") ?: ""
+                )
+            }
     }
 }

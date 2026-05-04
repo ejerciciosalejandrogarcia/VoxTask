@@ -16,6 +16,7 @@
     <string name="selecciona_idioma">Selecione um idioma</string>
     <string name="no_voces">Não há vozes disponíveis.</string>
     <string name="cancelar">Cancelar</string>
+    <string name="version">Versão: 1.0</string>
 
     <!-- Login Screen -->
     <string name="campo_nombre_usuario">Nome de usuário</string>

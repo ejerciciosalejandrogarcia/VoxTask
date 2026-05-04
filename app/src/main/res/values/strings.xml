@@ -71,7 +71,7 @@
     <string name="selecciona_idioma">Selecciona un idioma</string>
     <string name="no_voces">No hay voces disponibles.</string>
     <string name="cancelar">Cancelar</string>
-
+    <string name="version">Versión: 1.0</string>
     <string name="cambiar_fondo">Cambiar fondo</string>
     <string name="personaliza_fondo">Personaliza el fondo de la app</string>
     <string name="version_app">Versión</string>

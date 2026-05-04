@@ -31,6 +31,11 @@ class VerCorreoViewModel : ViewModel() {
                     .get()
                     .await()
                 val token = doc.getString("gmailAccessToken") ?: return@launch
+
+                // Añade esto para ver la URL exacta
+                android.util.Log.d("VerCorreo", "Llamando con id: $id")
+                android.util.Log.d("VerCorreo", "URL: ${N8nClient.BASE_URL}webhook/correo-detalle/correo/$id")
+
                 correo = N8nClient.api.obtenerCorreoPorId(id, token)
             } catch (e: Exception) {
                 error = "Error al cargar el correo: ${e.message}"

@@ -23,14 +23,16 @@ class ListaCompraViewModel : ViewModel() {
 
     //Funcion para cargar los productos de la lista de la compra del usuario
     private fun cargarProductos() {
+        if (usuarioId.isEmpty()) return  // ← añade esto
         viewModelScope.launch {
             try {
                 val listaProductos = repository.obtenerPorUsuario(usuarioId)
                 productos.clear()
                 productos.addAll(listaProductos)
             } catch (e: Exception) {
-
                 e.printStackTrace()
+                android.util.Log.e("ListaCompra", "Error al cargar: ${e.message}", e)
+
             }
         }
     }
@@ -42,26 +44,24 @@ class ListaCompraViewModel : ViewModel() {
 
     //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
     private fun procesarComando(texto: String) {
+        val prefijosEliminar = listOf("elimina ", "quita ", "borra ")
+        val prefijosAgregar = listOf("agrega ", "añade ", "pon ")
+
+        val prefijoEliminar = prefijosEliminar.find { texto.startsWith(it) }
+        val prefijoAgregar = prefijosAgregar.find { texto.startsWith(it) }
+
         when {
-            texto.startsWith("elimina") ||
-                    texto.startsWith("quita") ||
-                    texto.startsWith("borra") -> {
-                val nombre = texto
-                    .removePrefix("elimina")
-                    .removePrefix("quita")
-                    .removePrefix("borra")
-                    .trim()
-                eliminarProductoPorNombre(nombre)
+            prefijoEliminar != null -> {
+                val nombre = texto.removePrefix(prefijoEliminar).trim()
+                if (nombre.isNotEmpty()) eliminarProductoPorNombre(nombre)
+            }
+            prefijoAgregar != null -> {
+                val nombre = texto.removePrefix(prefijoAgregar).trim()
+                if (nombre.isNotEmpty()) agregarProducto(nombre)
             }
             texto.isNotEmpty() -> {
-                val nombre = texto
-                    .removePrefix("agrega")
-                    .removePrefix("añade")
-                    .removePrefix("pon")
-                    .trim()
-                if (nombre.isNotEmpty()) {
-                    agregarProducto(nombre)
-                }
+                // Texto sin prefijo → agregar directamente
+                agregarProducto(texto.trim())
             }
         }
     }

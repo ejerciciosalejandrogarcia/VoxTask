@@ -256,7 +256,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         text = {
             Column {
                 // Selector color modo claro
-                Text("☀️ Color modo claro", style = MaterialTheme.typography.titleMedium,
+                Text("Color modo claro", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
 
                 LazyVerticalGrid(
@@ -283,7 +283,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Selector color modo oscuro
-                Text("🌙 Color modo oscuro", style = MaterialTheme.typography.titleMedium,
+                Text("Color modo oscuro", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
 
                 LazyVerticalGrid(

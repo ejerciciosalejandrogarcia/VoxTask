@@ -133,29 +133,25 @@ fun InicioScreen(
                         TarjetaMenu(
                             icono = Icons.Default.Email,
                             titulo = stringResource(R.string.txt_correo),
-                            subtexto = "Ver mi correo",
-                            onClick = { navController.navigate("correo") }
+                            subtexto = "Ver mi correo"
                         )
 
                         TarjetaMenu(
                             icono = Icons.Default.DateRange,
                             titulo = stringResource(R.string.txt_recordatorio),
-                            subtexto = if (tieneEventos) "Ver mis recordatorios" else "Crear recordatorio",
-                            onClick = { navController.navigate("recordatorio") }
+                            subtexto = if (tieneEventos) "Ver mis recordatorios" else "Crear recordatorio"
                         )
-
                         TarjetaMenu(
                             icono = Icons.Default.ShoppingCart,
                             titulo = stringResource(R.string.txt_lista_compra),
-                            subtexto = if (tieneLista) "Ver mi lista de la compra" else "Crear lista de la compra",
-                            onClick = { navController.navigate("listacompra") }
+                            subtexto = if (tieneLista) "Ver mi lista de la compra" else "Crear lista de la compra"
                         )
 
                         TarjetaMenu(
                             icono = Icons.Default.Add,
                             titulo = stringResource(R.string.txt_contador),
-                            subtexto = "Crear contador",
-                            onClick = { navController.navigate("contador") }
+                            subtexto = "Crear contador"
+
                         )
 
                         Spacer(modifier = Modifier.height(32.dp))
@@ -171,12 +167,10 @@ fun TarjetaMenu(
     icono: ImageVector,
     titulo: String,
     subtexto: String,
-    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
