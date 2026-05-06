@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.VoxTaskScreen
-import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -125,7 +124,7 @@ fun CorreoScreen(
                     .padding(bottom = 8.dp, end = 4.dp)
                     .size(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Icon(

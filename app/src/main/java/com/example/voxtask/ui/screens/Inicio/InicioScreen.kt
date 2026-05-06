@@ -3,7 +3,6 @@ package com.example.voxtask.ui.screens.Inicio
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Usuario
-import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
@@ -50,7 +48,6 @@ fun InicioScreen(
     var mostrarTextos by remember { mutableStateOf(false) }
     val texto by viewModel.textoReconocido.collectAsState()
 
-    // Estado dinámico para lista y eventos
     var tieneLista by remember { mutableStateOf(false) }
     var tieneEventos by remember { mutableStateOf(false) }
 
@@ -71,7 +68,6 @@ fun InicioScreen(
             "Usuario"
         }
 
-        // Comprobar si tiene lista de la compra
         if (uid != null) {
             try {
                 val lista = FirebaseFirestore.getInstance()
@@ -113,16 +109,16 @@ fun InicioScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentAlignment = Alignment.Center  // ← Centra todo el contenido
+            contentAlignment = Alignment.Center
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()  // ← Solo ocupa el alto necesario
+                    .wrapContentHeight()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center  // ← Centra verticalmente
+                verticalArrangement = Arrangement.Center
             ) {
                 AnimatedVisibility(visible = mostrarTextos) {
                     Column(
@@ -135,7 +131,6 @@ fun InicioScreen(
                             titulo = stringResource(R.string.txt_correo),
                             subtexto = "Ver mi correo"
                         )
-
                         TarjetaMenu(
                             icono = Icons.Default.DateRange,
                             titulo = stringResource(R.string.txt_recordatorio),
@@ -146,14 +141,11 @@ fun InicioScreen(
                             titulo = stringResource(R.string.txt_lista_compra),
                             subtexto = if (tieneLista) "Ver mi lista de la compra" else "Crear lista de la compra"
                         )
-
                         TarjetaMenu(
                             icono = Icons.Default.Add,
                             titulo = stringResource(R.string.txt_contador),
-                            subtexto = "Crear contador"
-
+                            subtexto = stringResource(R.string.txt_crear_contador)
                         )
-
                         Spacer(modifier = Modifier.height(32.dp))
                     }
                 }
@@ -169,8 +161,7 @@ fun TarjetaMenu(
     subtexto: String,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -186,7 +177,7 @@ fun TarjetaMenu(
             Icon(
                 imageVector = icono,
                 contentDescription = titulo,
-                tint = VerdePrimario,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
             )
             Column {

@@ -56,10 +56,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.R
-import com.example.voxtask.ui.theme.ColoresDisponibles
+import com.example.voxtask.ui.theme.ColoresClaros
+import com.example.voxtask.ui.theme.ColoresOscuros
 import com.example.voxtask.ui.theme.LocalThemeManager
-import com.example.voxtask.ui.theme.ModoTema
-import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import java.util.Locale
@@ -263,7 +262,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     columns = GridCells.Fixed(5),
                     modifier = Modifier.fillMaxWidth().height(120.dp)
                 ) {
-                    items(ColoresDisponibles) { color ->
+                    items(ColoresClaros) { color ->
                         Box(
                             modifier = Modifier
                                 .padding(4.dp)
@@ -290,7 +289,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     columns = GridCells.Fixed(5),
                     modifier = Modifier.fillMaxWidth().height(120.dp)
                 ) {
-                    items(ColoresDisponibles) { color ->
+                    items(ColoresOscuros) { color ->
                         Box(
                             modifier = Modifier
                                 .padding(4.dp)
@@ -338,10 +337,9 @@ fun OpcionAjuste(
                 Icon(
                     imageVector = icono,
                     contentDescription = titulo,
-                    tint = VerdePrimario
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         )
     }
-
 }

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
@@ -40,30 +41,44 @@ fun InicioSesionScreen(
 ) {
     val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(estadoUi.inicioSesionExitoso) {
         if (estadoUi.inicioSesionExitoso) {
             alIniciarSesionExitosamente()
         }
     }
-
+    LaunchedEffect(estadoUi.mensajeError) {
+        if (estadoUi.mensajeError.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = estadoUi.mensajeError,
+                duration = SnackbarDuration.Short
+            )
+            // Es vital limpiar el error en el ViewModel después de mostrarlo
+            // para que si el usuario pulsa de nuevo, el LaunchedEffect detecte el cambio.
+            viewModel.limpiarError()
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FondoBlanco)
+            .background(MaterialTheme.colorScheme.background)
     ) {
-
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 50.dp)
+                .zIndex(10f)
+        )
         //Círculo grande superior izquierda
         Box(
             modifier = Modifier
                 .size(280.dp)
                 .offset(x = (-80).dp, y = (-60).dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeClaro, VerdePrimario)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
         )
 
         //Círculo mediano superior derecha
@@ -72,11 +87,7 @@ fun InicioSesionScreen(
                 .size(160.dp)
                 .offset(x = 270.dp, y = 40.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeMenta, VerdeClaro)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .blur(2.dp)
         )
 
@@ -86,11 +97,7 @@ fun InicioSesionScreen(
                 .size(300.dp)
                 .offset(x = 160.dp, y = 620.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeClaro, VerdePrimario)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
         )
 
         //  Círculo pequeño inferior izquierda
@@ -99,11 +106,7 @@ fun InicioSesionScreen(
                 .size(140.dp)
                 .offset(x = (-40).dp, y = 700.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeMenta, VerdeClaro)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .blur(1.dp)
         )
 
@@ -137,14 +140,11 @@ fun InicioSesionScreen(
                         text = stringResource(R.string.app_name),
                         fontSize = 34.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = VerdePrimario,
+                        color = MaterialTheme.colorScheme.primary,
                         letterSpacing = (-0.5).sp
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(26.dp))
 
                     // Campo nombre de usuario
                     OutlinedTextField(
@@ -166,13 +166,13 @@ fun InicioSesionScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -197,25 +197,25 @@ fun InicioSesionScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                         )
 
                     // Mensaje de error
-                    if (estadoUi.mensajeError.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = estadoUi.mensajeError,
-                            color = Color(0xFFE53935),
-                            fontSize = 12.sp,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    LaunchedEffect(estadoUi.mensajeError) {
+                        if (estadoUi.mensajeError.isNotEmpty()) {
+                            snackbarHostState.showSnackbar(
+                                message = estadoUi.mensajeError,
+                                duration = SnackbarDuration.Short
+                            )
+                            viewModel.limpiarError()
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(28.dp))
@@ -228,7 +228,7 @@ fun InicioSesionScreen(
                             .height(54.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = VerdePrimario
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
                     ) {
@@ -310,13 +310,12 @@ fun InicioSesionScreen(
                         )
                         Text(
                             text = " "+stringResource(R.string.txt_respuesta),
-                            color = VerdePrimario,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
                     // Botón para redireccionar a cambiar contraseña
                     TextButton(
                         onClick = { alNavegarARegistro(VoxTaskScreen.CambiarContrasenia.name) },
@@ -334,7 +333,7 @@ fun InicioSesionScreen(
                             Spacer(modifier = Modifier.height(4.dp)) // Un pequeño espacio entre líneas
                             Text(
                                 text = stringResource(R.string.txt_respuesta_contrasenia), // "Restablecer contraseña"
-                                color = VerdePrimario,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )

@@ -107,5 +107,5 @@ dependencies {
     implementation("com.google.apis:google-api-services-gmail:v1-rev110-1.25.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
-
+    implementation("com.google.firebase:firebase-storage-ktx")
 }

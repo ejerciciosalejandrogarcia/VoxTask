@@ -24,6 +24,7 @@
     <string name="campo_correo">Su correo electronico</string>
 
     <!-- Inicio Screen -->
+    <string name="txt_crear_contador">Crear contador</string>
     <string name="txt_contador">Contador</string>
     <string name="txt_correo">Correo</string>
     <string name="txt_recordatorio">Recordatorio</string>

@@ -20,6 +20,7 @@
     <string name="campo_fecha_naci">Date de naissance</string>
     <string name="campo_correo">Votre e-mail</string>
 
+    <string name="txt_crear_contador">Créer un compteur</string>
     <string name="txt_contador">Lancer un minuteur</string>
     <string name="txt_correo">Rédiger et envoyer un e-mail</string>
     <string name="txt_recordatorio">Créer un rappel</string>

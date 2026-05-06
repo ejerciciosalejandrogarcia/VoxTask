@@ -62,7 +62,7 @@ class InicioSesionViewModel(
 
         viewModelScope.launch {
             val resultado = usuarioRepository.iniciarSesion(nombreUsuario, contrasena)
-
+            Log.d("AUTH", "UID actual: ${FirebaseAuth.getInstance().currentUser?.uid}")
             resultado.onSuccess {
                 _estadoUi.value = _estadoUi.value.copy(
                     inicioSesionExitoso = true,
@@ -178,4 +178,8 @@ class InicioSesionViewModel(
                     mensajeError = "Error al conectar con Firestore: ${e.message}"
                 )
             }
-    }}
+    }
+    fun limpiarError() {
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+    }
+}

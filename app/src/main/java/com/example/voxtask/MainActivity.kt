@@ -13,20 +13,19 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.navigation.NavController
 import com.example.voxtask.ui.theme.VoxTaskTheme
+import com.example.voxtask.ui.theme.ThemeManager
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.firebase.FirebaseApp
 import android.Manifest
 import android.content.Context
 import android.content.res.Configuration
-import com.example.voxtask.ui.theme.rememberThemeManager
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : ComponentActivity() {
 
     var navController: NavController? = null
-
-    // ✅ Una sola instancia compartida por toda la app
     private val plantillaBaseViewModel: PlantillaBaseViewModel by viewModels()
+    private lateinit var themeManager: ThemeManager
 
     override fun attachBaseContext(newBase: Context) {
         val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
@@ -48,23 +47,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themeManager = ThemeManager(applicationContext)
         pedirPermiso.launch(Manifest.permission.RECORD_AUDIO)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
         setContent {
-            val themeManager = rememberThemeManager()
             VoxTaskTheme(themeManager = themeManager) {
                 Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                     val windowSize = calculateWindowSizeClass(this)
-
-                    // Captura el deep link si viene de un email
-                    val deepLinkIntent = intent
-
                     VoxTaskApp(
                         windowSize = windowSize.widthSizeClass,
                         plantillaBaseViewModel = plantillaBaseViewModel,
                         onNavControllerReady = { navController = it },
-                        deepLinkIntent = deepLinkIntent  // ← añade esto
+                        deepLinkIntent = intent
                     )
                 }
             }
@@ -73,11 +68,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        setIntent(intent)  // ← importante para capturar el intent nuevo
+        setIntent(intent)
         if (intent.action == "ABRIR_CONTADOR") {
             navController?.navigate(VoxTaskScreen.Contador.name)
         }
-        // Deep link de nueva contraseña
         val data = intent.data
         if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
             val oobCode = data.getQueryParameter("oobCode") ?: ""

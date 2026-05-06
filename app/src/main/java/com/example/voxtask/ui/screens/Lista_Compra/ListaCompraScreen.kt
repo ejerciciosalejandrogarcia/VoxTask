@@ -91,8 +91,8 @@ fun ListaCompraScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(VerdePrimario.copy(alpha = 0.08f))
-                                .border(1.dp, VerdePrimario.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                                 .padding(horizontal = 16.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween

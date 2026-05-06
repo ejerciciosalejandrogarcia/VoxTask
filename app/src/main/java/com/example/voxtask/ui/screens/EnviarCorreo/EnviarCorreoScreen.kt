@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
@@ -132,16 +131,16 @@ fun EnviarCorreoScreen(
                         onEditar = { campo -> viewModel.editarCampo(campo) }
                     )
                     PasoEnvio.ENVIANDO -> {
-                        CircularProgressIndicator(color = VerdePrimario)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Enviando correo...", color = VerdePrimario)
+                        Text("Enviando correo...", color = MaterialTheme.colorScheme.primary)
                     }
                     PasoEnvio.ENVIADO -> {
                         Text(
                             text = "✅ Correo enviado",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
-                            color = VerdePrimario
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         ResumenCorreo(
@@ -152,7 +151,7 @@ fun EnviarCorreoScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(
                             onClick = { viewModel.reiniciar(contexto) },
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario)
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Text("Enviar otro", color = Color.White)
                         }
@@ -166,7 +165,7 @@ fun EnviarCorreoScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = { viewModel.reiniciar(contexto) },
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario)
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Text("Intentar de nuevo", color = Color.White)
                         }
@@ -202,7 +201,7 @@ fun ConfirmacionUI(
             text = "¿Así lo quieres enviar?",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = VerdePrimario,
+            color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
         Text(
@@ -214,7 +213,7 @@ fun ConfirmacionUI(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = VerdePrimario.copy(alpha = 0.05f)
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
             )
         ) {
             Column(
@@ -232,7 +231,7 @@ fun ConfirmacionUI(
                         onEditar("destinatario:$nuevoValor")
                     }
                 )
-                Divider(color = VerdePrimario.copy(alpha = 0.15f))
+                Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                 FilaConfirmacion(
                     etiqueta = "Asunto",
                     valor = asuntoEdit,
@@ -244,7 +243,7 @@ fun ConfirmacionUI(
                         onEditar("asunto:$nuevoValor")
                     }
                 )
-                Divider(color = VerdePrimario.copy(alpha = 0.15f))
+                Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                 FilaConfirmacion(
                     etiqueta = "Mensaje",
                     valor = mensajeEdit,
@@ -256,7 +255,7 @@ fun ConfirmacionUI(
                         onEditar("mensaje:$nuevoValor")
                     }
                 )
-                Divider(color = VerdePrimario.copy(alpha = 0.15f))
+                Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                 FilaConfirmacion(
                     etiqueta = "Modo",
                     valor = if (modo == "ia") "Generado por IA" else "Manual",
@@ -270,7 +269,7 @@ fun ConfirmacionUI(
         Button(
             onClick = onConfirmar,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text(
                 text = "Enviar correo",
@@ -312,8 +311,8 @@ fun FilaConfirmacion(
                     singleLine = etiqueta != "Mensaje",
                     minLines = if (etiqueta == "Mensaje") 3 else 1,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VerdePrimario,
-                        cursorColor = VerdePrimario
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        cursorColor = MaterialTheme.colorScheme.primary
                     ),
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
@@ -321,7 +320,7 @@ fun FilaConfirmacion(
                 Text(
                     text = valor.ifEmpty { "—" },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = VerdePrimario,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -332,14 +331,14 @@ fun FilaConfirmacion(
         if (editando) {
             Button(
                 onClick = { onGuardar(textoTemporal) },
-                colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Guardar", style = MaterialTheme.typography.labelSmall, color = Color.White)
             }
         } else {
             OutlinedButton(
                 onClick = onEditar,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = VerdePrimario)
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Editar", style = MaterialTheme.typography.labelSmall)
             }
@@ -358,7 +357,7 @@ fun PasoUI(titulo: String, descripcion: String, valor: String) {
             text = titulo,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = VerdePrimario,
+            color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
         Text(
@@ -372,13 +371,13 @@ fun PasoUI(titulo: String, descripcion: String, valor: String) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = VerdePrimario.copy(alpha = 0.1f)
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 )
             ) {
                 Text(
                     text = valor,
                     modifier = Modifier.padding(12.dp),
-                    color = VerdePrimario,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -391,7 +390,7 @@ fun ResumenCorreo(para: String, asunto: String, modo: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = VerdePrimario.copy(alpha = 0.1f)
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         )
     ) {
         Column(

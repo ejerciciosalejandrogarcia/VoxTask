@@ -161,7 +161,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                                     when {
                                         esHoy -> MaterialTheme.colorScheme.primary
                                         seleccionado -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                        tieneEventos -> Color(0xFF4CAF50).copy(alpha = 0.25f)
+                                        tieneEventos -> MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
                                         else -> Color.Transparent
                                     }
                                 )
@@ -173,7 +173,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                                     },
                                     color = when {
                                         seleccionado && !esHoy -> MaterialTheme.colorScheme.primary
-                                        tieneEventos && !esHoy -> Color(0xFF4CAF50)
+                                        tieneEventos && !esHoy -> MaterialTheme.colorScheme.primary
                                         else -> Color.Transparent
                                     },
                                     shape = CircleShape
@@ -186,7 +186,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                                 fontWeight = if (esHoy || tieneEventos) FontWeight.Bold else FontWeight.Normal,
                                 color = when {
                                     esHoy -> MaterialTheme.colorScheme.onPrimary
-                                    tieneEventos -> Color(0xFF2E7D32)
+                                    tieneEventos -> MaterialTheme.colorScheme.primary
                                     else -> MaterialTheme.colorScheme.onSurface
                                 }
                             )
@@ -240,7 +240,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF4CAF50).copy(alpha = 0.1f))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -248,7 +248,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                                 modifier = Modifier
                                     .size(8.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF4CAF50))
+                                    .background(MaterialTheme.colorScheme.primary)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             //Asunto del evento
@@ -262,7 +262,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = stringResource(R.string.icono_eliminar_evento),
-                                    tint = Color(0xFF4CAF50),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }

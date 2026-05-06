@@ -44,16 +44,16 @@ fun NuevaContraseniaScreen(
     var verConfirmar by remember { mutableStateOf(false) }
 
 
-    Box(modifier = Modifier.fillMaxSize().background(FondoBlanco)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // Círculos decorativos
         Box(modifier = Modifier.size(280.dp).offset(x = (-80).dp, y = (-60).dp)
-            .clip(CircleShape).background(Brush.radialGradient(listOf(VerdeClaro, VerdePrimario))))
+            .clip(CircleShape).background(MaterialTheme.colorScheme.primary))
         Box(modifier = Modifier.size(160.dp).offset(x = 270.dp, y = 40.dp)
-            .clip(CircleShape).background(Brush.radialGradient(listOf(VerdeMenta, VerdeClaro))).blur(2.dp))
+            .clip(CircleShape).background(MaterialTheme.colorScheme.primary).blur(2.dp))
         Box(modifier = Modifier.size(300.dp).offset(x = 160.dp, y = 620.dp)
-            .clip(CircleShape).background(Brush.radialGradient(listOf(VerdeClaro, VerdePrimario))))
+            .clip(CircleShape).background(MaterialTheme.colorScheme.primary))
         Box(modifier = Modifier.size(140.dp).offset(x = (-40).dp, y = 700.dp)
-            .clip(CircleShape).background(Brush.radialGradient(listOf(VerdeMenta, VerdeClaro))).blur(1.dp))
+            .clip(CircleShape).background(MaterialTheme.colorScheme.primary).blur(1.dp))
 
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 36.dp),
@@ -73,7 +73,7 @@ fun NuevaContraseniaScreen(
                     when {
                         // Cargando
                         estado.cargando -> {
-                            CircularProgressIndicator(color = VerdePrimario, modifier = Modifier.size(56.dp), strokeWidth = 3.dp)
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(56.dp), strokeWidth = 3.dp)
                             Spacer(modifier = Modifier.height(16.dp))
                             Text("Guardando contraseña...", color = Color.Gray, fontSize = 14.sp)
                         }
@@ -85,14 +85,14 @@ fun NuevaContraseniaScreen(
 
                             AnimatedVisibility(visible = visible, enter = scaleIn() + fadeIn()) {
                                 Box(
-                                    modifier = Modifier.size(80.dp).clip(CircleShape).background(VerdePrimario),
+                                    modifier = Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(48.dp))
                                 }
                             }
                             Spacer(modifier = Modifier.height(20.dp))
-                            Text("¡Contraseña cambiada!", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = VerdePrimario)
+                            Text("¡Contraseña cambiada!", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Ya puedes iniciar sesión con tu nueva contraseña.",
                                 fontSize = 13.sp, color = Color.Gray, textAlign = TextAlign.Center)
@@ -105,7 +105,7 @@ fun NuevaContraseniaScreen(
                                 },
                                 modifier = Modifier.fillMaxWidth().height(54.dp),
                                 shape = RoundedCornerShape(14.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario)
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
                                 Text("Ir al inicio de sesión", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
                             }
@@ -114,7 +114,7 @@ fun NuevaContraseniaScreen(
                         // Formulario
                         else -> {
                             Text("Nueva contraseña", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold,
-                                color = VerdePrimario, textAlign = TextAlign.Center)
+                                color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Introduce tu nueva contraseña.", fontSize = 13.sp,
                                 color = Color.Gray, textAlign = TextAlign.Center)
@@ -135,8 +135,13 @@ fun NuevaContraseniaScreen(
                                 shape = RoundedCornerShape(14.dp),
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = VerdeClaro, unfocusedBorderColor = Color(0xFFE0E0E0),
-                                    focusedLabelColor = VerdeClaro, unfocusedLabelColor = VerdeClaro, cursorColor = VerdeClaro
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedLabelColor = TextoOscuro,
+                                    focusedTextColor = TextoOscuro,
+                                    unfocusedTextColor = TextoOscuro,
+                                    cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                             Spacer(modifier = Modifier.height(14.dp))
@@ -155,8 +160,13 @@ fun NuevaContraseniaScreen(
                                 shape = RoundedCornerShape(14.dp),
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = VerdeClaro, unfocusedBorderColor = Color(0xFFE0E0E0),
-                                    focusedLabelColor = VerdeClaro, unfocusedLabelColor = VerdeClaro, cursorColor = VerdeClaro
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedLabelColor = TextoOscuro,
+                                    focusedTextColor = TextoOscuro,
+                                    unfocusedTextColor = TextoOscuro,
+                                    cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                             if (estado.mensajeError.isNotEmpty()) {
@@ -168,7 +178,7 @@ fun NuevaContraseniaScreen(
                                 onClick = { viewModel.guardarNuevaContrasena(oobCode) },
                                 modifier = Modifier.fillMaxWidth().height(54.dp),
                                 shape = RoundedCornerShape(14.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                 enabled = !estado.cargando
                             ) {
                                 Text("Guardar contraseña", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)

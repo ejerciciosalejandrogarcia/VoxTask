@@ -20,6 +20,7 @@
     <string name="campo_fecha_naci">Date of birth</string>
     <string name="campo_correo">Email address</string>
 
+    <string name="txt_crear_contador">Create counter</string>
     <string name="txt_contador">Start a timer</string>
     <string name="txt_correo">Write and send an email</string>
     <string name="txt_recordatorio">Create a reminder</string>
@@ -69,5 +70,4 @@
     <string name="personaliza_fondo">Customize the app background</string>
     <string name="version_app">Version</string>
     <string name="ver_version_actual">Check the current version</string>
-    <string name="version">Version: 1.0</string>
 </resources>

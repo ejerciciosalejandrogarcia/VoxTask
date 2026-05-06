@@ -63,7 +63,7 @@ fun RegistroUsuarioScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FondoBlanco)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         //Círculo grande superior izquierda
@@ -72,11 +72,7 @@ fun RegistroUsuarioScreen(
                 .size(280.dp)
                 .offset(x = (-80).dp, y = (-60).dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeClaro, VerdePrimario)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
         )
 
         //Círculo mediano superior derecha
@@ -85,11 +81,7 @@ fun RegistroUsuarioScreen(
                 .size(160.dp)
                 .offset(x = 270.dp, y = 40.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeMenta, VerdeClaro)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .blur(2.dp)
         )
 
@@ -99,11 +91,7 @@ fun RegistroUsuarioScreen(
                 .size(300.dp)
                 .offset(x = 160.dp, y = 620.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeClaro, VerdePrimario)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
         )
 
         //Círculo pequeño inferior izquierda
@@ -112,11 +100,7 @@ fun RegistroUsuarioScreen(
                 .size(140.dp)
                 .offset(x = (-40).dp, y = 700.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(VerdeMenta, VerdeClaro)
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .blur(1.dp)
         )
 
@@ -150,7 +134,7 @@ fun RegistroUsuarioScreen(
                         text = stringResource(R.string.app_name),
                         fontSize = 34.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = VerdePrimario,
+                        color = MaterialTheme.colorScheme.primary,
                         letterSpacing = (-0.5).sp
                     )
 
@@ -178,13 +162,13 @@ fun RegistroUsuarioScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -210,13 +194,13 @@ fun RegistroUsuarioScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -242,13 +226,13 @@ fun RegistroUsuarioScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -276,13 +260,13 @@ fun RegistroUsuarioScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -304,13 +288,13 @@ fun RegistroUsuarioScreen(
                             .clickable { selectorFecha.show() },  // También abre el selector al tocar el campo
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
                             unfocusedTextColor = TextoOscuro,
-                            cursorColor = VerdeClaro
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
                     Spacer(modifier = Modifier.height(14.dp))
@@ -335,13 +319,13 @@ fun RegistroUsuarioScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -366,13 +350,13 @@ fun RegistroUsuarioScreen(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VerdeClaro,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedLabelColor = VerdeClaro,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
                             unfocusedLabelColor = TextoOscuro,
                             focusedTextColor = TextoOscuro,
-
-                            cursorColor = VerdeClaro
+                            unfocusedTextColor = TextoOscuro,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
 
@@ -397,7 +381,7 @@ fun RegistroUsuarioScreen(
                             .height(54.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = VerdePrimario
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
                     ) {

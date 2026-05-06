@@ -4,26 +4,32 @@ import androidx.compose.ui.graphics.Color
 
 // Colores existentes
 val VerdePrimario = Color(0xFF2E7D32)
-val VerdeClaro = Color(0xFF4CAF50)
-val VerdeMenta = Color(0xFF81C784)
-val MoradoBoton = Color(0xFF7C4DFF)
-val MoradoSuave = Color(0xFFEDE7F6)
-val FondoBlanco = Color(0xFFFAFAFA)
 val TextoOscuro = Color(0xFF1B1B1B)
 val TextoGris = Color(0xFF757575)
 
 // Paleta de colores para el selector
-val ColoresDisponibles = listOf(
- Color(0xFFF44336), // Rojo
- Color(0xFFE91E63), // Rosa
- Color(0xFF9C27B0), // Morado
- Color(0xFF2196F3), // Azul
- Color(0xFF00BCD4), // Cyan
- Color(0xFF4CAF50), // Verde
- Color(0xFFFFEB3B), // Amarillo
- Color(0xFFFF9800), // Naranja
+val ColoresClaros = listOf(
+ Color(0xFFFF8A80), // Rojo claro
+ Color(0xFFFF80AB), // Rosa claro
+ Color(0xFFCE93D8), // Morado claro
+ Color(0xFF90CAF9), // Azul claro
+ Color(0xFF80DEEA), // Cyan claro
+ Color(0xFFA5D6A7), // Verde claro
+ Color(0xFFFFF59D), // Amarillo claro
+ Color(0xFFFFCC80), // Naranja claro
  VerdePrimario,      // Verde primario
- Color(0xFF795548)  // Marrón
+ Color(0xFFBCAAA4)  // Marrón claro
 )
 
-enum class ModoTema { CLARO, OSCURO }
+val ColoresOscuros = listOf(
+ Color(0xFFD32F2F), // Rojo oscuro
+ Color(0xFFC2185B), // Rosa oscuro
+ Color(0xFF7B1FA2), // Morado oscuro
+ Color(0xFF1976D2), // Azul oscuro
+ Color(0xFF0097A7), // Cyan oscuro
+ Color(0xFF388E3C), // Verde oscuro
+ Color(0xFFFBC02D), // Amarillo oscuro
+ Color(0xFFF57C00), // Naranja oscuro
+ VerdePrimario,      // Verde primario
+ Color(0xFF5D4037)  // Marrón oscuro
+)

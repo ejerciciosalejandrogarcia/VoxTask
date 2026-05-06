@@ -50,28 +50,26 @@ class UsuarioRepository : UsuarioDao {
     ): Result<Usuario> {
         return try {
 
-            //Buscar usuario por nombre_usuario
             val query = coleccion
                 .whereEqualTo("nombre_usuario", nombreUsuario)
                 .get()
                 .await()
 
-            if (query.isEmpty) {
-                return Result.failure(Exception("Usuario no encontrado"))
-            }
+            val documento = query.documents.firstOrNull()
+                ?: return Result.failure(Exception("Usuario no encontrado"))
 
-            val usuario = query.documents[0].toObject(Usuario::class.java)
+            val usuario = documento.toObject(Usuario::class.java)
                 ?: return Result.failure(Exception("Error al obtener usuario"))
 
             val email = usuario.correo_electronico
 
-            // Login con email real
             val authResult = auth
                 .signInWithEmailAndPassword(email, contrasena)
                 .await()
 
-            val uid = authResult.user?.uid
-                ?: return Result.failure(Exception("No se pudo obtener UID"))
+            if (authResult.user == null) {
+                return Result.failure(Exception("Error en autenticación"))
+            }
 
             Result.success(usuario)
 

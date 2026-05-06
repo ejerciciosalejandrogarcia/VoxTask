@@ -43,6 +43,18 @@ class ThemeManager(private val context: Context) {
         _colorOscuro.value = color
         prefs.edit().putInt("color_oscuro", color.toArgb()).apply()
     }
+
+    fun resetearColores() {
+        val colorDefault = VerdePrimario
+
+        _colorClaro.value = colorDefault
+        _colorOscuro.value = colorDefault
+
+        prefs.edit()
+            .putInt("color_claro", colorDefault.toArgb())
+            .putInt("color_oscuro", colorDefault.toArgb())
+            .apply()
+    }
 }
 
 @Composable

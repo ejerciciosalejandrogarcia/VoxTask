@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.voxtask.ui.theme.ThemeManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -50,6 +51,8 @@ class PlantillaBaseViewModel : ViewModel() {
 
         clienteGoogle.signOut().addOnCompleteListener {
             auth.signOut()
+            val themeManager = ThemeManager(contexto)
+            themeManager.resetearColores()
             alCerrar()
             actividad.finishAffinity()
         }

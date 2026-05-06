@@ -58,7 +58,8 @@ fun VerificacionScreen(
     val minutos = segundosRestantes / 60
     val segundos = segundosRestantes % 60
     val tiempoTexto = "%02d:%02d".format(minutos, segundos)
-    val colorContador = if (segundosRestantes <= 60) Color(0xFFE53935) else VerdePrimario
+    val colorContador = if (segundosRestantes <= 60) Color(0xFFE53935) else MaterialTheme.colorScheme.primary
+
 
     val focusRequesters = remember { List(5) { FocusRequester() } }
     LaunchedEffect(Unit) { focusRequesters[0].requestFocus() }
@@ -86,7 +87,7 @@ fun VerificacionScreen(
                     text = "VoxTask",
                     fontSize = 34.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = VerdePrimario,
+                    color = MaterialTheme.colorScheme.primary,
                     letterSpacing = (-0.5).sp
                 )
 
@@ -112,7 +113,7 @@ fun VerificacionScreen(
                         text = estadoUi.email,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = VerdePrimario
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -120,7 +121,7 @@ fun VerificacionScreen(
 
                 // Estado de carga
                 if (estadoUi.cargando) {
-                    CircularProgressIndicator(color = VerdePrimario, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Enviando código...", fontSize = 12.sp, color = TextoGris)
                 } else {
@@ -182,9 +183,9 @@ fun VerificacionScreen(
                             ),
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VerdePrimario,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
                                 unfocusedBorderColor = Color(0xFFE0E0E0),
-                                cursorColor = VerdePrimario,
+                                cursorColor = MaterialTheme.colorScheme.primary,
                                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
                                 unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                                 focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -212,7 +213,7 @@ fun VerificacionScreen(
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = VerdePrimario,
+                        containerColor = MaterialTheme.colorScheme.primary,
                         disabledContainerColor = Color.Gray
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
@@ -236,7 +237,7 @@ fun VerificacionScreen(
                     }) {
                         Text(
                             text = "Reenviar código",
-                            color = VerdePrimario,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )

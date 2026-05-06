@@ -1,5 +1,9 @@
 package com.example.voxtask.ui.screens.Perfil
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voxtask.ui.theme.VerdePrimario
+import coil.compose.rememberAsyncImagePainter
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 
@@ -48,6 +52,15 @@ fun PerfilScreen(
         }
     }
 
+    // 🖼️ Launcher para abrir la galería del dispositivo
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            viewModel.subirAvatar(it) // ← Sube automáticamente al seleccionar
+        }
+    }
+
     PlantillaBase(
         viewModel = viewModelPlantilla,
         navController = navController
@@ -63,27 +76,43 @@ fun PerfilScreen(
                 verticalArrangement = Arrangement.Top
             ) {
 
-                // Avatar del usuario
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Avatar",
-                    tint = VerdePrimario,
+                // 🖼️ AVATAR — toca para cambiar la foto
+                Box(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .padding(bottom = 8.dp)
-                )
+                        .clickable { launcher.launch("image/*") }, // ← Abre galería
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (viewModel.avatarUrl != null && viewModel.avatarUrl!!.isNotEmpty()) {
+                        Image(
+                            painter = rememberAsyncImagePainter(viewModel.avatarUrl),
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Avatar",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                }
 
                 Text(
                     text = "@${viewModel.nombreUsuario}",
                     style = MaterialTheme.typography.titleMedium,
-                    color = VerdePrimario
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 if (viewModel.cargando) {
-                    CircularProgressIndicator(color = VerdePrimario)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 } else {
                     // Campo nombre
                     OutlinedTextField(

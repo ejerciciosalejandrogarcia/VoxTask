@@ -20,6 +20,7 @@
     <string name="campo_fecha_naci">Geburtsdatum</string>
     <string name="campo_correo">E-Mail-Adresse</string>
 
+    <string name="txt_crear_contador">Zähler erstellen</string>
     <string name="txt_contador">Timer starten</string>
     <string name="txt_correo">E-Mail schreiben und senden</string>
     <string name="txt_recordatorio">Erinnerung erstellen</string>

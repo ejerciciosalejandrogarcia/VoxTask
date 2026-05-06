@@ -40,6 +40,7 @@
     <string name="campo_correo">Seu endereço de e-mail</string>
 
     <!-- Inicio Screen -->
+    <string name="txt_crear_contador">Criar contador</string>
     <string name="txt_contador">Iniciar um contador</string>
     <string name="txt_correo">Redigir e enviar um e-mail</string>
     <string name="txt_recordatorio">Criar um lembrete</string>

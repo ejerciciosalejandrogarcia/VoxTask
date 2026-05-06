@@ -38,7 +38,7 @@ fun CambiarContrasenaScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FondoBlanco)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         // Círculo grande superior izquierda — igual que InicioSesion
@@ -47,9 +47,7 @@ fun CambiarContrasenaScreen(
                 .size(280.dp)
                 .offset(x = (-80).dp, y = (-60).dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(colors = listOf(VerdeClaro, VerdePrimario))
-                )
+                .background(MaterialTheme.colorScheme.primary)
         )
 
         // Círculo mediano superior derecha
@@ -58,9 +56,7 @@ fun CambiarContrasenaScreen(
                 .size(160.dp)
                 .offset(x = 270.dp, y = 40.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(colors = listOf(VerdeMenta, VerdeClaro))
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .blur(2.dp)
         )
 
@@ -70,9 +66,7 @@ fun CambiarContrasenaScreen(
                 .size(300.dp)
                 .offset(x = 160.dp, y = 620.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(colors = listOf(VerdeClaro, VerdePrimario))
-                )
+                .background(MaterialTheme.colorScheme.primary)
         )
 
         // Círculo pequeño inferior izquierda
@@ -81,26 +75,9 @@ fun CambiarContrasenaScreen(
                 .size(140.dp)
                 .offset(x = (-40).dp, y = 700.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(colors = listOf(VerdeMenta, VerdeClaro))
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .blur(1.dp)
         )
-
-        // Botón volver atrás
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 48.dp, start = 16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Volver",
-                tint = Color.White,
-                modifier = Modifier.size(28.dp)
-            )
-        }
 
         Column(
             modifier = Modifier
@@ -127,7 +104,7 @@ fun CambiarContrasenaScreen(
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = null,
-                            tint = VerdePrimario,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(64.dp)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -135,7 +112,7 @@ fun CambiarContrasenaScreen(
                             text = "Correo enviado",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = VerdePrimario
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
@@ -152,7 +129,7 @@ fun CambiarContrasenaScreen(
                                 .fillMaxWidth()
                                 .height(54.dp),
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
                         ) {
                             Text(
@@ -166,7 +143,7 @@ fun CambiarContrasenaScreen(
                         TextButton(onClick = { viewModel.reiniciar() }) {
                             Text(
                                 text = "Enviar de nuevo",
-                                color = VerdePrimario,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -178,7 +155,7 @@ fun CambiarContrasenaScreen(
                             text = "Recuperar contraseña",
                             fontSize = 26.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = VerdePrimario,
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                             letterSpacing = (-0.5).sp
                         )
@@ -211,11 +188,13 @@ fun CambiarContrasenaScreen(
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VerdeClaro,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
                                 unfocusedBorderColor = Color(0xFFE0E0E0),
-                                focusedLabelColor = VerdeClaro,
-                                unfocusedLabelColor = VerdeClaro,
-                                cursorColor = VerdeClaro
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = TextoOscuro,
+                                focusedTextColor = TextoOscuro,
+                                unfocusedTextColor = TextoOscuro,
+                                cursorColor = MaterialTheme.colorScheme.primary
                             )
                         )
 
@@ -237,7 +216,7 @@ fun CambiarContrasenaScreen(
                                 .fillMaxWidth()
                                 .height(54.dp),
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdePrimario),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
                             enabled = !estadoUi.cargando
                         ) {
@@ -255,17 +234,6 @@ fun CambiarContrasenaScreen(
                                     color = Color.White
                                 )
                             }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        TextButton(onClick = { navController.popBackStack() }) {
-                            Text(
-                                text = "Volver al inicio de sesión",
-                                color = VerdePrimario,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
                         }
                     }
                 }
