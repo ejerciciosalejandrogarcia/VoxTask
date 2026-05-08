@@ -94,9 +94,10 @@ class CambiarContraseniaViewModel : ViewModel() {
             try {
                 auth.sendPasswordResetEmail(email, actionCodeSettings).await()
 
+                /*
                 N8nClient.api.enviarCorreoRecuperacion(
                     RecuperarContraseniaRequest(email = email)
-                )
+                )*/
 
                 _estadoUi.value = _estadoUi.value.copy(
                     cargando = false,

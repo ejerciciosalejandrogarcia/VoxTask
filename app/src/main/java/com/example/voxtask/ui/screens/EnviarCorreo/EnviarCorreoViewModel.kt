@@ -1,4 +1,3 @@
-// EnviarCorreoViewModel.kt
 package com.example.voxtask.ui.screens.EnviarCorreo
 
 import android.content.Context
@@ -15,9 +14,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 enum class PasoEnvio {
@@ -26,8 +25,10 @@ enum class PasoEnvio {
 
 class EnviarCorreoViewModel : ViewModel() {
 
-    private val auth = FirebaseAuth.getInstance()
-    var modoEdicion by mutableStateOf(false)
+    companion object {
+        const val WEB_CLIENT_ID = "820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com"
+    }
+
     var paso by mutableStateOf(PasoEnvio.DESTINATARIO)
     var destinatario by mutableStateOf("")
     var asunto by mutableStateOf("")
@@ -35,27 +36,84 @@ class EnviarCorreoViewModel : ViewModel() {
     var mensaje by mutableStateOf("")
     var errorMensaje by mutableStateOf("")
     var accessToken by mutableStateOf("")
+    var necesitaVincularGoogle by mutableStateOf(false)
+    var cargandoToken by mutableStateOf(false)
+
+    fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
+        return GoogleSignIn.getClient(
+            contexto,
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(WEB_CLIENT_ID)
+                .requestEmail()
+                .requestScopes(Scope("https://www.googleapis.com/auth/gmail.send"))
+                .build()
+        )
+    }
 
     fun iniciar(contexto: Context) {
         viewModelScope.launch {
+            val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
+            val tieneScope = GoogleSignIn.hasPermissions(
+                cuentaGoogle,
+                Scope("https://www.googleapis.com/auth/gmail.send")
+            )
+            if (cuentaGoogle?.account == null || !tieneScope) {
+                necesitaVincularGoogle = true
+            } else {
+                necesitaVincularGoogle = false
+                obtenerToken(contexto)
+            }
+        }
+    }
+
+    fun vincularGoogle(contexto: Context, onListo: () -> Unit) {
+        viewModelScope.launch {
+            // Hacer signOut primero para forzar pantalla de consentimiento con el scope de Gmail
             try {
-                val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
-                if (cuentaGoogle?.account != null) {
-                    accessToken = withContext(Dispatchers.IO) {
-                        val tokenActual = GoogleAuthUtil.getToken(
-                            contexto,
-                            cuentaGoogle.account!!,
-                            "oauth2:https://www.googleapis.com/auth/gmail.send"
-                        )
-                        GoogleAuthUtil.clearToken(contexto, tokenActual)
-                        GoogleAuthUtil.getToken(
-                            contexto,
-                            cuentaGoogle.account!!,
-                            "oauth2:https://www.googleapis.com/auth/gmail.send"
-                        )
-                    }
+                obtenerClienteGoogle(contexto).signOut().await()
+            } catch (e: Exception) { }
+            onListo()
+        }
+    }
+
+    fun guardarToken(contexto: Context) {
+        viewModelScope.launch {
+            necesitaVincularGoogle = false
+            cargandoToken = true
+            obtenerToken(contexto)
+            cargandoToken = false
+            if (accessToken.isNotEmpty()) {
+                TextoAVoz.hablar(contexto, "Cuenta vinculada correctamente. ¿A quién se lo quieres enviar?")
+            }
+        }
+    }
+
+    private suspend fun obtenerToken(contexto: Context) {
+        try {
+            val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
+            if (cuentaGoogle?.account != null) {
+                accessToken = withContext(Dispatchers.IO) {
+                    val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
+                    try {
+                        val tokenViejo = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
+                        GoogleAuthUtil.clearToken(contexto, tokenViejo)
+                    } catch (e: Exception) { }
+                    val nuevoToken = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
+                    android.util.Log.d("TOKEN", "Token obtenido: $nuevoToken")
+                    nuevoToken
                 }
-            } catch (e: Exception) {
+            } else {
+                necesitaVincularGoogle = true
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("TOKEN", "Error: ${e.javaClass.simpleName} - ${e.message}")
+            // Si el error es de consentimiento, volver a pedir vinculación
+            if (e.message?.contains("consent") == true ||
+                e.message?.contains("remote") == true ||
+                e.javaClass.simpleName == "UserRecoverableAuthException"
+            ) {
+                necesitaVincularGoogle = true
+            } else {
                 errorMensaje = "Error obteniendo token: ${e.message}"
                 paso = PasoEnvio.ERROR
             }
@@ -63,6 +121,7 @@ class EnviarCorreoViewModel : ViewModel() {
     }
 
     fun procesarVoz(texto: String, contexto: Context) {
+        if (necesitaVincularGoogle || cargandoToken) return
         val textoLimpio = texto.lowercase().trim()
         viewModelScope.launch {
             when (paso) {
@@ -104,7 +163,6 @@ class EnviarCorreoViewModel : ViewModel() {
     }
 
     fun editarCampo(campo: String) {
-        // formato "campo:nuevoValor" para actualizaciones, o solo "campo" para navegar
         if (campo.contains(":")) {
             val (nombre, valor) = campo.split(":", limit = 2)
             when (nombre) {
@@ -114,9 +172,33 @@ class EnviarCorreoViewModel : ViewModel() {
             }
         }
     }
+    
     private fun enviarCorreo(contexto: Context) {
         viewModelScope.launch {
             paso = PasoEnvio.ENVIANDO
+
+            // Obtener token FRESCO justo ahora
+            try {
+                val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
+                accessToken = withContext(Dispatchers.IO) {
+                    val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
+                    // Solo clear y get UNA VEZ
+                    val token = GoogleAuthUtil.getToken(contexto, cuentaGoogle!!.account!!, scope)
+                    GoogleAuthUtil.clearToken(contexto, token)
+                    GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
+                }
+            } catch (e: Exception) {
+                errorMensaje = "Error de autenticación: ${e.message}"
+                paso = PasoEnvio.ERROR
+                return@launch
+            }
+
+            if (accessToken.isEmpty()) {
+                errorMensaje = "Token vacío."
+                paso = PasoEnvio.ERROR
+                return@launch
+            }
+
             try {
                 val request = EnviarCorreoRequest(
                     token = accessToken,
@@ -125,12 +207,14 @@ class EnviarCorreoViewModel : ViewModel() {
                     mensaje = mensaje,
                     modo = modo
                 )
+                android.util.Log.d("CORREO", "Token usado: ${accessToken.take(20)}")
                 val response = N8nClient.api.enviarCorreo(request)
                 if (response.isSuccessful) {
                     paso = PasoEnvio.ENVIADO
                     TextoAVoz.hablar(contexto, "Correo enviado correctamente.")
                 } else {
-                    errorMensaje = "Error al enviar: ${response.code()}"
+                    val errorBody = response.errorBody()?.string() ?: "Sin detalle"
+                    errorMensaje = "Error (${response.code()}): $errorBody"
                     paso = PasoEnvio.ERROR
                     TextoAVoz.hablar(contexto, "Hubo un error al enviar el correo.")
                 }
@@ -141,7 +225,6 @@ class EnviarCorreoViewModel : ViewModel() {
             }
         }
     }
-
     fun reiniciar(contexto: Context) {
         destinatario = ""
         asunto = ""
@@ -152,21 +235,5 @@ class EnviarCorreoViewModel : ViewModel() {
         viewModelScope.launch {
             TextoAVoz.hablar(contexto, "¿A quién se lo quieres enviar?")
         }
-    }
-
-    fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
-        val emailFirebase = FirebaseAuth.getInstance().currentUser?.email ?: ""
-        return GoogleSignIn.getClient(
-            contexto,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestScopes(Scope("https://www.googleapis.com/auth/gmail.send"))
-                .setAccountName(emailFirebase)
-                .build()
-        )
-    }
-
-    fun guardarToken(contexto: Context) {
-        iniciar(contexto)
     }
 }

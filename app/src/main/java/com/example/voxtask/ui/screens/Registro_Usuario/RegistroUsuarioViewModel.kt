@@ -10,7 +10,8 @@ import com.example.voxtask.databases.repository.UsuarioRepository
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.dao.UsuarioDao
 import kotlinx.coroutines.launch
-
+import com.example.voxtask.databases.network.BienvenidaRequest
+import com.example.voxtask.databases.network.N8nClient
 data class RegistrarUsuarioUiState(
     val nombreUsuario: String = "",
     val nombre: String = "",
@@ -103,6 +104,7 @@ class RegistroUsuarioViewModel(
                         val resultado = repositorio.registrarUsuario(usuario)
 
                         if (resultado.isSuccess) {
+                            enviarCorreoBienvenida(correoElectronico)
                             _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
                         } else {
                             val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
@@ -111,5 +113,23 @@ class RegistroUsuarioViewModel(
                     }
                 }
             }
+    }
+
+    suspend fun enviarCorreoBienvenida(email: String) {
+        try {
+
+            val response = N8nClient.api.enviarCorreoBienvenida(
+                BienvenidaRequest(email)
+            )
+
+            if (response.isSuccessful) {
+                println("Correo de bienvenida enviado")
+            } else {
+                println("Error enviando correo")
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

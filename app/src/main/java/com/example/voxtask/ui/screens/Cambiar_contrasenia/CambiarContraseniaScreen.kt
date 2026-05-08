@@ -123,24 +123,8 @@ fun CambiarContrasenaScreen(
                             lineHeight = 20.sp
                         )
                         Spacer(modifier = Modifier.height(28.dp))
-                        Button(
-                            onClick = { navController.popBackStack() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(54.dp),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
-                        ) {
-                            Text(
-                                text = "Volver al inicio de sesión",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        TextButton(onClick = { viewModel.reiniciar() }) {
+
+                        TextButton(onClick = { viewModel.enviarCorreoRecuperacion() }) {
                             Text(
                                 text = "Enviar de nuevo",
                                 color = MaterialTheme.colorScheme.primary,

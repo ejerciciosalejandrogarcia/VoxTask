@@ -1,4 +1,3 @@
-// EnviarCorreoScreen.kt
 package com.example.voxtask.ui.screens.EnviarCorreo
 
 import android.app.Activity
@@ -61,13 +60,17 @@ fun EnviarCorreoScreen(
                 GoogleSignIn.getSignedInAccountFromIntent(resultado.data)
                     .getResult(ApiException::class.java)
                 viewModel.guardarToken(contexto)
-            } catch (e: ApiException) { }
+            } catch (e: ApiException) {
+                android.util.Log.e("GOOGLE", "Error ApiException: ${e.statusCode} - ${e.message}")
+            }
         }
     }
 
     LaunchedEffect(Unit) {
         viewModel.iniciar(contexto)
-        TextoAVoz.hablar(contexto, "¿A quién se lo quieres enviar?")
+        if (!viewModel.necesitaVincularGoogle) {
+            TextoAVoz.hablar(contexto, "¿A quién se lo quieres enviar?")
+        }
     }
 
     PlantillaBase(
@@ -81,7 +84,9 @@ fun EnviarCorreoScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            if (viewModel.paso != PasoEnvio.ENVIANDO &&
+            if (!viewModel.necesitaVincularGoogle &&
+                !viewModel.cargandoToken &&
+                viewModel.paso != PasoEnvio.ENVIANDO &&
                 viewModel.paso != PasoEnvio.ENVIADO &&
                 viewModel.paso != PasoEnvio.ERROR &&
                 viewModel.paso != PasoEnvio.CONFIRMACION
@@ -101,77 +106,142 @@ fun EnviarCorreoScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                when (viewModel.paso) {
-                    PasoEnvio.DESTINATARIO -> PasoUI(
-                        titulo = "¿A quién envías el correo?",
-                        descripcion = "Di el correo electrónico del destinatario",
-                        valor = viewModel.destinatario
-                    )
-                    PasoEnvio.ASUNTO -> PasoUI(
-                        titulo = "¿Cuál es el asunto?",
-                        descripcion = "Di el asunto del correo",
-                        valor = viewModel.asunto
-                    )
-                    PasoEnvio.MODO -> PasoUI(
-                        titulo = "¿Cómo quieres el mensaje?",
-                        descripcion = "Di \"yo mismo\" para escribirlo tú\nDi \"inteligencia artificial\" para que lo cree la IA",
-                        valor = ""
-                    )
-                    PasoEnvio.MENSAJE -> PasoUI(
-                        titulo = if (viewModel.modo == "ia") "¿Sobre qué trata el correo?" else "Dicta el mensaje",
-                        descripcion = if (viewModel.modo == "ia") "Di el tema o idea principal" else "Di el contenido completo del correo",
-                        valor = viewModel.mensaje
-                    )
-                    PasoEnvio.CONFIRMACION -> ConfirmacionUI(
-                        destinatario = viewModel.destinatario,
-                        asunto = viewModel.asunto,
-                        mensaje = viewModel.mensaje,
-                        modo = viewModel.modo,
-                        onConfirmar = { viewModel.confirmarEnvio(contexto) },
-                        onEditar = { campo -> viewModel.editarCampo(campo) }
-                    )
-                    PasoEnvio.ENVIANDO -> {
+                when {
+                    viewModel.cargandoToken -> {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Enviando correo...", color = MaterialTheme.colorScheme.primary)
+                        Text("Vinculando cuenta...", color = MaterialTheme.colorScheme.primary)
                     }
-                    PasoEnvio.ENVIADO -> {
-                        Text(
-                            text = "✅ Correo enviado",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                    viewModel.necesitaVincularGoogle -> {
+                        VincularGoogleUI(
+                            onVincular = {
+                                viewModel.vincularGoogle(contexto) {
+                                    lanzadorGoogle.launch(
+                                        viewModel.obtenerClienteGoogle(contexto).signInIntent
+                                    )
+                                }
+                            }
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        ResumenCorreo(
-                            para = viewModel.destinatario,
-                            asunto = viewModel.asunto,
-                            modo = viewModel.modo
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Button(
-                            onClick = { viewModel.reiniciar(contexto) },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Enviar otro", color = Color.White)
-                        }
                     }
-                    PasoEnvio.ERROR -> {
-                        Text(
-                            text = viewModel.errorMensaje,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { viewModel.reiniciar(contexto) },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Intentar de nuevo", color = Color.White)
+                    else -> {
+                        when (viewModel.paso) {
+                            PasoEnvio.DESTINATARIO -> PasoUI(
+                                titulo = "¿A quién envías el correo?",
+                                descripcion = "Di el correo electrónico del destinatario",
+                                valor = viewModel.destinatario
+                            )
+                            PasoEnvio.ASUNTO -> PasoUI(
+                                titulo = "¿Cuál es el asunto?",
+                                descripcion = "Di el asunto del correo",
+                                valor = viewModel.asunto
+                            )
+                            PasoEnvio.MODO -> PasoUI(
+                                titulo = "¿Cómo quieres el mensaje?",
+                                descripcion = "Di \"yo mismo\" para escribirlo tú\nDi \"inteligencia artificial\" para que lo cree la IA",
+                                valor = ""
+                            )
+                            PasoEnvio.MENSAJE -> PasoUI(
+                                titulo = if (viewModel.modo == "ia") "¿Sobre qué trata el correo?" else "Dicta el mensaje",
+                                descripcion = if (viewModel.modo == "ia") "Di el tema o idea principal" else "Di el contenido completo del correo",
+                                valor = viewModel.mensaje
+                            )
+                            PasoEnvio.CONFIRMACION -> ConfirmacionUI(
+                                destinatario = viewModel.destinatario,
+                                asunto = viewModel.asunto,
+                                mensaje = viewModel.mensaje,
+                                modo = viewModel.modo,
+                                onConfirmar = { viewModel.confirmarEnvio(contexto) },
+                                onEditar = { campo -> viewModel.editarCampo(campo) }
+                            )
+                            PasoEnvio.ENVIANDO -> {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text("Enviando correo...", color = MaterialTheme.colorScheme.primary)
+                            }
+                            PasoEnvio.ENVIADO -> {
+                                Text(
+                                    text = "✓ Correo enviado",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                ResumenCorreo(
+                                    para = viewModel.destinatario,
+                                    asunto = viewModel.asunto,
+                                    modo = viewModel.modo
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Button(
+                                    onClick = { viewModel.reiniciar(contexto) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Enviar otro", color = Color.White)
+                                }
+                            }
+                            PasoEnvio.ERROR -> {
+                                Text(
+                                    text = viewModel.errorMensaje,
+                                    color = MaterialTheme.colorScheme.error,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Button(
+                                    onClick = { viewModel.reiniciar(contexto) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Intentar de nuevo", color = Color.White)
+                                }
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun VincularGoogleUI(onVincular: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(32.dp)
+    ) {
+        Text(
+            text = "Cuenta de Google requerida",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Para enviar correos necesitas vincular tu cuenta de Google con permiso de Gmail.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = onVincular,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(
+                text = "Vincular cuenta de Google",
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -185,9 +255,7 @@ fun ConfirmacionUI(
     onConfirmar: () -> Unit,
     onEditar: (String) -> Unit
 ) {
-    // Estado local para saber qué campo está en modo edición
     var campoEditando by remember { mutableStateOf<String?>(null) }
-    // Copias locales editables
     var destinatarioEdit by remember { mutableStateOf(destinatario) }
     var asuntoEdit by remember { mutableStateOf(asunto) }
     var mensajeEdit by remember { mutableStateOf(mensaje) }
@@ -259,7 +327,7 @@ fun ConfirmacionUI(
                 FilaConfirmacion(
                     etiqueta = "Modo",
                     valor = if (modo == "ia") "Generado por IA" else "Manual",
-                    editando = false,      // el modo no se edita manualmente
+                    editando = false,
                     onEditar = { },
                     onGuardar = { }
                 )
@@ -302,7 +370,6 @@ fun FilaConfirmacion(
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(4.dp))
-
             if (editando) {
                 OutlinedTextField(
                     value = textoTemporal,
@@ -326,19 +393,21 @@ fun FilaConfirmacion(
             }
         }
         Spacer(modifier = Modifier.width(8.dp))
-
-        // Botón cambia entre "Editar" y "Guardar" según el estado
         if (editando) {
             Button(
                 onClick = { onGuardar(textoTemporal) },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
                 Text("Guardar", style = MaterialTheme.typography.labelSmall, color = Color.White)
             }
         } else {
             OutlinedButton(
                 onClick = onEditar,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
             ) {
                 Text("Editar", style = MaterialTheme.typography.labelSmall)
             }

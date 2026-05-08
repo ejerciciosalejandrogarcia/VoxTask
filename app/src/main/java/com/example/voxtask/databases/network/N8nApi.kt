@@ -29,6 +29,9 @@ data class VerificacionRequest(
 data class RecuperarContraseniaRequest(
     val email: String
 )
+data class BienvenidaRequest(
+    val email: String
+)
 data class VerificacionResponse(
     val success: Boolean,
     val codigo: String
@@ -60,6 +63,11 @@ interface N8nApiService {
     @POST("webhook/recuperar-contrasenia")
     suspend fun enviarCorreoRecuperacion(
         @Body body: RecuperarContraseniaRequest
+    ): retrofit2.Response<Unit>
+
+    @POST("webhook/bienvenida")
+    suspend fun enviarCorreoBienvenida(
+        @Body body: BienvenidaRequest
     ): retrofit2.Response<Unit>
 }
 
