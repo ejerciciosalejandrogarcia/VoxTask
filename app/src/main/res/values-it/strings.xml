@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">VoxTask</string>
 
+    <!-- Schermata Inizio Sessione (Login) -->
     <string name="campo_nombre_usuario">Nome utente</string>
     <string name="campo_contrasenia">Password</string>
     <string name="btn_iniciar_sesion">Accedi</string>
@@ -9,27 +10,30 @@
     <string name="icono_mostrar_contrasenia">Mostra password</string>
     <string name="icono_limpiar">Cancella</string>
     <string name="txt_o">o</string>
-    <string name="txt_iniciar_google">Accedi con Google</string>
-    <string name="txt_pregunta_contrasenia">Password dimenticata?</string>
-    <string name="txt_respuesta_contrasenia">Reimposta password</string>
+    <string name="txt_iniciar_google">Continua con Google</string>
+    <string name="txt_pregunta_contrasenia">Hai dimenticato la password?</string>
+    <string name="txt_respuesta_contrasenia">Reimposta ora</string>
 
+    <!-- Schermata Registrazione Utente -->
     <string name="btn_registrar_usuario">Crea account</string>
-    <string name="campo_nombre">Il tuo nome</string>
-    <string name="campo_primer_ap">Il tuo cognome</string>
+    <string name="campo_nombre">Nome</string>
+    <string name="campo_primer_ap">Primo cognome</string>
     <string name="campo_segundo_ap">Secondo cognome</string>
     <string name="campo_fecha_naci">Data di nascita</string>
-    <string name="campo_correo">Il tuo indirizzo e-mail</string>
+    <string name="campo_correo">Indirizzo email</string>
 
-    <string name="txt_crear_contador">Crea contatore</string>
-    <string name="txt_contador">Avvia un timer</string>
-    <string name="txt_correo">Scrivi e invia un\'e-mail</string>
-    <string name="txt_recordatorio">Crea un promemoria</string>
-    <string name="txt_lista_compra">Crea una lista della spesa</string>
-    <string name="btn_hablar">Pulsante parla</string>
-    <string name="btn_ajustes">Pulsante impostazioni</string>
-    <string name="btn_inicio">Pulsante home</string>
-    <string name="btn_traducir">Pulsante traduci</string>
+    <!-- Schermata Home -->
+    <string name="txt_inicio_bienvenida">Ciao %1$s, come stai? Cosa posso fare per te?</string>
+    <string name="txt_inicio_instrucciones">Scegli una delle seguenti opzioni e, quando sei pronto, tieni premuto il pulsante per parlare</string>
+    <string name="txt_inicio_sub_correo">Controlla email</string>
+    <string name="txt_inicio_sub_recordatorios_ver">Vedi promemoria</string>
+    <string name="txt_inicio_sub_recordatorios_crear">Crea promemoria</string>
+    <string name="txt_inicio_sub_lista_ver">Vedi lista della spesa</string>
+    <string name="txt_inicio_sub_lista_crear">Crea lista della spesa</string>
+    <string name="txt_inicio_sub_contador">Imposta timer</string>
+    <string name="txt_usuario_generico">Utente</string>
 
+    <!-- Schermata Lista Spesa -->
     <string name="icono_eliminar_producto">Elimina prodotto</string>
     <string name="txt_sin_producto_lista_compra">Pronuncia un prodotto per aggiungerlo</string>
     <string name="txt_titulo_mensaje_confirmacion_producto">Elimina prodotto</string>
@@ -37,6 +41,7 @@
     <string name="btn_eliminar_producto">Elimina</string>
     <string name="btn_cancelar_producto">Annulla</string>
 
+    <!-- Schermata Promemoria -->
     <string name="icono_mes_anterior">Mese precedente</string>
     <string name="icono_mes_siguiente">Mese successivo</string>
     <string-array name="dias_semana">
@@ -52,23 +57,109 @@
     <string name="txt_sin_eventos_dia_seleccionado">Nessun evento per questo giorno</string>
     <string name="txt_eventos_dia_seleccionado">Eventi del %1$d %2$s</string>
 
+    <!-- Schermata Impostazioni -->
     <string name="ajustes">Impostazioni</string>
     <string name="cambiar_voz">Cambia voce</string>
     <string name="voz_actual">Voce attuale</string>
     <string name="cambiar_idioma">Cambia lingua</string>
     <string name="idioma_actual">Lingua attuale</string>
     <string name="mi_perfil">Il mio profilo</string>
-    <string name="ver_editar_perfil">Visualizza e modifica le tue informazioni</string>
+    <string name="ver_editar_perfil">Visualizza e modifica informazioni</string>
     <string name="color_interfaz">Colore interfaccia</string>
     <string name="personaliza_colores">Personalizza i colori dell\'app</string>
     <string name="selecciona_voz">Seleziona una voce</string>
     <string name="selecciona_idioma">Seleziona una lingua</string>
     <string name="no_voces">Nessuna voce disponibile.</string>
     <string name="cancelar">Annulla</string>
+    <string name="version">Versione: 1.0</string>
     <string name="cambiar_fondo">Cambia sfondo</string>
     <string name="personaliza_fondo">Personalizza lo sfondo dell\'app</string>
     <string name="version_app">Versione</string>
-    <string name="ver_version_actual">Visualizza la versione attuale</string>
-    <string name="version">Versione: 1.0</string>
+    <string name="ver_version_actual">Consulta la versione attuale</string>
+    <string name="quitar_fondo">Rimuovi sfondo</string>
+    <string name="descripcion_quitar_fondo">Torna allo sfondo predefinito</string>
+    <string name="opcion_color_interfaz">Colore dell\'interfaccia</string>
+    <string name="opcion_color_interfaz_modo_claro">Colore modalità chiara</string>
+    <string name="opcion_color_interfaz_modo_oscuro">Colore modalità scura</string>
+    <string name="model_cerrar">Chiudi</string>
+
+    <!-- Schermata Cambio Password -->
+    <string name="instrucciones_restablecer_email_uno">Email inviata</string>
+    <string name="instrucciones_restablecer_email_dos">Controlla la tua posta in arrivo su\n%1$s\ne segui le istruzioni per reimpostare la password.</string>
+    <string name="btn_enviar_de_nuevo">Invia di nuovo</string>
+    <string name="txt_titulo_recuperar_contrasenia">Recupera password</string>
+    <string name="txt_titulo_recuperar_contrasenia_dos">Inserisci la tua email e ti invieremo un link per reimpostare la password</string>
+    <string name="txt_placeholder_recuperar_contrasenia">Inserisci la tua email</string>
+    <string name="txt_limpiar">Cancella</string>
+    <string name="btn_recuperar_contrasenia">Invia email di recupero</string>
+
+    <!-- Schermata Timer/Contatore -->
+    <string name="btn_parar">Stop</string>
+    <string name="btn_iniciar">Avvia</string>
+    <string name="btn_cancelar">Annulla</string>
+    <string name="txt_titulo_contador_pausado">Timer in pausa</string>
+    <string name="txt_titulo_contador_iniciado">Timer avviato</string>
+    <string name="txt_titulo_contador_encurso">Timer in corso</string>
+    <string name="txt_titulo_contador_terminado">Tempo scaduto!</string>
+    <string name="txt_titulo_contador_finalizado">Il timer è terminato</string>
+    <string name="txt_name_canal">Timer VoxTask</string>
+    <string name="txt_descripcion">Mostra il conto alla rovescia del timer</string>
+    <string name="txt_title_reanudar">Riprendi</string>
+    <string name="txt_title_pausar">Pausa</string>
+    <string name="txt_title_cancelar">Annulla</string>
+
+    <!-- Schermata Email -->
+    <string name="txt_title_advertencia_ver_correos">Collega il tuo account Gmail per vedere le tue email</string>
+    <string name="txt_btn_conectar_gmail">Collega Gmail</string>
+    <string name="txt_title_no_correos">Non hai email</string>
+    <string name="txt_btne_crear_correo">Scrivi email</string>
+
+    <!-- Schermata Invia Email -->
+    <string name="txt_enviarcorreo_paso_uno">Passaggio %1$d di 4</string>
+    <string name="txt_enviarcorreo_vincular_cuenta">Collegamento account...</string>
+    <string name="txt_enviarcorreo_paso_destinatario_pregunta">A chi vuoi inviare l\'email?</string>
+    <string name="txt_enviarcorreo_paso_destinatario_description">Pronuncia l\'indirizzo email del destinatario</string>
+    <string name="txt_enviarcorreo_pregunta_asunto">Qual è l\'oggetto?</string>
+    <string name="txt_enviarcorreo_descripcion_asunto">Pronuncia l\'oggetto dell\'email</string>
+    <string name="txt_enviarcorreo_pregunta_modo">Come vuoi comporre il messaggio?</string>
+    <string name="txt_enviarcorreo_descripcion_modo">Dì \"manualmente\" per scriverlo tu\nDì \"intelligenza artificiale\" per farlo creare all\'IA</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_ia">Di cosa tratta l\'email?</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Detta il messaggio</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Dì l\'argomento o l\'idea principale</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Pronuncia il contenuto completo dell\'email</string>
+    <string name="txt_enviarcorreo_titulo_confirmacion">Vuoi inviarla così?</string>
+    <string name="txt_enviarcorreo_subtitulo_confirmacion">Controlla i dati prima di inviare</string>
+    <string name="txt_enviarcorreo_etiqueta_para">A</string>
+    <string name="txt_enviarcorreo_etiqueta_asunto">Oggetto</string>
+    <string name="txt_enviarcorreo_etiqueta_mensaje">Messaggio</string>
+    <string name="txt_enviarcorreo_etiqueta_modo">Modalità</string>
+    <string name="txt_enviarcorreo_modo_ia">Generato da IA</string>
+    <string name="txt_enviarcorreo_modo_manual">Manuale</string>
+    <string name="txt_enviarcorreo_btn_enviar">Invia email</string>
+    <string name="txt_enviarcorreo_estado_enviando">Invio email in corso...</string>
+    <string name="txt_enviarcorreo_exito">✓ Email inviata</string>
+    <string name="txt_enviarcorreo_btn_otro">Inviane un\'altra</string>
+    <string name="txt_enviarcorreo_btn_reintentar">Riprova</string>
+    <string name="txt_enviarcorreo_resumen_para">A: %1$s</string>
+    <string name="txt_enviarcorreo_resumen_asunto">Oggetto: %1$s</string>
+    <string name="txt_enviarcorreo_resumen_modo">Modalità: %1$s</string>
+    <string name="txt_enviarcorreo_google_requerido">Account Google richiesto</string>
+    <string name="txt_enviarcorreo_google_descripcion">Per inviare email devi collegare il tuo account Google con i permessi di Gmail.</string>
+    <string name="txt_enviarcorreo_btn_vincular">Collega account Google</string>
+    <string name="txt_enviarcorreo_btn_guardar">Salva</string>
+    <string name="txt_enviarcorreo_btn_editar">Modifica</string>
+    <string name="txt_enviarcorreo_vincular_cuenta_exito">Account collegato correttamente. A chi vuoi inviare l\'email?</string>
+    <string name="txt_enviarcorreo_error_token">Errore nel recupero del token: %1$s</string>
+    <string name="txt_enviarcorreo_error_auth">Errore di autenticazione: %1$s</string>
+    <string name="txt_enviarcorreo_error_generico">Si è verificato un errore durante l\'invio dell\'email.</string>
+
+    <!-- Messaggi di errore Accesso -->
+    <string name="err_campos_vacios">Per favore, compila tutti i campi obbligatori.</string>
+    <string name="err_nombre_usuario_invalido">Il nome utente può contenere solo lettere e numeri.</string>
+    <string name="err_contrasenia_debil">La password deve essere più sicura (9+ caratteri, maiuscola, numero, simbolo).</string>
+    <string name="err_google_auth">Errore nella connessione con Google. Riprova.</string>
+    <string name="err_credenciales_incorrectas">Nome utente o password non validi.</string>
+    <string name="err_firestore">Impossibile salvare i dati nel cloud.</string>
+    <string name="err_conexion">Errore di rete. Controlla la tua connessione internet.</string>
 
 </resources>

@@ -145,6 +145,7 @@ fun VoxTaskApp(
                     navController.navigate(VoxTaskScreen.Inicio_sesion.name) {
                         popUpTo(VoxTaskScreen.Registro_Usuario.name) { inclusive = true }
                     }
+                    viewModelRegistrar.limpiarEstadoRegistro()
                 },
                 viewModel = viewModelRegistrar
             )

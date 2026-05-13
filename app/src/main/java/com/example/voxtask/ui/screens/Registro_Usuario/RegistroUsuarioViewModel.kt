@@ -25,7 +25,7 @@ data class RegistrarUsuarioUiState(
 )
 
 class RegistroUsuarioViewModel(
-    private val repositorio: UsuarioDao = UsuarioRepository()  // ← añadir
+    private val repositorio: UsuarioDao = UsuarioRepository()
 ) : ViewModel() {
 
     private val _estadoUi = MutableStateFlow(RegistrarUsuarioUiState())
@@ -64,9 +64,11 @@ class RegistroUsuarioViewModel(
         val fechaNacimiento = _estadoUi.value.fecha_nacimiento.trim()
         val correoElectronico = _estadoUi.value.correo_electronico.trim()
         val contrasenia = _estadoUi.value.contrasenia.trim()
-
+        val regexNombre = Regex("^[a-záéíóúàèìòùäëïöüñçâêîôûãõ]+$", RegexOption.IGNORE_CASE)
+        val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
+        val regexNombreUsuario = Regex("^[a-zA-Z0-9]+$")
         //Control de errores
-            when {
+        when {
             nombreUsuario.isBlank() ||
                     nombre.isBlank() ||
                     primerApellido.isBlank() ||
@@ -78,8 +80,22 @@ class RegistroUsuarioViewModel(
                 return
             }
 
-            contrasenia.length < 6 -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "La contraseña debe tener mínimo 6 caracteres")
+            !regexNombreUsuario.matches(nombreUsuario) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre de usuario solo puede contener letras y números")
+                return
+            }
+            !regexNombre.matches(nombre) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre solo puede contener letras")
+                return
+            }
+
+            !regexNombre.matches(primerApellido) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El primer apellido solo puede contener letras")
+                return
+            }
+
+            !regexNombre.matches(segundoApellido) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El segundo apellido solo puede contener letras")
                 return
             }
 
@@ -88,31 +104,36 @@ class RegistroUsuarioViewModel(
                 return
             }
 
-                else -> {
-                    _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+            !regexContrasenia.matches(contrasenia) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial")
+                return
+            }
 
-                    viewModelScope.launch {
-                        val usuario = Usuario(
-                            nombre_usuario     = nombreUsuario,
-                            nombre             = nombre,
-                            primer_apellido    = primerApellido,
-                            segundo_apellido   = segundoApellido,
-                            fecha_nacimiento   = fechaNacimiento,
-                            correo_electronico = correoElectronico,
-                            contrasenia        = contrasenia
-                        )
-                        val resultado = repositorio.registrarUsuario(usuario)
+            else -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
 
-                        if (resultado.isSuccess) {
-                            enviarCorreoBienvenida(correoElectronico)
-                            _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
-                        } else {
-                            val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
-                            _estadoUi.value = _estadoUi.value.copy(mensajeError = msg)
-                        }
+                viewModelScope.launch {
+                    val usuario = Usuario(
+                        nombre_usuario     = nombreUsuario,
+                        nombre             = nombre,
+                        primer_apellido    = primerApellido,
+                        segundo_apellido   = segundoApellido,
+                        fecha_nacimiento   = fechaNacimiento,
+                        correo_electronico = correoElectronico,
+                        contrasenia        = contrasenia
+                    )
+                    val resultado = repositorio.registrarUsuario(usuario)
+
+                    if (resultado.isSuccess) {
+                        enviarCorreoBienvenida(correoElectronico)
+                        _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
+                    } else {
+                        val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = msg)
                     }
                 }
             }
+        }
     }
 
     suspend fun enviarCorreoBienvenida(email: String) {
@@ -131,5 +152,11 @@ class RegistroUsuarioViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+    fun limpiarError() {
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+    }
+    fun limpiarEstadoRegistro() {
+        _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = false)
     }
 }

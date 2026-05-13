@@ -1,100 +1,167 @@
 package com.example.voxtask.ui.screens.Perfil
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+data class PerfilUiState(
+    val nombre: String = "",
+    val nombreUsuario: String = "",
+    val primerApellido: String = "",
+    val segundoApellido: String = "",
+    val avatarSeleccionado: String = "",
+    val cargando: Boolean = false,
+    val mensajeError: String = "",
+    val modoEdicion: Boolean = false,
+    val operacionExitosa:Boolean = false
+)
+fun nombreAvatar(nombre: String): Int? = when (nombre) {
+    "tigre"   -> R.drawable.tigre
+    "leon"      -> R.drawable.leon
+    "zorro"      -> R.drawable.zorro
+    "astronauta" -> R.drawable.astronauta
+    else         -> null
+}
 
 class PerfilViewModel : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
-    var avatarUrl by mutableStateOf<String?>(null)
-    var nombre by mutableStateOf("")
-    var nombreUsuario by mutableStateOf("")
-    var primerApellido by mutableStateOf("")
-    var segundoApellido by mutableStateOf("")
+    private val _estadoUi = MutableStateFlow(PerfilUiState())
+    val estadoUi: StateFlow<PerfilUiState> = _estadoUi.asStateFlow()
 
-    var modoEdicion by mutableStateOf(false)
-    var cargando by mutableStateOf(false)
-    var mensaje by mutableStateOf<String?>(null)
+    val avatarOpciones = listOf("tigre", "leon", "zorro", "astronauta")
 
     init {
         cargarPerfil()
     }
 
-    fun subirAvatar(uri: android.net.Uri) {
-        val idUsuario = auth.currentUser?.uid ?: return
-        val referencia = FirebaseStorage.getInstance()
-            .reference.child("avatars/$idUsuario.jpg")
-
-        cargando = true
-
-        referencia.putFile(uri)
-            .continueWithTask { tarea ->
-                if (!tarea.isSuccessful) throw tarea.exception ?: Exception("Error al subir imagen")
-                referencia.downloadUrl
-            }
-            .addOnSuccessListener { urlDescarga ->
-                val url = urlDescarga.toString()
-                avatarUrl = url
-                firestore.collection("usuarios").document(idUsuario).update("avatar", url)
-                mensaje = "✅ Avatar actualizado"
-                cargando = false
-            }
-            .addOnFailureListener {
-                mensaje = "❌ Error al subir avatar"
-                cargando = false
-            }
+    fun alCambiarNombre(valor: String) {
+        _estadoUi.value = _estadoUi.value.copy(nombre = valor)
+    }
+    fun alCambiarNombreUsuario(valor: String) {
+        _estadoUi.value = _estadoUi.value.copy(nombreUsuario = valor)
+    }
+    fun alCambiarPrimerApellido(valor: String) {
+        _estadoUi.value = _estadoUi.value.copy(primerApellido = valor)
+    }
+    fun alCambiarSegundoApellido(valor: String) {
+        _estadoUi.value = _estadoUi.value.copy(segundoApellido = valor)
+    }
+    fun conmutarModoEdicion() {
+        _estadoUi.value = _estadoUi.value.copy(modoEdicion = !_estadoUi.value.modoEdicion)
     }
 
     private fun cargarPerfil() {
+        val idUsuario = auth.currentUser?.uid ?: return
+
         viewModelScope.launch {
-            cargando = true
+            _estadoUi.value = _estadoUi.value.copy(cargando = true)
             try {
-                val idUsuario = auth.currentUser?.uid ?: return@launch
                 val documento = firestore.collection("usuarios").document(idUsuario).get().await()
-                nombre = documento.getString("nombre") ?: ""
-                nombreUsuario = documento.getString("nombre_usuario") ?: ""
-                primerApellido = documento.getString("primer_apellido") ?: ""
-                segundoApellido = documento.getString("segundo_apellido") ?: ""
-                avatarUrl = documento.getString("avatar")
+                if (documento.exists()) {
+                    _estadoUi.value = _estadoUi.value.copy(
+                        nombre = documento.getString("nombre") ?: "",
+                        nombreUsuario = documento.getString("nombre_usuario") ?: "",
+                        primerApellido = documento.getString("primer_apellido") ?: "",
+                        segundoApellido = documento.getString("segundo_apellido") ?: "",
+                        avatarSeleccionado = documento.getString("avatar") ?: ""
+                    )
+                }
             } catch (e: Exception) {
-                mensaje = "❌ Error al cargar el perfil"
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Error al cargar datos")
             } finally {
-                cargando = false
+                _estadoUi.value = _estadoUi.value.copy(cargando = false)
             }
         }
     }
 
     fun guardarPerfil() {
-        viewModelScope.launch {
-            cargando = true
-            try {
-                val idUsuario = auth.currentUser?.uid ?: return@launch
-                firestore.collection("usuarios").document(idUsuario).update(
-                    mapOf(
-                        "nombre" to nombre,
-                        "nombre_usuario" to nombreUsuario,
-                        "primer_apellido" to primerApellido,
-                        "segundo_apellido" to segundoApellido,
-                        "avatar" to avatarUrl
-                    )
-                ).await()
-                mensaje = "✅ Perfil guardado correctamente"
-                modoEdicion = false
-            } catch (e: Exception) {
-                mensaje = "❌ Error al guardar el perfil"
-            } finally {
-                cargando = false
+        val uiState = _estadoUi.value
+        val nombre = uiState.nombre.trim()
+        val nombreUsuario = uiState.nombreUsuario.trim()
+        val primerApellido = uiState.primerApellido.trim()
+        val segundoApellido = uiState.segundoApellido.trim()
+
+        val regexNombre = Regex("^[a-záéíóúàèìòùäëïöüñçâêîôûãõ]+$", RegexOption.IGNORE_CASE)
+        val regexNombreUsuario = Regex("^[a-zA-Z0-9]+$")
+
+        when {
+            nombre.isBlank() || nombreUsuario.isBlank() || primerApellido.isBlank() || segundoApellido.isBlank() -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "No puede haber ningún campo vacío")
+                return
+            }
+            !regexNombreUsuario.matches(nombreUsuario) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre de usuario solo puede contener letras y números")
+                return
+            }
+            !regexNombre.matches(nombre) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre solo puede contener letras")
+                return
+            }
+            !regexNombre.matches(primerApellido) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El primer apellido solo puede contener letras")
+                return
+            }
+            !regexNombre.matches(segundoApellido) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El segundo apellido solo puede contener letras")
+                return
+            }
+            else -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+
+                viewModelScope.launch {
+                    _estadoUi.value = _estadoUi.value.copy(cargando = true)
+                    try {
+                        val idUsuario = auth.currentUser?.uid ?: return@launch
+                        firestore.collection("usuarios").document(idUsuario).update(
+                            mapOf(
+                                "nombre" to nombre,
+                                "nombre_usuario" to nombreUsuario,
+                                "primer_apellido" to primerApellido,
+                                "segundo_apellido" to segundoApellido,
+                                "avatar" to uiState.avatarSeleccionado
+                            )
+                        ).await()
+
+                        _estadoUi.value = _estadoUi.value.copy(
+                            operacionExitosa = true,
+                            modoEdicion = false,
+                            mensajeError = "Perfil actualizado correctamente"
+                        )
+                    } catch (e: Exception) {
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = "Error al guardar el perfil")
+                    } finally {
+                        _estadoUi.value = _estadoUi.value.copy(cargando = false)
+                    }
+                }
             }
         }
+    }
+
+    fun seleccionarYGuardarAvatar(nombreAvatar: String) {
+        _estadoUi.value = _estadoUi.value.copy(avatarSeleccionado = nombreAvatar)
+        viewModelScope.launch {
+            try {
+                val idUsuario = auth.currentUser?.uid ?: return@launch
+                firestore.collection("usuarios").document(idUsuario)
+                    .update("avatar", nombreAvatar).await()
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Avatar actualizado")
+            } catch (e: Exception) {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Error al actualizar el avatar")
+            }
+        }
+    }
+
+    fun limpiarError() {
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
     }
 }

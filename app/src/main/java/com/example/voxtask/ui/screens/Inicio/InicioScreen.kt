@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Inicio
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import androidx.compose.runtime.collectAsState
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioScreen(
@@ -41,17 +43,17 @@ fun InicioScreen(
     plantillaBaseViewModel: PlantillaBaseViewModel
 ) {
     val contexto = LocalContext.current
-    val actividad = contexto as Activity
-    val coroutineScope = rememberCoroutineScope()
     val usuario = FirebaseAuth.getInstance().currentUser
     val uid = usuario?.uid
     var mostrarTextos by remember { mutableStateOf(false) }
-    val texto by viewModel.textoReconocido.collectAsState()
 
+    // Estados para subtextos dinámicos
     var tieneLista by remember { mutableStateOf(false) }
     var tieneEventos by remember { mutableStateOf(false) }
 
     LaunchedEffect(uid) {
+        val nombreUsuarioGenerico = contexto.getString(R.string.txt_usuario_generico)
+
         val nombre = if (uid != null) {
             try {
                 val doc = FirebaseFirestore.getInstance()
@@ -60,12 +62,12 @@ fun InicioScreen(
                     .get()
                     .await()
                 val usuarioObj = doc.toObject(Usuario::class.java)
-                usuarioObj?.nombre ?: "Usuario"
+                usuarioObj?.nombre ?: nombreUsuarioGenerico
             } catch (e: Exception) {
-                "Usuario"
+                nombreUsuarioGenerico
             }
         } else {
-            "Usuario"
+            nombreUsuarioGenerico
         }
 
         if (uid != null) {
@@ -84,13 +86,17 @@ fun InicioScreen(
             } catch (e: Exception) { }
         }
 
+        // --- VOCES ACTUALIZADAS CON STRINGS ---
         if (!viewModel.bienvenidaDada) {
-            TextoAVoz.hablar(contexto, "Hola, ¿cómo estás? $nombre. ¿Qué te gustaría que hiciera por ti?")
+            TextoAVoz.hablar(
+                contexto,
+                contexto.getString(R.string.txt_inicio_bienvenida, nombre)
+            )
             viewModel.bienvenidaDada = true
         }
 
         mostrarTextos = true
-        TextoAVoz.hablar(contexto, "Elige una de las siguientes opciones y cuando estés listo mantén el botón de hablar")
+        TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_inicio_instrucciones))
     }
 
     PlantillaBase(
@@ -100,7 +106,7 @@ fun InicioScreen(
         mostrarBotonSalir = true,
         mostrarBotonAjustes = true,
         mostrarBotonHome = false,
-        textoInformacion = "Elige una de las siguientes opciones y cuando estés listo mantén el botón de hablar",
+        textoInformacion = stringResource(R.string.txt_inicio_instrucciones),
         onTextoReconocido = { textoRecibido ->
             viewModel.onTextoRecibido(textoRecibido)
         }
@@ -129,22 +135,28 @@ fun InicioScreen(
                         TarjetaMenu(
                             icono = Icons.Default.Email,
                             titulo = stringResource(R.string.txt_correo),
-                            subtexto = "Ver mi correo"
+                            subtexto = stringResource(R.string.txt_inicio_sub_correo)
                         )
                         TarjetaMenu(
                             icono = Icons.Default.DateRange,
                             titulo = stringResource(R.string.txt_recordatorio),
-                            subtexto = if (tieneEventos) "Ver mis recordatorios" else "Crear recordatorio"
+                            subtexto = if (tieneEventos)
+                                stringResource(R.string.txt_inicio_sub_recordatorios_ver)
+                            else
+                                stringResource(R.string.txt_inicio_sub_recordatorios_crear)
                         )
                         TarjetaMenu(
                             icono = Icons.Default.ShoppingCart,
                             titulo = stringResource(R.string.txt_lista_compra),
-                            subtexto = if (tieneLista) "Ver mi lista de la compra" else "Crear lista de la compra"
+                            subtexto = if (tieneLista)
+                                stringResource(R.string.txt_inicio_sub_lista_ver)
+                            else
+                                stringResource(R.string.txt_inicio_sub_lista_crear)
                         )
                         TarjetaMenu(
                             icono = Icons.Default.Add,
                             titulo = stringResource(R.string.txt_contador),
-                            subtexto = stringResource(R.string.txt_crear_contador)
+                            subtexto = stringResource(R.string.txt_inicio_sub_contador)
                         )
                         Spacer(modifier = Modifier.height(32.dp))
                     }

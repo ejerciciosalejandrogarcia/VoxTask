@@ -1,6 +1,5 @@
 package com.example.voxtask.ui.screens.NuevaContrasenia
 
-// Cambia este import en NuevaContraseniaScreen.kt
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.voxtask.VoxTaskScreen
@@ -42,9 +42,29 @@ fun NuevaContraseniaScreen(
     val estado by viewModel.estadoNueva.collectAsState()
     var verNueva by remember { mutableStateOf(false) }
     var verConfirmar by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoNueva by viewModel.estadoNueva.collectAsState()
 
+    LaunchedEffect(estadoNueva.mensajeError) {
+        if (estadoNueva.mensajeError.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = estadoNueva.mensajeError,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.limpiarErrorNueva()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 50.dp)
+                .zIndex(10f)
+        )
+
         // Círculos decorativos
         Box(modifier = Modifier.size(280.dp).offset(x = (-80).dp, y = (-60).dp)
             .clip(CircleShape).background(MaterialTheme.colorScheme.primary))
@@ -169,10 +189,6 @@ fun NuevaContraseniaScreen(
                                     cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
-                            if (estado.mensajeError.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(estado.mensajeError, color = Color(0xFFE53935), fontSize = 12.sp, modifier = Modifier.fillMaxWidth())
-                            }
                             Spacer(modifier = Modifier.height(28.dp))
                             Button(
                                 onClick = { viewModel.guardarNuevaContrasena(oobCode) },

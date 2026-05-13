@@ -1,20 +1,14 @@
 package com.example.voxtask.ui.screens.Inicio_Sesion
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.voxtask.R
 import com.example.voxtask.databases.repository.UsuarioRepository
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.dao.UsuarioDao
-import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +21,7 @@ data class InicioSesionUiState(
     val nombreUsuario: String = "",
     val contrasena: String = "",
     val inicioSesionExitoso: Boolean = false,
-    val mensajeError: String = "",
-    val gmailAuthCode: String = ""
+    val mensajeError: String = ""
 )
 
 class InicioSesionViewModel(
@@ -53,133 +46,87 @@ class InicioSesionViewModel(
         val nombreUsuario = _estadoUi.value.nombreUsuario.trim()
         val contrasena = _estadoUi.value.contrasena.trim()
 
-        if (nombreUsuario.isBlank() || contrasena.isBlank()) {
-            _estadoUi.value = _estadoUi.value.copy(
-                mensajeError = "Rellena todos los campos"
-            )
-            return
-        }
+        val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
+        val regexNombreUsuario = Regex("^[a-zA-Z0-9]+$")
 
-        viewModelScope.launch {
-            val resultado = usuarioRepository.iniciarSesion(nombreUsuario, contrasena)
-            Log.d("AUTH", "UID actual: ${FirebaseAuth.getInstance().currentUser?.uid}")
-            resultado.onSuccess {
-                _estadoUi.value = _estadoUi.value.copy(
-                    inicioSesionExitoso = true,
-                    mensajeError = ""
-                )
-            }.onFailure {
-                _estadoUi.value = _estadoUi.value.copy(
-                    mensajeError = it.message ?: "Credenciales incorrectas"
-                )
+        when {
+            nombreUsuario.isBlank() || contrasena.isBlank() -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "CAMPOS_VACIOS")
+                return
+            }
+            !regexNombreUsuario.matches(nombreUsuario) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "USUARIO_INVALIDO")
+                return
+            }
+            !regexContrasenia.matches(contrasena) -> {
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = "CONTRASENIA_DEBIL")
+                return
+            }
+            else -> {
+                viewModelScope.launch {
+                    val resultado = usuarioRepository.iniciarSesion(nombreUsuario, contrasena)
+                    resultado.onSuccess {
+                        _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true, mensajeError = "")
+                    }.onFailure {
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = it.message ?: "ERROR_CREDENTIALS")
+                    }
+                }
             }
         }
     }
-    // Login con cuenta Google
 
-    fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
-        val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(contexto.getString(R.string.default_web_client_id))
-            .requestServerAuthCode(contexto.getString(R.string.default_web_client_id)) // ← AÑADIR
-            .requestEmail()
-            .requestScopes(Scope("https://www.googleapis.com/auth/gmail.readonly")) // ← AÑADIR
-            .build()
-        return GoogleSignIn.getClient(contexto, opciones)
-    }
     fun autenticarConGoogle(tokenGoogle: String, serverAuthCode: String? = null) {
         val credencial = GoogleAuthProvider.getCredential(tokenGoogle, null)
 
         auth.signInWithCredential(credencial)
             .addOnCompleteListener { tarea ->
                 if (tarea.isSuccessful) {
-                    val usuarioFirebase = auth.currentUser
-                    if (usuarioFirebase == null) return@addOnCompleteListener
+                    val usuarioFirebase = auth.currentUser ?: return@addOnCompleteListener
 
                     if (serverAuthCode != null) {
                         firestore.collection("usuarios")
                             .document(usuarioFirebase.uid)
                             .update("gmailAuthCode", serverAuthCode)
-                            .addOnSuccessListener {
-                                Log.d("Firestore", "✅ gmailAuthCode guardado")
-                            }
-                            .addOnFailureListener {
-                                Log.e("Firestore", "❌ Error guardando gmailAuthCode: ${it.message}")
-                            }
                     }
 
                     guardarOActualizarUsuarioEnFirestore(usuarioFirebase.uid) {
-                        Log.d("Firestore", "✅ Navegando a home")
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true)
                     }
                 } else {
-                    _estadoUi.value = _estadoUi.value.copy(
-                        mensajeError = "Error al iniciar sesión con Google"
-                    )
+                    _estadoUi.value = _estadoUi.value.copy(mensajeError = "ERROR_GOOGLE")
                 }
             }
     }
 
     private fun guardarOActualizarUsuarioEnFirestore(uid: String, alTerminar: () -> Unit) {
-        val usuarioFirebase = auth.currentUser
-        Log.d("Firestore", "Intentando guardar usuario con UID: $uid")
-
-        if (usuarioFirebase == null) {
-            Log.e("Firestore", "❌ currentUser es null en guardar")
-            return
-        }
-
+        val usuarioFirebase = auth.currentUser ?: return
         val ref = firestore.collection("usuarios").document(uid)
-        Log.d("Firestore", "Referencia creada: ${ref.path}")
 
-        ref.get()
-            .addOnSuccessListener { documento ->
-                Log.d("Firestore", "Documento obtenido. Existe: ${documento.exists()}")
-                if (documento.exists()) {
-                    Log.d("Firestore", "✅ Usuario ya existe, navegando")
-                    alTerminar()
-                } else {
-                    Log.d("Firestore", "Usuario nuevo, creando documento...")
-                    val nombreCompleto = usuarioFirebase.displayName ?: ""
-                    val partes = nombreCompleto.trim().split(" ")
-
-                    val nuevoUsuario = Usuario(
-                        id = uid,
-                        nombre_usuario = usuarioFirebase.email?.substringBefore("@") ?: uid,
-                        nombre = partes.getOrElse(0) { "" },
-                        primer_apellido = partes.getOrElse(1) { "" },
-                        segundo_apellido = partes.drop(2).joinToString(" "),
-                        fecha_nacimiento = "",
-                        correo_electronico = usuarioFirebase.email ?: "",
-                        contrasenia = "",
-                        verificado = usuarioFirebase.isEmailVerified,
-                        fecha_creacion = SimpleDateFormat(
-                            "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
-                        ).format(Date())
-                    )
-
-                    Log.d("Firestore", "Usuario a guardar: $nuevoUsuario")
-
-                    ref.set(nuevoUsuario)
-                        .addOnSuccessListener {
-                            Log.d("Firestore", "✅ Usuario guardado correctamente en Firestore")
-                            alTerminar()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("Firestore", "❌ Error al guardar: ${e.message}")
-                            _estadoUi.value = _estadoUi.value.copy(
-                                mensajeError = "Error al guardar datos: ${e.message}"
-                            )
-                        }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "❌ Error al obtener documento: ${e.message}")
-                _estadoUi.value = _estadoUi.value.copy(
-                    mensajeError = "Error al conectar con Firestore: ${e.message}"
+        ref.get().addOnSuccessListener { documento ->
+            if (documento.exists()) {
+                alTerminar()
+            } else {
+                val nombreCompleto = usuarioFirebase.displayName ?: ""
+                val partes = nombreCompleto.trim().split(" ")
+                val nuevoUsuario = Usuario(
+                    id = uid,
+                    nombre_usuario = usuarioFirebase.email?.substringBefore("@") ?: uid,
+                    nombre = partes.getOrElse(0) { "" },
+                    primer_apellido = partes.getOrElse(1) { "" },
+                    segundo_apellido = partes.drop(2).joinToString(" "),
+                    fecha_creacion = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
+                    correo_electronico = usuarioFirebase.email ?: ""
                 )
+
+                ref.set(nuevoUsuario)
+                    .addOnSuccessListener { alTerminar() }
+                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError = "ERROR_FIRESTORE") }
             }
+        }.addOnFailureListener {
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = "ERROR_CONEXION")
+        }
     }
-    fun limpiarError() {
-        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
-    }
+
+    fun limpiarError() { _estadoUi.value = _estadoUi.value.copy(mensajeError = "") }
+    fun limpiarEstadoInicioSesion() { _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = false) }
 }

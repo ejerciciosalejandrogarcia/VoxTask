@@ -47,6 +47,8 @@ fun InicioSesionScreen(
     LaunchedEffect(estadoUi.inicioSesionExitoso) {
         if (estadoUi.inicioSesionExitoso) {
             alIniciarSesionExitosamente()
+            viewModel.limpiarEstadoInicioSesion()
+
         }
     }
     LaunchedEffect(estadoUi.mensajeError) {
@@ -55,8 +57,6 @@ fun InicioSesionScreen(
                 message = estadoUi.mensajeError,
                 duration = SnackbarDuration.Short
             )
-            // Es vital limpiar el error en el ViewModel después de mostrarlo
-            // para que si el usuario pulsa de nuevo, el LaunchedEffect detecte el cambio.
             viewModel.limpiarError()
         }
     }
@@ -205,7 +205,7 @@ fun InicioSesionScreen(
                             unfocusedTextColor = TextoOscuro,
                             cursorColor = MaterialTheme.colorScheme.primary
                         )
-                        )
+                    )
 
                     // Mensaje de error
                     LaunchedEffect(estadoUi.mensajeError) {

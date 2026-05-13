@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Ajustes
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -12,10 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +26,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
@@ -39,7 +37,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.R
+import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.ColoresClaros
 import com.example.voxtask.ui.theme.ColoresOscuros
 import com.example.voxtask.ui.theme.LocalThemeManager
@@ -63,6 +61,7 @@ import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import java.util.Locale
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AjustesScreen(
@@ -197,7 +196,7 @@ fun AjustesScreen(
                     icono = Icons.Default.AccountCircle,
                     titulo = stringResource(R.string.mi_perfil),
                     descripcion = stringResource(R.string.ver_editar_perfil)
-                ) { navController.navigate("Perfil") }
+                ) { navController.navigate(VoxTaskScreen.Perfil.name) }
             }
             item {
                 OpcionAjuste(
@@ -212,8 +211,8 @@ fun AjustesScreen(
                 if (fondoUri != null) {
                     OpcionAjuste(
                         icono = Icons.Default.Wallpaper,
-                        titulo = "Quitar fondo",
-                        descripcion = "Volver al fondo por defecto"
+                        titulo = stringResource(R.string.quitar_fondo),
+                        descripcion = stringResource(R.string.descripcion_quitar_fondo)
                     ) {
                         plantillaBaseViewModel.actualizarFondo(null)
                     }
@@ -233,7 +232,7 @@ fun AjustesScreen(
                     titulo = stringResource(R.string.version_app),
                     descripcion = stringResource(R.string.ver_version_actual)
                 ) {
-                    Toast.makeText(contexto, "Versión: 1.0", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(contexto, contexto.getString(R.string.version), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -250,12 +249,12 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Color de interfaz", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.opcion_color_interfaz), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         },
         text = {
             Column {
                 // Selector color modo claro
-                Text("Color modo claro", style = MaterialTheme.typography.titleMedium,
+                Text(stringResource(R.string.opcion_color_interfaz_modo_claro), style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
 
                 LazyVerticalGrid(
@@ -282,7 +281,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Selector color modo oscuro
-                Text("Color modo oscuro", style = MaterialTheme.typography.titleMedium,
+                Text(stringResource(R.string.opcion_color_interfaz_modo_oscuro), style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
 
                 LazyVerticalGrid(
@@ -310,7 +309,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cerrar", color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.model_cerrar), color = MaterialTheme.colorScheme.primary)
             }
         }
     )

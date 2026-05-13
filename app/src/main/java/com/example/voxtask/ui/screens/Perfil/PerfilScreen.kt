@@ -1,38 +1,24 @@
 package com.example.voxtask.ui.screens.Perfil
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 
@@ -42,22 +28,20 @@ fun PerfilScreen(
     viewModel: PerfilViewModel,
     navController: NavController
 ) {
+    // Observar el estado del ViewModel (StateFlow)
+    val uiState by viewModel.estadoUi.collectAsStateWithLifecycle()
+
     val snackbarHostState = remember { SnackbarHostState() }
+    var mostrarSelector by remember { mutableStateOf(false) }
 
-    // Muestra el mensaje de exito o error
-    LaunchedEffect(viewModel.mensaje) {
-        viewModel.mensaje?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.mensaje = null
-        }
-    }
-
-    // 🖼️ Launcher para abrir la galería del dispositivo
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let {
-            viewModel.subirAvatar(it) // ← Sube automáticamente al seleccionar
+    // Manejo de mensajes de error o éxito
+    LaunchedEffect(uiState.mensajeError) {
+        if (uiState.mensajeError.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = uiState.mensajeError,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.limpiarError()
         }
     }
 
@@ -66,32 +50,35 @@ fun PerfilScreen(
         navController = navController
     ) { paddingValues ->
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        // Box es el contenedor principal que permite superponer elementos (como el Snackbar)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // Contenido principal en una columna
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-
-                // 🖼️ AVATAR — toca para cambiar la foto
+                // --- SECCIÓN AVATAR ---
                 Box(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .clickable { launcher.launch("image/*") }, // ← Abre galería
+                        .clickable { mostrarSelector = true },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (viewModel.avatarUrl != null && viewModel.avatarUrl!!.isNotEmpty()) {
+                    val drawableId = nombreAvatar(uiState.avatarSeleccionado)
+                    if (drawableId != null) {
                         Image(
-                            painter = rememberAsyncImagePainter(viewModel.avatarUrl),
+                            painter = painterResource(id = drawableId),
                             contentDescription = "Avatar",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            modifier = Modifier.fillMaxSize().clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(
@@ -103,80 +90,84 @@ fun PerfilScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
-                    text = "@${viewModel.nombreUsuario}",
+                    text = "@${uiState.nombreUsuario}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (viewModel.cargando) {
+                if (uiState.cargando) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 } else {
-                    // Campo nombre
                     OutlinedTextField(
-                        value = viewModel.nombre,
-                        onValueChange = { viewModel.nombre = it },
-                        label = { Text("Nombre") },
-                        enabled = viewModel.modoEdicion,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Campo nombre de usuario
-                    OutlinedTextField(
-                        value = viewModel.nombreUsuario,
-                        onValueChange = { viewModel.nombreUsuario = it },
+                        value = uiState.nombreUsuario,
+                        onValueChange = { viewModel.alCambiarNombreUsuario(it) },
                         label = { Text("Nombre de usuario") },
-                        enabled = viewModel.modoEdicion,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        enabled = uiState.modoEdicion,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+
+                        )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Campo primer apellido
                     OutlinedTextField(
-                        value = viewModel.primerApellido,
-                        onValueChange = { viewModel.primerApellido = it },
+                        value = uiState.nombre,
+                        onValueChange = { viewModel.alCambiarNombre(it) },
+                        label = { Text("Nombre") },
+                        enabled = uiState.modoEdicion,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+
+                        )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = uiState.primerApellido,
+                        onValueChange = { viewModel.alCambiarPrimerApellido(it) },
                         label = { Text("Primer apellido") },
-                        enabled = viewModel.modoEdicion,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        enabled = uiState.modoEdicion,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+
+                        )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Campo segundo apellido
                     OutlinedTextField(
-                        value = viewModel.segundoApellido,
-                        onValueChange = { viewModel.segundoApellido = it },
+                        value = uiState.segundoApellido,
+                        onValueChange = { viewModel.alCambiarSegundoApellido(it) },
                         label = { Text("Segundo apellido") },
-                        enabled = viewModel.modoEdicion,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        enabled = uiState.modoEdicion,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+                        )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Boton editar o guardar segun el modo
+                    // --- BOTONES DE ACCIÓN ---
                     Button(
                         onClick = {
-                            if (viewModel.modoEdicion) {
+                            if (uiState.modoEdicion) {
                                 viewModel.guardarPerfil()
                             } else {
-                                viewModel.modoEdicion = true
+                                viewModel.conmutarModoEdicion()
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (viewModel.modoEdicion) "Guardar cambios" else "Editar perfil")
+                        Text(if (uiState.modoEdicion) "Guardar cambios" else "Editar perfil")
                     }
 
-                    // Boton cancelar solo visible en modo edicion
-                    if (viewModel.modoEdicion) {
+                    if (uiState.modoEdicion) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.modoEdicion = false },
+                        TextButton(
+                            onClick = { viewModel.conmutarModoEdicion() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Cancelar")
@@ -185,10 +176,55 @@ fun PerfilScreen(
                 }
             }
 
-            // Snackbar para mostrar mensajes
+            if (mostrarSelector) {
+                AlertDialog(
+                    onDismissRequest = { mostrarSelector = false },
+                    title = { Text("Elige tu avatar") },
+                    text = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            viewModel.avatarOpciones.forEach { nombre ->
+                                val drawableId = nombreAvatar(nombre)
+                                if (drawableId != null) {
+                                    Image(
+                                        painter = painterResource(id = drawableId),
+                                        contentDescription = nombre,
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(CircleShape)
+                                            .border(
+                                                width = if (uiState.avatarSeleccionado == nombre) 3.dp else 0.dp,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                shape = CircleShape
+                                            )
+                                            .clickable {
+                                                viewModel.seleccionarYGuardarAvatar(nombre)
+                                                mostrarSelector = false
+                                            },
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        TextButton(onClick = { mostrarSelector = false }) {
+                            Text("Cerrar")
+                        }
+                    }
+                )
+            }
+
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter)
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 16.dp)
+                    .zIndex(1f)
             )
         }
     }

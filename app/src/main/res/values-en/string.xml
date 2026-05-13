@@ -1,35 +1,39 @@
 <resources>
     <string name="app_name">VoxTask</string>
 
+    <!-- Login Screen -->
     <string name="campo_nombre_usuario">Username</string>
     <string name="campo_contrasenia">Password</string>
-    <string name="btn_iniciar_sesion">Log in</string>
+    <string name="btn_iniciar_sesion">Log In</string>
     <string name="txt_pregunta">Don\'t have an account?</string>
-    <string name="txt_respuesta">Sign up</string>
+    <string name="txt_respuesta">Sign Up</string>
     <string name="icono_mostrar_contrasenia">Show password</string>
     <string name="icono_limpiar">Clear</string>
     <string name="txt_o">or</string>
     <string name="txt_iniciar_google">Sign in with Google</string>
-    <string name="txt_pregunta_contrasenia">Forgot your password?</string>
+    <string name="txt_pregunta_contrasenia">Can\'t remember your password?</string>
     <string name="txt_respuesta_contrasenia">Reset password</string>
 
+    <!-- User Registration Screen -->
     <string name="btn_registrar_usuario">Create account</string>
     <string name="campo_nombre">First name</string>
-    <string name="campo_primer_ap">Last name</string>
-    <string name="campo_segundo_ap">Middle name</string>
+    <string name="campo_primer_ap">First surname</string>
+    <string name="campo_segundo_ap">Second surname</string>
     <string name="campo_fecha_naci">Date of birth</string>
     <string name="campo_correo">Email address</string>
 
-    <string name="txt_crear_contador">Create counter</string>
-    <string name="txt_contador">Start a timer</string>
-    <string name="txt_correo">Write and send an email</string>
-    <string name="txt_recordatorio">Create a reminder</string>
-    <string name="txt_lista_compra">Create a shopping list</string>
-    <string name="btn_hablar">Speak button</string>
-    <string name="btn_ajustes">Settings button</string>
-    <string name="btn_inicio">Home button</string>
-    <string name="btn_traducir">Translate button</string>
+    <!-- Home Screen -->
+    <string name="txt_inicio_bienvenida">Hello, how are you %1$s? What would you like me to do for you?</string>
+    <string name="txt_inicio_instrucciones">Choose one of the following options and when you\'re ready, hold the talk button</string>
+    <string name="txt_inicio_sub_correo">Check my email</string>
+    <string name="txt_inicio_sub_recordatorios_ver">View my reminders</string>
+    <string name="txt_inicio_sub_recordatorios_crear">Create reminder</string>
+    <string name="txt_inicio_sub_lista_ver">View my shopping list</string>
+    <string name="txt_inicio_sub_lista_crear">Create shopping list</string>
+    <string name="txt_inicio_sub_contador">Set a timer</string>
+    <string name="txt_usuario_generico">User</string>
 
+    <!-- Shopping List Screen -->
     <string name="icono_eliminar_producto">Delete product</string>
     <string name="txt_sin_producto_lista_compra">Say a product to add it</string>
     <string name="txt_titulo_mensaje_confirmacion_producto">Delete product</string>
@@ -37,6 +41,7 @@
     <string name="btn_eliminar_producto">Delete</string>
     <string name="btn_cancelar_producto">Cancel</string>
 
+    <!-- Reminder Screen -->
     <string name="icono_mes_anterior">Previous month</string>
     <string name="icono_mes_siguiente">Next month</string>
     <string-array name="dias_semana">
@@ -49,9 +54,10 @@
         <item>Sun</item>
     </string-array>
     <string name="icono_eliminar_evento">Delete event</string>
-    <string name="txt_sin_eventos_dia_seleccionado">No events this day</string>
+    <string name="txt_sin_eventos_dia_seleccionado">No events for this day</string>
     <string name="txt_eventos_dia_seleccionado">Events for %2$s %1$d</string>
 
+    <!-- Settings Screen -->
     <string name="ajustes">Settings</string>
     <string name="cambiar_voz">Change voice</string>
     <string name="voz_actual">Current voice</string>
@@ -67,7 +73,92 @@
     <string name="cancelar">Cancel</string>
     <string name="version">Version: 1.0</string>
     <string name="cambiar_fondo">Change background</string>
-    <string name="personaliza_fondo">Customize the app background</string>
+    <string name="personaliza_fondo">Customize app background</string>
     <string name="version_app">Version</string>
-    <string name="ver_version_actual">Check the current version</string>
+    <string name="ver_version_actual">Check current version</string>
+    <string name="quitar_fondo">Remove background</string>
+    <string name="descripcion_quitar_fondo">Back to default background</string>
+    <string name="opcion_color_interfaz">Interface color</string>
+    <string name="opcion_color_interfaz_modo_claro">Light mode color</string>
+    <string name="opcion_color_interfaz_modo_oscuro">Dark mode color</string>
+    <string name="model_cerrar">Close</string>
+
+    <!-- Change Password Screen -->
+    <string name="instrucciones_restablecer_email_uno">Email sent</string>
+    <string name="instrucciones_restablecer_email_dos">Check your inbox at\n%1$s\nand follow the instructions to reset your password.</string>
+    <string name="btn_enviar_de_nuevo">Resend</string>
+    <string name="txt_titulo_recuperar_contrasenia">Recover password</string>
+    <string name="txt_titulo_recuperar_contrasenia_dos">Enter your email and we will send you a link to reset your password</string>
+    <string name="txt_placeholder_recuperar_contrasenia">Enter your email</string>
+    <string name="txt_limpiar">Clear</string>
+    <string name="btn_recuperar_contrasenia">Send recovery email</string>
+
+    <!-- Counter/Timer Screen -->
+    <string name="btn_parar">Stop</string>
+    <string name="btn_iniciar">Start</string>
+    <string name="btn_cancelar">Cancel</string>
+    <string name="txt_titulo_contador_pausado">Timer paused</string>
+    <string name="txt_titulo_contador_iniciado">Timer started</string>
+    <string name="txt_titulo_contador_encurso">Timer in progress</string>
+    <string name="txt_titulo_contador_terminado">Time\'s up!</string>
+    <string name="txt_titulo_contador_finalizado">The timer has finished</string>
+    <string name="txt_name_canal">VoxTask Timer</string>
+    <string name="txt_descripcion">Shows the timer countdown</string>
+    <string name="txt_title_reanudar">Resume</string>
+    <string name="txt_title_pausar">Pause</string>
+    <string name="txt_title_cancelar">Cancel</string>
+
+    <!-- Email Screen -->
+    <string name="txt_title_advertencia_ver_correos">Connect your Gmail account to view your emails</string>
+    <string name="txt_btn_conectar_gmail">Connect Gmail</string>
+    <string name="txt_title_no_correos">You have no emails</string>
+    <string name="txt_btne_crear_correo">Compose email</string>
+
+    <!-- Send Email Screen -->
+    <string name="txt_enviarcorreo_paso_uno">Step %1$d of 4</string>
+    <string name="txt_enviarcorreo_vincular_cuenta">Linking account...</string>
+    <string name="txt_enviarcorreo_paso_destinatario_pregunta">Who are you sending the email to?</string>
+    <string name="txt_enviarcorreo_paso_destinatario_description">Say the recipient\'s email address</string>
+    <string name="txt_enviarcorreo_pregunta_asunto">What is the subject?</string>
+    <string name="txt_enviarcorreo_descripcion_asunto">Say the email subject</string>
+    <string name="txt_enviarcorreo_pregunta_modo">How do you want to write the message?</string>
+    <string name="txt_enviarcorreo_descripcion_modo">Say \"myself\" to write it manually\nSay \"artificial intelligence\" for the AI to create it</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_ia">What is the email about?</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Dictate the message</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Say the main topic or idea</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Say the full content of the email</string>
+    <string name="txt_enviarcorreo_titulo_confirmacion">Is this how you want to send it?</string>
+    <string name="txt_enviarcorreo_subtitulo_confirmacion">Review the details before sending</string>
+    <string name="txt_enviarcorreo_etiqueta_para">To</string>
+    <string name="txt_enviarcorreo_etiqueta_asunto">Subject</string>
+    <string name="txt_enviarcorreo_etiqueta_mensaje">Message</string>
+    <string name="txt_enviarcorreo_etiqueta_modo">Mode</string>
+    <string name="txt_enviarcorreo_modo_ia">AI Generated</string>
+    <string name="txt_enviarcorreo_modo_manual">Manual</string>
+    <string name="txt_enviarcorreo_btn_enviar">Send email</string>
+    <string name="txt_enviarcorreo_estado_enviando">Sending email...</string>
+    <string name="txt_enviarcorreo_exito">✓ Email sent</string>
+    <string name="txt_enviarcorreo_btn_otro">Send another</string>
+    <string name="txt_enviarcorreo_btn_reintentar">Try again</string>
+    <string name="txt_enviarcorreo_resumen_para">To: %1$s</string>
+    <string name="txt_enviarcorreo_resumen_asunto">Subject: %1$s</string>
+    <string name="txt_enviarcorreo_resumen_modo">Mode: %1$s</string>
+    <string name="txt_enviarcorreo_google_requerido">Google account required</string>
+    <string name="txt_enviarcorreo_google_descripcion">To send emails you need to link your Google account with Gmail permissions.</string>
+    <string name="txt_enviarcorreo_btn_vincular">Link Google account</string>
+    <string name="txt_enviarcorreo_btn_guardar">Save</string>
+    <string name="txt_enviarcorreo_btn_editar">Edit</string>
+    <string name="txt_enviarcorreo_vincular_cuenta_exito">Account linked successfully. Who do you want to send it to?</string>
+    <string name="txt_enviarcorreo_error_token">Error obtaining token: %1$s</string>
+    <string name="txt_enviarcorreo_error_auth">Authentication error: %1$s</string>
+    <string name="txt_enviarcorreo_error_generico">There was an error sending the email.</string>
+
+    <!-- Login Error Messages -->
+    <string name="err_campos_vacios">Please fill in all required fields.</string>
+    <string name="err_nombre_usuario_invalido">Username can only contain letters and numbers.</string>
+    <string name="err_contrasenia_debil">Password must be stronger (9+ characters, Upper, Num, Special).</string>
+    <string name="err_google_auth">Failed to connect with Google. Please try again.</string>
+    <string name="err_credenciales_incorrectas">Invalid username or password.</string>
+    <string name="err_firestore">Could not save data to the cloud.</string>
+    <string name="err_conexion">Network error. Please check your internet connection.</string>
 </resources>

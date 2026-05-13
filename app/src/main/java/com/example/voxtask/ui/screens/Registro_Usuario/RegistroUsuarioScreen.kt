@@ -35,6 +35,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.zIndex
 
 @Composable
 fun RegistroUsuarioScreen(
@@ -46,6 +47,7 @@ fun RegistroUsuarioScreen(
     var contrasenaVisible by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val calendario = Calendar.getInstance()
+    val snackbarHostState = remember { SnackbarHostState() }
 
 
     val selectorFecha = remember {
@@ -59,12 +61,28 @@ fun RegistroUsuarioScreen(
             calendario.get(Calendar.DAY_OF_MONTH)
         )
     }
+    LaunchedEffect(estadoUi.mensajeError) {
+        if (estadoUi.mensajeError.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = estadoUi.mensajeError,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.limpiarError()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 50.dp)
+                .zIndex(10f)
+        )
         //Círculo grande superior izquierda
         Box(
             modifier = Modifier
@@ -431,16 +449,7 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-                        // Mensaje de error del formulario
-                        if (estadoUi.mensajeError.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = estadoUi.mensajeError,
-                                color = Color(0xFFE53935),
-                                fontSize = 12.sp,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+
 
                         Spacer(modifier = Modifier.height(28.dp))
 

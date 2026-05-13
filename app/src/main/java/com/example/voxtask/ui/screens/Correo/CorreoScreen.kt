@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -24,6 +25,7 @@ import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.example.voxtask.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +78,7 @@ fun CorreoScreen(
                         modifier = Modifier.padding(24.dp)
                     ) {
                         Text(
-                            text = "Conecta tu cuenta de Gmail para ver tus correos",
+                            text = stringResource(R.string.txt_title_advertencia_ver_correos),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
@@ -86,14 +88,14 @@ fun CorreoScreen(
                                 lanzadorGoogle.launch(cliente.signInIntent)
                             }
                         ) {
-                            Text("Conectar Gmail")
+                            Text(stringResource(R.string.txt_btn_conectar_gmail))
                         }
                     }
                 }
 
                 is CorreoUiState.Exito -> {
                     if (estado.correos.isEmpty()) {
-                        Text("No tienes correos.")
+                        Text(stringResource(R.string.txt_title_no_correos))
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -117,7 +119,7 @@ fun CorreoScreen(
             // Botón para crear un correo
             Button(
                 onClick = {
-                    navController.navigate("enviarcorreo")
+                    navController.navigate(VoxTaskScreen.EnviarCorreo.name)
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -129,7 +131,7 @@ fun CorreoScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Nuevo correo",
+                    contentDescription = stringResource(R.string.txt_btne_crear_correo),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp)
                 )

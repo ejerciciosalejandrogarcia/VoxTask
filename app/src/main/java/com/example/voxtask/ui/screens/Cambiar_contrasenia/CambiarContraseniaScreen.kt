@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
@@ -15,17 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
-
+import com.example.voxtask.R
 @Composable
 fun CambiarContrasenaScreen(
     navController: NavController,
@@ -33,15 +32,36 @@ fun CambiarContrasenaScreen(
 ) {
 
     val estadoUi by viewModel.estadoUi.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(estadoUi.mensajeError) {
+        if (estadoUi.mensajeError.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = estadoUi.mensajeError,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.limpiarError()
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.reiniciar()
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 50.dp)
+                .zIndex(10f)
+        )
 
-        // Círculo grande superior izquierda — igual que InicioSesion
         Box(
             modifier = Modifier
                 .size(280.dp)
@@ -109,14 +129,17 @@ fun CambiarContrasenaScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Correo enviado",
+                            text = stringResource(R.string.instrucciones_restablecer_email_uno),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Revisa tu bandeja de entrada en\n${estadoUi.email}\ny sigue las instrucciones para restablecer tu contraseña.",
+                            text = stringResource(
+                                id = R.string.instrucciones_restablecer_email_dos,
+                                estadoUi.email
+                            ),
                             fontSize = 14.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
@@ -126,7 +149,7 @@ fun CambiarContrasenaScreen(
 
                         TextButton(onClick = { viewModel.enviarCorreoRecuperacion() }) {
                             Text(
-                                text = "Enviar de nuevo",
+                                text = stringResource(R.string.btn_enviar_de_nuevo),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
@@ -136,7 +159,7 @@ fun CambiarContrasenaScreen(
                     } else {
                         // ── Formulario ──
                         Text(
-                            text = "Recuperar contraseña",
+                            text = stringResource(R.string.txt_titulo_recuperar_contrasenia),
                             fontSize = 26.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -145,7 +168,7 @@ fun CambiarContrasenaScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+                            text = stringResource(R.string.txt_titulo_recuperar_contrasenia_dos),
                             fontSize = 13.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
@@ -156,14 +179,14 @@ fun CambiarContrasenaScreen(
                         OutlinedTextField(
                             value = estadoUi.email,
                             onValueChange = { viewModel.alCambiarEmail(it) },
-                            label = { Text("Correo electrónico") },
+                            label = { Text(stringResource(R.string.txt_placeholder_recuperar_contrasenia)) },
                             singleLine = true,
                             trailingIcon = {
                                 if (estadoUi.email.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.alCambiarEmail("") }) {
                                         Icon(
                                             Icons.Default.Clear,
-                                            contentDescription = "Limpiar",
+                                            contentDescription = stringResource(R.string.txt_limpiar),
                                             tint = TextoGris
                                         )
                                     }
@@ -182,15 +205,7 @@ fun CambiarContrasenaScreen(
                             )
                         )
 
-                        if (estadoUi.mensajeError.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = estadoUi.mensajeError,
-                                color = Color(0xFFE53935),
-                                fontSize = 12.sp,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+
 
                         Spacer(modifier = Modifier.height(28.dp))
 
@@ -212,7 +227,7 @@ fun CambiarContrasenaScreen(
                                 )
                             } else {
                                 Text(
-                                    text = "Enviar correo de recuperación",
+                                    text = stringResource(R.string.btn_recuperar_contrasenia),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White

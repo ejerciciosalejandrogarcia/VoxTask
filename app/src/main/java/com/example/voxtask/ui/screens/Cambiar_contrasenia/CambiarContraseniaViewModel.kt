@@ -2,8 +2,6 @@ package com.example.voxtask.ui.screens.Cambiar_contrasenia
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.voxtask.databases.network.N8nClient
-import com.example.voxtask.databases.network.RecuperarContraseniaRequest
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,12 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 data class CambiarContrasenaUiState(
     val email: String = "",
@@ -43,11 +35,6 @@ class CambiarContraseniaViewModel : ViewModel() {
     private val _estadoNueva = MutableStateFlow(NuevaContraseniaUiState())
     val estadoNueva: StateFlow<NuevaContraseniaUiState> = _estadoNueva.asStateFlow()
 
-    private val cliente = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
-
     fun alCambiarEmail(nuevoEmail: String) {
         _estadoUi.value = _estadoUi.value.copy(email = nuevoEmail, mensajeError = "")
     }
@@ -60,7 +47,6 @@ class CambiarContraseniaViewModel : ViewModel() {
         _estadoNueva.value = _estadoNueva.value.copy(confirmarContrasena = valor, mensajeError = "")
     }
 
-    // ✅ FUNCIÓN QUE PEDISTE
     private suspend fun correoEstaRegistrado(email: String): Boolean {
         return try {
             val result = auth.fetchSignInMethodsForEmail(email).await()
@@ -79,7 +65,7 @@ class CambiarContraseniaViewModel : ViewModel() {
         }
 
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = "El formato del correo no es válido")
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = "Correo electrónico no válido")
             return
         }
 
@@ -93,11 +79,6 @@ class CambiarContraseniaViewModel : ViewModel() {
             _estadoUi.value = _estadoUi.value.copy(cargando = true, mensajeError = "")
             try {
                 auth.sendPasswordResetEmail(email, actionCodeSettings).await()
-
-                /*
-                N8nClient.api.enviarCorreoRecuperacion(
-                    RecuperarContraseniaRequest(email = email)
-                )*/
 
                 _estadoUi.value = _estadoUi.value.copy(
                     cargando = false,
@@ -115,41 +96,51 @@ class CambiarContraseniaViewModel : ViewModel() {
     fun guardarNuevaContrasena(oobCode: String) {
         val nueva = _estadoNueva.value.nuevaContrasena
         val confirmar = _estadoNueva.value.confirmarContrasena
+        val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
 
-        if (nueva.length < 6) {
-            _estadoNueva.value = _estadoNueva.value.copy(
-                mensajeError = "La contraseña debe tener al menos 6 caracteres"
-            )
-            return
-        }
-        if (nueva != confirmar) {
-            _estadoNueva.value = _estadoNueva.value.copy(
-                mensajeError = "Las contraseñas no coinciden"
-            )
-            return
-        }
+        when {
+            nueva.isBlank() || confirmar.isBlank() -> {
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = "Rellena todos los campos")
+                return
+            }
 
-        viewModelScope.launch {
-            _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = "")
-            try {
-                // ✅ Cambia la contraseña con el oobCode de Firebase
-                auth.confirmPasswordReset(oobCode, nueva).await()
-
+            !regexContrasenia.matches(nueva) -> {
                 _estadoNueva.value = _estadoNueva.value.copy(
-                    cargando = false,
-                    cambioExitoso = true
+                    mensajeError = "La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
                 )
-            } catch (e: Exception) {
-                _estadoNueva.value = _estadoNueva.value.copy(
-                    cargando = false,
-                    mensajeError = e.message ?: "Error al cambiar la contraseña"
-                )
+                return
+            }
+
+            nueva != confirmar -> {
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = "Las contraseñas no coinciden")
+                return
+            }
+
+            else -> {
+                viewModelScope.launch {
+                    _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = "")
+                    try {
+                        auth.confirmPasswordReset(oobCode, nueva).await()
+                        _estadoNueva.value = _estadoNueva.value.copy(cargando = false, cambioExitoso = true)
+                    } catch (e: Exception) {
+                        _estadoNueva.value = _estadoNueva.value.copy(
+                            cargando = false,
+                            mensajeError = e.message ?: "Error al cambiar la contraseña"
+                        )
+                    }
+                }
             }
         }
     }
 
     fun reiniciar() {
         _estadoUi.value = CambiarContrasenaUiState()
+    }
+    fun limpiarError() {
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+    }
+    fun limpiarErrorNueva() {
+        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = "")
     }
 
 }

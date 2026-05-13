@@ -33,13 +33,11 @@ class ContadorViewModel : ViewModel() {
             mostrarContador = true
 
             if (ContadorService.estaActivo) {
-                // ▶️ corriendo
                 if (!corriendo) {
                     iniciarContador(ContadorService.segundosRestantes)
                 }
 
             } else if (ContadorService.estaPausado) {
-                // ⏸ pausado
                 corriendo = false
 
                 val h = ContadorService.segundosRestantes / 3600

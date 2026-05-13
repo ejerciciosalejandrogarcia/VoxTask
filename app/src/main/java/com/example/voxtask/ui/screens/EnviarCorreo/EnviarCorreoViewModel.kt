@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.R
 import com.example.voxtask.databases.network.EnviarCorreoRequest
 import com.example.voxtask.databases.network.N8nClient
 import com.example.voxtask.utils.TextoAVoz
@@ -68,7 +69,6 @@ class EnviarCorreoViewModel : ViewModel() {
 
     fun vincularGoogle(contexto: Context, onListo: () -> Unit) {
         viewModelScope.launch {
-            // Hacer signOut primero para forzar pantalla de consentimiento con el scope de Gmail
             try {
                 obtenerClienteGoogle(contexto).signOut().await()
             } catch (e: Exception) { }
@@ -83,7 +83,7 @@ class EnviarCorreoViewModel : ViewModel() {
             obtenerToken(contexto)
             cargandoToken = false
             if (accessToken.isNotEmpty()) {
-                TextoAVoz.hablar(contexto, "Cuenta vinculada correctamente. ¿A quién se lo quieres enviar?")
+                TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_vincular_cuenta_exito))
             }
         }
     }
@@ -98,23 +98,19 @@ class EnviarCorreoViewModel : ViewModel() {
                         val tokenViejo = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
                         GoogleAuthUtil.clearToken(contexto, tokenViejo)
                     } catch (e: Exception) { }
-                    val nuevoToken = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
-                    android.util.Log.d("TOKEN", "Token obtenido: $nuevoToken")
-                    nuevoToken
+                    GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
                 }
             } else {
                 necesitaVincularGoogle = true
             }
         } catch (e: Exception) {
-            android.util.Log.e("TOKEN", "Error: ${e.javaClass.simpleName} - ${e.message}")
-            // Si el error es de consentimiento, volver a pedir vinculación
             if (e.message?.contains("consent") == true ||
                 e.message?.contains("remote") == true ||
                 e.javaClass.simpleName == "UserRecoverableAuthException"
             ) {
                 necesitaVincularGoogle = true
             } else {
-                errorMensaje = "Error obteniendo token: ${e.message}"
+                errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_token, e.message)
                 paso = PasoEnvio.ERROR
             }
         }
@@ -128,12 +124,12 @@ class EnviarCorreoViewModel : ViewModel() {
                 PasoEnvio.DESTINATARIO -> {
                     destinatario = texto.trim()
                     paso = PasoEnvio.ASUNTO
-                    TextoAVoz.hablar(contexto, "¿Cuál es el asunto del correo?")
+                    TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_asunto))
                 }
                 PasoEnvio.ASUNTO -> {
                     asunto = texto.trim()
                     paso = PasoEnvio.MODO
-                    TextoAVoz.hablar(contexto, "¿Quieres escribir el mensaje tú, o que lo cree la inteligencia artificial?")
+                    TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_modo))
                 }
                 PasoEnvio.MODO -> {
                     modo = if (textoLimpio.contains("ia") ||
@@ -143,15 +139,15 @@ class EnviarCorreoViewModel : ViewModel() {
                         textoLimpio.contains("generar")) "ia" else "manual"
                     paso = PasoEnvio.MENSAJE
                     if (modo == "ia") {
-                        TextoAVoz.hablar(contexto, "¿Sobre qué quieres que trate el correo?")
+                        TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_mensaje_ia))
                     } else {
-                        TextoAVoz.hablar(contexto, "Dicta el mensaje del correo.")
+                        TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_mensaje_manual))
                     }
                 }
                 PasoEnvio.MENSAJE -> {
                     mensaje = texto.trim()
                     paso = PasoEnvio.CONFIRMACION
-                    TextoAVoz.hablar(contexto, "Revisa los datos. ¿Todo correcto?")
+                    TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_titulo_confirmacion))
                 }
                 else -> {}
             }
@@ -172,29 +168,20 @@ class EnviarCorreoViewModel : ViewModel() {
             }
         }
     }
-    
+
     private fun enviarCorreo(contexto: Context) {
         viewModelScope.launch {
             paso = PasoEnvio.ENVIANDO
-
-            // Obtener token FRESCO justo ahora
             try {
                 val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
                 accessToken = withContext(Dispatchers.IO) {
                     val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
-                    // Solo clear y get UNA VEZ
                     val token = GoogleAuthUtil.getToken(contexto, cuentaGoogle!!.account!!, scope)
                     GoogleAuthUtil.clearToken(contexto, token)
                     GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
                 }
             } catch (e: Exception) {
-                errorMensaje = "Error de autenticación: ${e.message}"
-                paso = PasoEnvio.ERROR
-                return@launch
-            }
-
-            if (accessToken.isEmpty()) {
-                errorMensaje = "Token vacío."
+                errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_auth, e.message)
                 paso = PasoEnvio.ERROR
                 return@launch
             }
@@ -207,24 +194,23 @@ class EnviarCorreoViewModel : ViewModel() {
                     mensaje = mensaje,
                     modo = modo
                 )
-                android.util.Log.d("CORREO", "Token usado: ${accessToken.take(20)}")
                 val response = N8nClient.api.enviarCorreo(request)
                 if (response.isSuccessful) {
                     paso = PasoEnvio.ENVIADO
-                    TextoAVoz.hablar(contexto, "Correo enviado correctamente.")
+                    TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_exito))
                 } else {
-                    val errorBody = response.errorBody()?.string() ?: "Sin detalle"
-                    errorMensaje = "Error (${response.code()}): $errorBody"
+                    errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_generico)
                     paso = PasoEnvio.ERROR
-                    TextoAVoz.hablar(contexto, "Hubo un error al enviar el correo.")
+                    TextoAVoz.hablar(contexto, errorMensaje)
                 }
             } catch (e: Exception) {
-                errorMensaje = "Error: ${e.message}"
+                errorMensaje = e.message ?: contexto.getString(R.string.txt_enviarcorreo_error_generico)
                 paso = PasoEnvio.ERROR
-                TextoAVoz.hablar(contexto, "Hubo un error al enviar el correo.")
+                TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_error_generico))
             }
         }
     }
+
     fun reiniciar(contexto: Context) {
         destinatario = ""
         asunto = ""
@@ -233,7 +219,7 @@ class EnviarCorreoViewModel : ViewModel() {
         errorMensaje = ""
         paso = PasoEnvio.DESTINATARIO
         viewModelScope.launch {
-            TextoAVoz.hablar(contexto, "¿A quién se lo quieres enviar?")
+            TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_paso_destinatario_pregunta))
         }
     }
 }

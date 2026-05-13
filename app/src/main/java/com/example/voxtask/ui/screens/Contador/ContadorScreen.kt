@@ -10,6 +10,7 @@ import androidx.compose.material3.IconButton
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,7 +44,8 @@ import com.example.voxtask.utils.TextoAVoz
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-
+import com.example.voxtask.R
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ContadorScreen(
     viewModelPlantilla: PlantillaBaseViewModel,
@@ -151,7 +154,7 @@ fun ContadorScreen(
                                         Icons.Default.Pause
                                     else
                                         Icons.Default.PlayArrow,
-                                    contentDescription = if (viewModel.corriendo) "Parar" else "Iniciar",
+                                    contentDescription = if (viewModel.corriendo) stringResource(R.string.btn_parar) else stringResource(R.string.btn_iniciar),
                                     tint = Color.White,
                                     modifier = Modifier.size(32.dp)
                                 )
@@ -168,7 +171,7 @@ fun ContadorScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Cancelar",
+                                    contentDescription = stringResource(R.string.btn_cancelar),
                                     tint = Color.White,
                                     modifier = Modifier.size(32.dp)
                                 )

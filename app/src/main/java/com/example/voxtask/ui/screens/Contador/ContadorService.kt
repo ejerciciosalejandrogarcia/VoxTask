@@ -45,7 +45,7 @@ class ContadorService : Service() {
                 startForeground(
                     NOTIF_ID,
                     crearNotificacion(
-                        "⏱ Contador iniciado",
+                        this.getString(R.string.txt_titulo_contador_iniciado),
                         formatearTiempo(totalSegundos),
                         pausado = false
                     ).build()
@@ -61,7 +61,7 @@ class ContadorService : Service() {
                 estaPausado = true
 
                 actualizarNotificacion(
-                    "⏸ Contador pausado",
+                    "Contador pausado",
                     formatearTiempo(segundosRestantes),
                     pausado = true
                 )
@@ -74,7 +74,7 @@ class ContadorService : Service() {
                 startForeground(
                     NOTIF_ID,
                     crearNotificacion(
-                        "⏱ Contador reanudado",
+                        this.getString(R.string.txt_titulo_contador_pausado),
                         formatearTiempo(segundosRestantes),
                         pausado = false
                     ).build()
@@ -107,8 +107,8 @@ class ContadorService : Service() {
                 segundosRestantes = restantes
 
                 actualizarNotificacion(
-                    titulo = if (restantes > 0) "⏱ Contador en curso" else "✅ ¡Tiempo terminado!",
-                    contenido = if (restantes > 0) formatearTiempo(restantes) else "El contador ha finalizado",
+                    titulo = if (restantes > 0) getString(R.string.txt_titulo_contador_pausado) else getString(R.string.txt_titulo_contador_terminado),
+                    contenido = if (restantes > 0) formatearTiempo(restantes) else getString(R.string.txt_titulo_contador_finalizado),
                     pausado = false
                 )
 
@@ -162,10 +162,10 @@ class ContadorService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val canal = NotificationChannel(
                 CHANNEL_ID,
-                "Contador VoxTask",
+                getString(R.string.txt_name_canal),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Muestra la cuenta atrás del contador"
+                description = getString(R.string.txt_descripcion)
             }
 
             getSystemService(NotificationManager::class.java)
@@ -188,25 +188,22 @@ class ContadorService : Service() {
             .setContentIntent(crearPendingIntent())
 
         if (pausado) {
-            // ▶️ REANUDAR
             builder.addAction(
                 android.R.drawable.ic_media_play,
-                "Reanudar",
+                getString(R.string.txt_title_reanudar),
                 pendingIntentAccion(ACCION_REANUDAR)
             )
         } else {
-            // ⏸ PAUSAR
             builder.addAction(
                 android.R.drawable.ic_media_pause,
-                "Pausar",
+                getString(R.string.txt_title_pausar),
                 pendingIntentAccion(ACCION_PARAR)
             )
         }
 
-        // ❌ CANCELAR (siempre)
         builder.addAction(
             android.R.drawable.ic_menu_close_clear_cancel,
-            "Cancelar",
+            getString(R.string.txt_title_cancelar),
             pendingIntentAccion(ACCION_CANCELAR)
         )
 

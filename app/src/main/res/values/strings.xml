@@ -1,4 +1,3 @@
-<!-- res/values/strings.xml -->
 <resources>
     <string name="app_name">VoxTask</string>
 
@@ -24,15 +23,16 @@
     <string name="campo_correo">Su correo electronico</string>
 
     <!-- Inicio Screen -->
-    <string name="txt_crear_contador">Crear contador</string>
-    <string name="txt_contador">Contador</string>
-    <string name="txt_correo">Correo</string>
-    <string name="txt_recordatorio">Recordatorio</string>
-    <string name="txt_lista_compra">Lista de la compra</string>
-    <string name="btn_hablar">Boton de hablar</string>
-    <string name="btn_ajustes">Boton de ajustes</string>
-    <string name="btn_inicio">Boton de inicio</string>
-    <string name="btn_traducir">Boton de traducir</string>
+    <string name="txt_inicio_bienvenida">Hola, ¿cómo estás? %1$s. ¿Qué te gustaría que hiciera por ti?</string>
+    <string name="txt_inicio_instrucciones">Elige una de las siguientes opciones y cuando estés listo mantén el botón de hablar</string>
+    <string name="txt_inicio_sub_correo">Ver mi correo</string>
+    <string name="txt_inicio_sub_recordatorios_ver">Ver mis recordatorios</string>
+    <string name="txt_inicio_sub_recordatorios_crear">Crear recordatorio</string>
+    <string name="txt_inicio_sub_lista_ver">Ver mi lista de la compra</string>
+    <string name="txt_inicio_sub_lista_crear">Crear lista de la compra</string>
+    <string name="txt_inicio_sub_contador">Crear un contador</string>
+    <string name="txt_usuario_generico">Usuario</string>
+
 
     <!-- Lista Compra Screen -->
     <string name="icono_eliminar_producto">Eliminar producto</string>
@@ -77,4 +77,103 @@
     <string name="personaliza_fondo">Personaliza el fondo de la app</string>
     <string name="version_app">Versión</string>
     <string name="ver_version_actual">Consulta la versión actual</string>
+    <string name="quitar_fondo">Quitar fondo</string>
+    <string name="descripcion_quitar_fondo">Volver al fondo por defecto</string>
+    <string name="opcion_color_interfaz">Color de la interfaz</string>
+    <string name="opcion_color_interfaz_modo_claro">Color modo claro</string>
+    <string name="opcion_color_interfaz_modo_oscuro">Color modo oscuro</string>
+    <string name="model_cerrar">Cerrar</string>
+
+
+    <!-- Cambiar contrasenia Screen -->
+    <string name="instrucciones_restablecer_email_uno">Correo enviado</string>
+    <string name="instrucciones_restablecer_email_dos">Revisa tu bandeja de entrada en\n%1$s\ny sigue las instrucciones para restablecer tu contraseña.</string>
+    <string name="btn_enviar_de_nuevo">Enviar de nuevo</string>
+    <string name="txt_titulo_recuperar_contrasenia">Recuperar contraseña</string>
+    <string name="txt_titulo_recuperar_contrasenia_dos">Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña</string>
+    <string name="txt_placeholder_recuperar_contrasenia">Introduce tu correo</string>
+    <string name="txt_limpiar">Limpiar</string>
+    <string name="btn_recuperar_contrasenia">Enviar correo de recuperación</string>
+
+
+    <!-- Contador Screen -->
+    <string name="btn_parar">Parar</string>
+    <string name="btn_iniciar">Iniciar</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="txt_titulo_contador_pausado">Contador pausado</string>
+    <string name="txt_titulo_contador_iniciado">Contador iniciado</string>
+    <string name="txt_titulo_contador_encurso">Contador en curso</string>
+    <string name="txt_titulo_contador_terminado">¡Tiempo terminado!</string>
+    <string name="txt_titulo_contador_finalizado">El contador ha finalizado</string>
+    <string name="txt_name_canal">Contador VoxTask</string>
+    <string name="txt_descripcion">Muestra la cuenta atrás del contador</string>
+    <string name="txt_title_reanudar">Reanudar</string>
+    <string name="txt_title_pausar">Pausar</string>
+    <string name="txt_title_cancelar">Cancelar</string>
+
+    <!-- Correo Screen -->
+    <string name="txt_title_advertencia_ver_correos">Conecta tu cuenta de Gmail para ver tus correos</string>
+    <string name="txt_btn_conectar_gmail">Conectar Gmail</string>
+    <string name="txt_title_no_correos">No tienes correos</string>
+    <string name="txt_btne_crear_correo">Crear correo</string>
+
+    <!-- Enviar Correo Screen -->
+    <string name="txt_enviarcorreo_paso_uno">Paso %1$d de 4</string>
+    <string name="txt_enviarcorreo_vincular_cuenta">Vinculando cuenta...</string>
+    <string name="txt_enviarcorreo_paso_destinatario_pregunta">¿A quién envías el correo?</string>
+    <string name="txt_enviarcorreo_paso_destinatario_description">Di el correo electrónico del destinatario</string>
+    <string name="txt_enviarcorreo_pregunta_asunto">¿Cuál es el asunto?</string>
+    <string name="txt_enviarcorreo_descripcion_asunto">Di el asunto del correo</string>
+    <string name="txt_enviarcorreo_pregunta_modo">¿Cómo quieres el mensaje?</string>
+    <string name="txt_enviarcorreo_descripcion_modo">Di \"yo mismo\" para escribirlo tú\nDi \"inteligencia artificial\" para que lo cree la IA</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_ia">¿Sobre qué trata el correo?</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Dicta el mensaje</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Di el tema o idea principal</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Di el contenido completo del correo</string>
+    <string name="txt_enviarcorreo_titulo_confirmacion">¿Así lo quieres enviar?</string>
+    <string name="txt_enviarcorreo_subtitulo_confirmacion">Revisa los datos antes de enviar</string>
+    <string name="txt_enviarcorreo_etiqueta_para">Para</string>
+    <string name="txt_enviarcorreo_etiqueta_asunto">Asunto</string>
+    <string name="txt_enviarcorreo_etiqueta_mensaje">Mensaje</string>
+    <string name="txt_enviarcorreo_etiqueta_modo">Modo</string>
+    <string name="txt_enviarcorreo_modo_ia">Generado por IA</string>
+    <string name="txt_enviarcorreo_modo_manual">Manual</string>
+    <string name="txt_enviarcorreo_btn_enviar">Enviar correo</string>
+    <string name="txt_enviarcorreo_estado_enviando">Enviando correo...</string>
+    <string name="txt_enviarcorreo_exito">✓ Correo enviado</string>
+    <string name="txt_enviarcorreo_btn_otro">Enviar otro</string>
+    <string name="txt_enviarcorreo_btn_reintentar">Intentar de nuevo</string>
+    <string name="txt_enviarcorreo_resumen_para">Para: %1$s</string>
+    <string name="txt_enviarcorreo_resumen_asunto">Asunto: %1$s</string>
+    <string name="txt_enviarcorreo_resumen_modo">Modo: %1$s</string>
+    <string name="txt_enviarcorreo_google_requerido">Cuenta de Google requerida</string>
+    <string name="txt_enviarcorreo_google_descripcion">Para enviar correos necesitas vincular tu cuenta de Google con permiso de Gmail.</string>
+    <string name="txt_enviarcorreo_btn_vincular">Vincular cuenta de Google</string>
+    <string name="txt_enviarcorreo_btn_guardar">Guardar</string>
+    <string name="txt_enviarcorreo_btn_editar">Editar</string>
+    <string name="txt_enviarcorreo_vincular_cuenta_exito">Cuenta vinculada correctamente. ¿A quién se lo quieres enviar?</string>
+    <string name="txt_enviarcorreo_error_token">Error obteniendo token: %1$s</string>
+    <string name="txt_enviarcorreo_error_auth">Error de autenticación: %1$s</string>
+    <string name="txt_enviarcorreo_error_generico">Hubo un error al enviar el correo.</string>
+
+    <!-- Inicio de Sesión Screen -->
+    <string name="campo_nombre_usuario">Nombre de usuario</string>
+    <string name="campo_contrasenia">Contraseña</string>
+    <string name="btn_iniciar_sesion">Iniciar sesión</string>
+    <string name="txt_o">o</string>
+    <string name="txt_iniciar_google">Continuar con Google</string>
+    <string name="txt_pregunta">¿No tienes cuenta?</string>
+    <string name="txt_respuesta">Regístrate</string>
+    <string name="txt_pregunta_contrasenia">¿Olvidaste tu contraseña?</string>
+    <string name="txt_respuesta_contrasenia">Restablecer ahora</string>
+    <string name="err_campos_vacios">Por favor, rellena todos los campos obligatorios.</string>
+    <string name="err_nombre_usuario_invalido">El usuario solo puede contener letras y números.</string>
+    <string name="err_contrasenia_debil">La contraseña debe ser más fuerte (9+ caracteres, Mayús, Núm, Especial).</string>
+    <string name="err_google_auth">Hubo un fallo al conectar con Google. Inténtalo de nuevo.</string>
+    <string name="err_credenciales_incorrectas">Usuario o contraseña no válidos.</string>
+    <string name="err_firestore">No se pudieron guardar los datos en la nube.</string>
+    <string name="err_conexion">Error de red. Revisa tu conexión a internet.</string>
+
+
+
 </resources>
