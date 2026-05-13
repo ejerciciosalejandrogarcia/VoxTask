@@ -1,19 +1,6 @@
 <resources>
     <string name="app_name">VoxTask</string>
 
-    <!-- Iniciar sesion Screen -->
-    <string name="campo_nombre_usuario">Nombre de usuario</string>
-    <string name="campo_contrasenia">Contraseña</string>
-    <string name="btn_iniciar_sesion">Iniciar sesión</string>
-    <string name="txt_pregunta">¿No tienes cuenta?</string>
-    <string name="txt_respuesta">Regístrate</string>
-    <string name="icono_mostrar_contrasenia">Mostrar contraseña</string>
-    <string name="icono_limpiar">Limpiar</string>
-    <string name="txt_o">o</string>
-    <string name="txt_iniciar_google">Iniciar sesión con Google</string>
-    <string name="txt_pregunta_contrasenia">¿No te acuerdas de la contraseña?</string>
-    <string name="txt_respuesta_contrasenia">Restablecer contraseña</string>
-
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Crear cuenta</string>
     <string name="campo_nombre">Su nombre</string>
@@ -21,7 +8,8 @@
     <string name="campo_segundo_ap">Su segundo apellido</string>
     <string name="campo_fecha_naci">Su fecha de nacimiento</string>
     <string name="campo_correo">Su correo electronico</string>
-
+    <string name="icono_mostrar_contrasenia">Mostrar contraseña</string>
+    <string name="icono_limpiar">Limpiar</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hola, ¿cómo estás? %1$s. ¿Qué te gustaría que hiciera por ti?</string>
     <string name="txt_inicio_instrucciones">Elige una de las siguientes opciones y cuando estés listo mantén el botón de hablar</string>
@@ -32,8 +20,13 @@
     <string name="txt_inicio_sub_lista_crear">Crear lista de la compra</string>
     <string name="txt_inicio_sub_contador">Crear un contador</string>
     <string name="txt_usuario_generico">Usuario</string>
-
-
+    <string name="txt_correo">Correo electrónico</string>
+    <string name="txt_recordatorio">Recordatorios</string>
+    <string name="txt_lista_compra">Lista de la compra</string>
+    <string name="txt_contador">Contador</string>
+    <string name="btn_inicio">Inicio</string>
+    <string name="btn_hablar">Hablar</string>
+    <string name="btn_ajustes">Ajustes</string>
     <!-- Lista Compra Screen -->
     <string name="icono_eliminar_producto">Eliminar producto</string>
     <string name="txt_sin_producto_lista_compra">Di un producto para agregarlo</string>

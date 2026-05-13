@@ -32,6 +32,13 @@
     <string name="txt_inicio_sub_lista_crear">Créer une liste de courses</string>
     <string name="txt_inicio_sub_contador">Créer un minuteur</string>
     <string name="txt_usuario_generico">Utilisateur</string>
+    <string name="txt_correo">E-mail</string>
+    <string name="txt_recordatorio">Rappels</string>
+    <string name="txt_lista_compra">Liste de courses</string>
+    <string name="txt_contador">Compteur</string>
+    <string name="btn_inicio">Accueil</string>
+    <string name="btn_hablar">Parler</string>
+    <string name="btn_ajustes">Paramètres</string>
 
 
     <!-- Écran Liste de Courses -->

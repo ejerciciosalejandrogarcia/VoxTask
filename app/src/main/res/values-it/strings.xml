@@ -32,7 +32,13 @@
     <string name="txt_inicio_sub_lista_crear">Crea lista della spesa</string>
     <string name="txt_inicio_sub_contador">Imposta timer</string>
     <string name="txt_usuario_generico">Utente</string>
-
+    <string name="txt_correo">E-mail</string>
+    <string name="txt_recordatorio">Promemoria</string>
+    <string name="txt_lista_compra">Lista della spesa</string>
+    <string name="txt_contador">Contatore</string>
+    <string name="btn_inicio">Home</string>
+    <string name="btn_hablar">Parla</string>
+    <string name="btn_ajustes">Impostazioni</string>
     <!-- Schermata Lista Spesa -->
     <string name="icono_eliminar_producto">Elimina prodotto</string>
     <string name="txt_sin_producto_lista_compra">Pronuncia un prodotto per aggiungerlo</string>

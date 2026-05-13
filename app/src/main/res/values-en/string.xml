@@ -32,6 +32,14 @@
     <string name="txt_inicio_sub_lista_crear">Create shopping list</string>
     <string name="txt_inicio_sub_contador">Set a timer</string>
     <string name="txt_usuario_generico">User</string>
+    <string name="txt_correo">Email</string>
+    <string name="txt_recordatorio">Reminders</string>
+    <string name="txt_lista_compra">Shopping list</string>
+    <string name="txt_contador">Counter</string>
+    <string name="btn_inicio">Home</string>
+    <string name="btn_hablar">Speak</string>
+    <string name="btn_ajustes">Settings</string>
+
 
     <!-- Shopping List Screen -->
     <string name="icono_eliminar_producto">Delete product</string>

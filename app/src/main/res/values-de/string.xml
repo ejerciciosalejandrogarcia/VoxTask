@@ -32,7 +32,13 @@
     <string name="txt_inicio_sub_lista_crear">Einkaufsliste erstellen</string>
     <string name="txt_inicio_sub_contador">Timer erstellen</string>
     <string name="txt_usuario_generico">Benutzer</string>
-
+    <string name="txt_correo">E-Mail</string>
+    <string name="txt_recordatorio">Erinnerungen</string>
+    <string name="txt_lista_compra">Einkaufsliste</string>
+    <string name="txt_contador">Zähler</string>
+    <string name="btn_inicio">Startseite</string>
+    <string name="btn_hablar">Sprechen</string>
+    <string name="btn_ajustes">Einstellungen</string>
 
     <!-- Lista Compra Screen (Einkaufsliste) -->
     <string name="icono_eliminar_producto">Produkt löschen</string>

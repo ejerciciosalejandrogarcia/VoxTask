@@ -32,8 +32,13 @@
     <string name="txt_inicio_sub_lista_crear">Criar lista de compras</string>
     <string name="txt_inicio_sub_contador">Criar um timer</string>
     <string name="txt_usuario_generico">Usuário</string>
-
-
+    <string name="txt_correo">E-mail</string>
+    <string name="txt_lista_compra">Lista de compras</string>
+    <string name="txt_contador">Contador</string>
+    <string name="txt_recordatorio">Lembretes</string>
+    <string name="btn_inicio">Início</string>
+    <string name="btn_hablar">Falar</string>
+    <string name="btn_ajustes">Configurações</string>
     <!-- Tela Lista de Compras -->
     <string name="icono_eliminar_producto">Excluir produto</string>
     <string name="txt_sin_producto_lista_compra">Diga um produto para adicioná-lo</string>

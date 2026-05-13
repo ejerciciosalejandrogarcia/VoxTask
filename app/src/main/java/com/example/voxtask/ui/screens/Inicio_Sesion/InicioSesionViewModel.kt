@@ -1,6 +1,5 @@
 package com.example.voxtask.ui.screens.Inicio_Sesion
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -16,7 +15,10 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import android.content.Context
 data class InicioSesionUiState(
     val nombreUsuario: String = "",
     val contrasena: String = "",
@@ -129,4 +131,14 @@ class InicioSesionViewModel(
 
     fun limpiarError() { _estadoUi.value = _estadoUi.value.copy(mensajeError = "") }
     fun limpiarEstadoInicioSesion() { _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = false) }
+
+    fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            // He puesto el client_id de tipo 3 de tu JSON
+            .requestIdToken("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+
+        return GoogleSignIn.getClient(contexto, gso)
+    }
 }
