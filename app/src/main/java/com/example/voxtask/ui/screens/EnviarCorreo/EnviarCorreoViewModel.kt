@@ -172,21 +172,21 @@ class EnviarCorreoViewModel : ViewModel() {
     private fun enviarCorreo(contexto: Context) {
         viewModelScope.launch {
             paso = PasoEnvio.ENVIANDO
-            try {
-                val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
-                accessToken = withContext(Dispatchers.IO) {
-                    val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
-                    val token = GoogleAuthUtil.getToken(contexto, cuentaGoogle!!.account!!, scope)
-                    GoogleAuthUtil.clearToken(contexto, token)
-                    GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
-                }
-            } catch (e: Exception) {
-                errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_auth, e.message)
+
+            // Reutiliza obtenerToken en lugar de duplicar la lógica
+            obtenerToken(contexto)
+
+            // Si obtenerToken falló, ya habrá puesto paso = ERROR o necesitaVincularGoogle
+            if (paso == PasoEnvio.ERROR || necesitaVincularGoogle) return@launch
+            if (accessToken.isEmpty()) {
+                errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío")
                 paso = PasoEnvio.ERROR
                 return@launch
             }
 
             try {
+                android.util.Log.d("TOKEN_ENVIO", "Token a enviar: ${accessToken.take(30)}")
+                android.util.Log.d("TOKEN_ENVIO", "Para: $destinatario")
                 val request = EnviarCorreoRequest(
                     token = accessToken,
                     para = destinatario,
@@ -210,7 +210,6 @@ class EnviarCorreoViewModel : ViewModel() {
             }
         }
     }
-
     fun reiniciar(contexto: Context) {
         destinatario = ""
         asunto = ""

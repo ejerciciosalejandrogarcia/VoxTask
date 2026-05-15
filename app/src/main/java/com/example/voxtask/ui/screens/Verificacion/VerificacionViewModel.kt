@@ -1,7 +1,9 @@
 package com.example.voxtask.ui.screens.Verificacion
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.R
 import com.example.voxtask.databases.network.N8nClient
 import com.example.voxtask.databases.network.VerificacionRequest
 import com.google.firebase.auth.FirebaseAuth
@@ -14,7 +16,8 @@ data class VerificacionUiState(
     val email: String = "",
     val codigoCorrecto: String = "",
     val cargando: Boolean = false,
-    val error: String = "",
+    val mensajeError: Int? = null,
+    val errorDinamico: String = "",
     val verificado: Boolean = false
 )
 
@@ -27,7 +30,7 @@ class VerificacionViewModel : ViewModel() {
         enviarCodigo()
     }
 
-    fun enviarCodigo() {
+    fun enviarCodigo(contexto: Context? = null) {
         val usuario = FirebaseAuth.getInstance().currentUser ?: return
         val email = usuario.email ?: return
         val uid = usuario.uid
@@ -35,7 +38,8 @@ class VerificacionViewModel : ViewModel() {
         _estadoUi.value = _estadoUi.value.copy(
             email = email,
             cargando = true,
-            error = "",
+            mensajeError = null,
+            errorDinamico = "",
             verificado = false,
             codigoCorrecto = ""
         )
@@ -48,12 +52,12 @@ class VerificacionViewModel : ViewModel() {
                 android.util.Log.d("Verificacion", "Código recibido: '${respuesta.codigo}'")
                 _estadoUi.value = _estadoUi.value.copy(
                     codigoCorrecto = respuesta.codigo,
-
                     cargando = false
                 )
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(
-                    error = "Error al enviar el código: ${e.message}",
+                    errorDinamico = contexto?.getString(R.string.error_enviar_codigo, e.message ?: "")
+                        ?: "Error al enviar el código: ${e.message}",
                     cargando = false
                 )
             }
@@ -65,9 +69,13 @@ class VerificacionViewModel : ViewModel() {
         val correcto = _estadoUi.value.codigoCorrecto.trim().uppercase()
 
         if (introducido == correcto) {
-            _estadoUi.value = _estadoUi.value.copy(verificado = true, error = "")
+            _estadoUi.value = _estadoUi.value.copy(verificado = true, mensajeError = null)
         } else {
-            _estadoUi.value = _estadoUi.value.copy(error = "Código incorrecto, inténtalo de nuevo")
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_codigo_incorrecto)
         }
+    }
+
+    fun limpiarError() {
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = null, errorDinamico = "")
     }
 }

@@ -67,6 +67,7 @@ class RecordatorioViewModel : ViewModel() {
         when {
             texto.contains("crea evento") ||
                     texto.contains("añade evento") ||
+                    texto.contains("crear evento") ||
                     texto.contains("nuevo evento") -> {
                 val fecha = extraerFecha(texto)
                 if (fecha != null) {

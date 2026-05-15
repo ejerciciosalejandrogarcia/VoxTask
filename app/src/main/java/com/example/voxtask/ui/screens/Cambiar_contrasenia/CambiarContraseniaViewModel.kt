@@ -2,6 +2,7 @@ package com.example.voxtask.ui.screens.Cambiar_contrasenia
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.R
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,7 @@ data class CambiarContrasenaUiState(
     val email: String = "",
     val cargando: Boolean = false,
     val correoEnviado: Boolean = false,
-    val mensajeError: String = ""
+    val mensajeError: Int = 0
 )
 
 data class NuevaContraseniaUiState(
@@ -22,7 +23,7 @@ data class NuevaContraseniaUiState(
     val confirmarContrasena: String = "",
     val cargando: Boolean = false,
     val cambioExitoso: Boolean = false,
-    val mensajeError: String = ""
+    val mensajeError: Int = 0
 )
 
 class CambiarContraseniaViewModel : ViewModel() {
@@ -36,36 +37,27 @@ class CambiarContraseniaViewModel : ViewModel() {
     val estadoNueva: StateFlow<NuevaContraseniaUiState> = _estadoNueva.asStateFlow()
 
     fun alCambiarEmail(nuevoEmail: String) {
-        _estadoUi.value = _estadoUi.value.copy(email = nuevoEmail, mensajeError = "")
+        _estadoUi.value = _estadoUi.value.copy(email = nuevoEmail, mensajeError = 0)
     }
 
     fun alCambiarNuevaContrasena(valor: String) {
-        _estadoNueva.value = _estadoNueva.value.copy(nuevaContrasena = valor, mensajeError = "")
+        _estadoNueva.value = _estadoNueva.value.copy(nuevaContrasena = valor, mensajeError = 0)
     }
 
     fun alCambiarConfirmarContrasena(valor: String) {
-        _estadoNueva.value = _estadoNueva.value.copy(confirmarContrasena = valor, mensajeError = "")
-    }
-
-    private suspend fun correoEstaRegistrado(email: String): Boolean {
-        return try {
-            val result = auth.fetchSignInMethodsForEmail(email).await()
-            !result.signInMethods.isNullOrEmpty()
-        } catch (e: Exception) {
-            false
-        }
+        _estadoNueva.value = _estadoNueva.value.copy(confirmarContrasena = valor, mensajeError = 0)
     }
 
     fun enviarCorreoRecuperacion() {
         val email = _estadoUi.value.email.trim()
 
         if (email.isEmpty()) {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = "Introduce tu correo electrónico")
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_email_vacio)
             return
         }
 
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = "Correo electrónico no válido")
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_email_invalido)
             return
         }
 
@@ -76,18 +68,14 @@ class CambiarContraseniaViewModel : ViewModel() {
             .build()
 
         viewModelScope.launch {
-            _estadoUi.value = _estadoUi.value.copy(cargando = true, mensajeError = "")
+            _estadoUi.value = _estadoUi.value.copy(cargando = true, mensajeError = 0)
             try {
                 auth.sendPasswordResetEmail(email, actionCodeSettings).await()
-
-                _estadoUi.value = _estadoUi.value.copy(
-                    cargando = false,
-                    correoEnviado = true
-                )
+                _estadoUi.value = _estadoUi.value.copy(cargando = false, correoEnviado = true)
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(
                     cargando = false,
-                    mensajeError = e.message ?: "Error. Inténtalo de nuevo"
+                    mensajeError = R.string.error_envio_correo
                 )
             }
         }
@@ -100,32 +88,27 @@ class CambiarContraseniaViewModel : ViewModel() {
 
         when {
             nueva.isBlank() || confirmar.isBlank() -> {
-                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = "Rellena todos los campos")
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_campos_vacios)
                 return
             }
-
             !regexContrasenia.matches(nueva) -> {
-                _estadoNueva.value = _estadoNueva.value.copy(
-                    mensajeError = "La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
-                )
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_contrasena_debil)
                 return
             }
-
             nueva != confirmar -> {
-                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = "Las contraseñas no coinciden")
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_contrasenas_no_coinciden)
                 return
             }
-
             else -> {
                 viewModelScope.launch {
-                    _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = "")
+                    _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = 0)
                     try {
                         auth.confirmPasswordReset(oobCode, nueva).await()
                         _estadoNueva.value = _estadoNueva.value.copy(cargando = false, cambioExitoso = true)
                     } catch (e: Exception) {
                         _estadoNueva.value = _estadoNueva.value.copy(
                             cargando = false,
-                            mensajeError = e.message ?: "Error al cambiar la contraseña"
+                            mensajeError = R.string.error_cambio_contrasena
                         )
                     }
                 }
@@ -136,11 +119,12 @@ class CambiarContraseniaViewModel : ViewModel() {
     fun reiniciar() {
         _estadoUi.value = CambiarContrasenaUiState()
     }
+
     fun limpiarError() {
-        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
-    }
-    fun limpiarErrorNueva() {
-        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = "")
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = 0)
     }
 
+    fun limpiarErrorNueva() {
+        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = 0)
+    }
 }

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
+import com.example.voxtask.R
 import com.example.voxtask.databases.repository.UsuarioRepository
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.dao.UsuarioDao
@@ -21,7 +22,7 @@ data class RegistrarUsuarioUiState(
     val correo_electronico: String = "",
     val contrasenia: String = "",
     val registroUsuarioExitoso: Boolean = false,
-    val mensajeError: String = ""
+    val mensajeError: Int? = null
 )
 
 class RegistroUsuarioViewModel(
@@ -76,41 +77,41 @@ class RegistroUsuarioViewModel(
                     fechaNacimiento.isBlank() ||
                     correoElectronico.isBlank() ||
                     contrasenia.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Rellena todos los campos")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_campos_vacios_registro)
                 return
             }
 
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre de usuario solo puede contener letras y números")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_nombre_usuario_invalido_registro)
                 return
             }
             !regexNombre.matches(nombre) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre solo puede contener letras")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_nombre_invalido_registro)
                 return
             }
 
             !regexNombre.matches(primerApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El primer apellido solo puede contener letras")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_primer_apellido_invalido_registro)
                 return
             }
 
             !regexNombre.matches(segundoApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El segundo apellido solo puede contener letras")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_segundo_apellido_invalido_registro)
                 return
             }
 
             !Patterns.EMAIL_ADDRESS.matcher(correoElectronico).matches() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Correo electrónico no válido")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_correo_invalido)
                 return
             }
 
             !regexContrasenia.matches(contrasenia) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_contrasenia_debil_registro)
                 return
             }
 
             else -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
 
                 viewModelScope.launch {
                     val usuario = Usuario(
@@ -129,7 +130,7 @@ class RegistroUsuarioViewModel(
                         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
                     } else {
                         val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = msg)
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_registro_fallido)
                     }
                 }
             }
@@ -154,7 +155,7 @@ class RegistroUsuarioViewModel(
         }
     }
     fun limpiarError() {
-        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
     }
     fun limpiarEstadoRegistro() {
         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = false)

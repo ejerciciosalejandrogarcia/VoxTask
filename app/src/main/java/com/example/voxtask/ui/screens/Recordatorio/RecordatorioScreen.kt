@@ -90,7 +90,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
         ) {
             // Icono para retroceder de mes
             IconButton(onClick = { mesActual = mesActual.minusMonths(1) }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Mes anterior")
+                Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.icono_mes_anterior))
             }
             //Mes actual
             Text(
@@ -102,7 +102,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
             )
             // Icono para avanzar de mes
             IconButton(onClick = { mesActual = mesActual.plusMonths(1) }) {
-                Icon(Icons.Default.ArrowForward, contentDescription = "Mes siguiente")
+                Icon(Icons.Default.ArrowForward, contentDescription = stringResource(R.string.icono_mes_siguiente))
             }
         }
 

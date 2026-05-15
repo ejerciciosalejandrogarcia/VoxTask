@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.TextoAVoz
 import com.example.voxtask.R
@@ -64,7 +63,7 @@ fun ListaCompraScreen(
 
     PlantillaBase(
         viewModel = viewModelPlantilla,
-        textoInformacion = "Di un producto para agregarlo, o di elimina y el producto para borrarlo",
+        textoInformacion = stringResource(R.string.txt_info_lista_compra),
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->

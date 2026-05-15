@@ -18,7 +18,7 @@ data class PerfilUiState(
     val segundoApellido: String = "",
     val avatarSeleccionado: String = "",
     val cargando: Boolean = false,
-    val mensajeError: String = "",
+    val mensajeError: Int? = null,
     val modoEdicion: Boolean = false,
     val operacionExitosa:Boolean = false
 )
@@ -77,7 +77,7 @@ class PerfilViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Error al cargar datos")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_cargar_datos)
             } finally {
                 _estadoUi.value = _estadoUi.value.copy(cargando = false)
             }
@@ -96,27 +96,27 @@ class PerfilViewModel : ViewModel() {
 
         when {
             nombre.isBlank() || nombreUsuario.isBlank() || primerApellido.isBlank() || segundoApellido.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "No puede haber ningún campo vacío")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_campos_vacios)
                 return
             }
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre de usuario solo puede contener letras y números")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_nombre_usuario_invalido)
                 return
             }
             !regexNombre.matches(nombre) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El nombre solo puede contener letras")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_nombre_invalido)
                 return
             }
             !regexNombre.matches(primerApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El primer apellido solo puede contener letras")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_primer_apellido_invalido)
                 return
             }
             !regexNombre.matches(segundoApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "El segundo apellido solo puede contener letras")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_segundo_apellido_invalido)
                 return
             }
             else -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
 
                 viewModelScope.launch {
                     _estadoUi.value = _estadoUi.value.copy(cargando = true)
@@ -135,10 +135,10 @@ class PerfilViewModel : ViewModel() {
                         _estadoUi.value = _estadoUi.value.copy(
                             operacionExitosa = true,
                             modoEdicion = false,
-                            mensajeError = "Perfil actualizado correctamente"
+                            mensajeError = R.string.msg_perfil_actualizado
                         )
                     } catch (e: Exception) {
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = "Error al guardar el perfil")
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_guardar_perfil)
                     } finally {
                         _estadoUi.value = _estadoUi.value.copy(cargando = false)
                     }
@@ -154,14 +154,14 @@ class PerfilViewModel : ViewModel() {
                 val idUsuario = auth.currentUser?.uid ?: return@launch
                 firestore.collection("usuarios").document(idUsuario)
                     .update("avatar", nombreAvatar).await()
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Avatar actualizado")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.msg_avatar_actualizado)
             } catch (e: Exception) {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "Error al actualizar el avatar")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_actualizar_avatar)
             }
         }
     }
 
     fun limpiarError() {
-        _estadoUi.value = _estadoUi.value.copy(mensajeError = "")
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
     }
 }

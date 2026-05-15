@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Registro_Usuario
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,7 +37,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.zIndex
-
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun RegistroUsuarioScreen(
     alRegistroExitoso: () -> Unit,
@@ -62,9 +63,9 @@ fun RegistroUsuarioScreen(
         )
     }
     LaunchedEffect(estadoUi.mensajeError) {
-        if (estadoUi.mensajeError.isNotEmpty()) {
+        estadoUi.mensajeError?.let { resId ->
             snackbarHostState.showSnackbar(
-                message = estadoUi.mensajeError,
+                message = contexto.getString(resId),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()
@@ -175,7 +176,7 @@ fun RegistroUsuarioScreen(
                         Spacer(modifier = Modifier.height(20.dp))
 
                         Text(
-                            text = "Cuenta creada con éxito",
+                            text = stringResource(R.string.txt_cuenta_creada),
                             fontSize = 22.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
@@ -184,7 +185,7 @@ fun RegistroUsuarioScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Ya puedes iniciar sesión con tus credenciales.",
+                            text = stringResource(R.string.txt_cuenta_creada_descripcion),
                             fontSize = 13.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
@@ -205,7 +206,7 @@ fun RegistroUsuarioScreen(
                             )
                         ) {
                             Text(
-                                "Ir al inicio de sesión",
+                                stringResource(R.string.txt_ir_inicio_sesion),
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -363,18 +364,18 @@ fun RegistroUsuarioScreen(
                             value = estadoUi.fecha_nacimiento,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Fecha de nacimiento") },
+                            label = { Text(stringResource(R.string.hint_fecha_nacimiento)) },
                             trailingIcon = {
-                                IconButton(onClick = { selectorFecha.show() }) {   // Icono para abrir el DatePicker
+                                IconButton(onClick = { selectorFecha.show() }) {
                                     Icon(
                                         Icons.Default.DateRange,
-                                        contentDescription = "Seleccionar fecha"
+                                        contentDescription = stringResource(R.string.content_desc_seleccionar_fecha)
                                     )
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectorFecha.show() },  // También abre el selector al tocar el campo
+                                .clickable { selectorFecha.show() },
                             shape = RoundedCornerShape(14.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = MaterialTheme.colorScheme.primary,

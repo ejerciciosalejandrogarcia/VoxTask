@@ -7,9 +7,6 @@ import com.example.voxtask.databases.model.Correo
 import com.example.voxtask.databases.network.N8nClient
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
@@ -18,12 +15,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import com.example.voxtask.R
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
 
 sealed class CorreoUiState {
     object Cargando : CorreoUiState()
     object NecesitaConectarGoogle : CorreoUiState()
     data class Exito(val correos: List<Correo>) : CorreoUiState()
-    data class Error(val mensaje: String) : CorreoUiState()
+    data class Error(val mensaje: Int) : CorreoUiState()
 }
 
 class CorreoViewModel : ViewModel() {
@@ -38,7 +39,7 @@ class CorreoViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = CorreoUiState.Cargando
             val uid = auth.currentUser?.uid ?: run {
-                _uiState.value = CorreoUiState.Error("No hay sesión activa")
+                _uiState.value = CorreoUiState.Error(R.string.error_sin_sesion)
                 return@launch
             }
 
@@ -75,7 +76,7 @@ class CorreoViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                _uiState.value = CorreoUiState.Error("Error: ${e.message}")
+                _uiState.value = CorreoUiState.Error(R.string.error_general)
             }
         }
     }
@@ -85,30 +86,8 @@ class CorreoViewModel : ViewModel() {
             val correos = N8nClient.api.obtenerCorreos(token)
             _uiState.value = CorreoUiState.Exito(correos)
         } catch (e: Exception) {
-            _uiState.value = CorreoUiState.Error("Error: ${e.javaClass.simpleName} - ${e.message}")
+            _uiState.value = CorreoUiState.Error(R.string.error_cargar_correos)
         }
-    }
-
-    fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
-        val emailFirebase = FirebaseAuth.getInstance().currentUser?.email ?: ""
-
-        val cliente = GoogleSignIn.getClient(
-            contexto,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestScopes(Scope("https://www.googleapis.com/auth/gmail.readonly"))
-                .build()
-        )
-        cliente.signOut()
-
-        return GoogleSignIn.getClient(
-            contexto,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestScopes(Scope("https://www.googleapis.com/auth/gmail.readonly"))
-                .setAccountName(emailFirebase)
-                .build()
-        )
     }
 
     fun guardarTokenYCargarCorreos(contexto: Context, serverAuthCode: String?) {
@@ -119,12 +98,10 @@ class CorreoViewModel : ViewModel() {
 
             try {
                 val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
-                    ?: throw Exception("No hay cuenta Google")
+                    ?: throw Exception()
 
                 if (cuentaGoogle.email != emailFirebase) {
-                    _uiState.value = CorreoUiState.Error(
-                        "La cuenta Google debe ser $emailFirebase"
-                    )
+                    _uiState.value = CorreoUiState.Error(R.string.error_cuenta_google_incorrecta)
                     return@launch
                 }
 
@@ -153,8 +130,17 @@ class CorreoViewModel : ViewModel() {
                 cargarCorreos(accessToken)
 
             } catch (e: Exception) {
-                _uiState.value = CorreoUiState.Error("Error: ${e.message}")
+                _uiState.value = CorreoUiState.Error(R.string.error_general)
             }
         }
+    }
+    fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
+        val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")
+            .requestServerAuthCode("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")
+            .requestEmail()
+            .requestScopes(Scope("https://www.googleapis.com/auth/gmail.readonly"))
+            .build()
+        return GoogleSignIn.getClient(contexto, opciones)
     }
 }

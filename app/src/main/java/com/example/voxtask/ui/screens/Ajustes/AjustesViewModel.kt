@@ -51,8 +51,8 @@ class AjustesViewModel : ViewModel() {
 
 
     fun cargarIdiomas(contexto: Context, idioma: String, onListo: () -> Unit) {
-        val locale = java.util.Locale(idioma)
-        java.util.Locale.setDefault(locale)
+        val locale = Locale(idioma)
+        Locale.setDefault(locale)
 
         val config = Configuration(contexto.resources.configuration)
         config.setLocale(locale)
@@ -61,13 +61,26 @@ class AjustesViewModel : ViewModel() {
         @Suppress("DEPRECATION")
         contexto.resources.updateConfiguration(config, contexto.resources.displayMetrics)
 
-        // commit() garantiza que se guarda antes de continuar
         val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         prefs.edit().putString("idioma", idioma).commit()
 
         idiomaActual = idiomasDisponibles.find { it.first == idioma }?.second ?: idioma
 
-        onListo() // avisa a la pantalla que ya está listo
+        // 👇 Cambiar idioma del TTS y dar mensaje de prueba en el nuevo idioma
+        viewModelScope.launch {
+            TextoAVoz.cambiarIdioma(locale)
+            val mensajePrueba = when (idioma) {
+                "en" -> "Language changed to English"
+                "fr" -> "Langue changée en français"
+                "de" -> "Sprache auf Deutsch geändert"
+                "it" -> "Lingua cambiata in italiano"
+                "pt" -> "Idioma alterado para português"
+                else -> "Idioma cambiado a español"
+            }
+            TextoAVoz.hablar(contexto, mensajePrueba)
+        }
+
+        onListo()
     }
     fun inicializarIdioma(contexto: Context) {
         val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)

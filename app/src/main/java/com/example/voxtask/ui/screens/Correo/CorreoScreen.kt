@@ -110,7 +110,7 @@ fun CorreoScreen(
 
                 is CorreoUiState.Error -> {
                     Text(
-                        text = estado.mensaje,
+                        text = stringResource( estado.mensaje),
                         color = MaterialTheme.colorScheme.error
                     )
                 }

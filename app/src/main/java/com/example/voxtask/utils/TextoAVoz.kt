@@ -12,6 +12,7 @@ object TextoAVoz {
 
     private var tts: TextToSpeech? = null
     var vozElegida: String? = null
+    var localeActual: Locale = Locale("es", "MX")  // 👈 nuevo
 
     // Devuelve la lista de voces que tiene instaladas el movil
     fun obtenerVoces(): List<Voice> {
@@ -25,12 +26,19 @@ object TextoAVoz {
         if (voz != null) tts?.voice = voz
     }
 
+    fun cambiarIdioma(locale: Locale) {
+        localeActual = locale
+        tts?.language = locale
+        // Resetear voz elegida porque puede no ser compatible con el nuevo idioma
+        vozElegida = null
+    }
+
     suspend fun hablar(context: Context, texto: String) {
         if (tts == null) {
             suspendCancellableCoroutine<Unit> { continuation ->
                 tts = TextToSpeech(context) { status ->
                     if (status == TextToSpeech.SUCCESS) {
-                        tts?.language = Locale("es", "MX")
+                        tts?.language = localeActual
                         tts?.setSpeechRate(0.95f)
                         tts?.setPitch(1.0f)
 

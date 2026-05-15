@@ -19,6 +19,7 @@ import com.google.firebase.FirebaseApp
 import android.Manifest
 import android.content.Context
 import android.content.res.Configuration
+import com.example.voxtask.utils.TextoAVoz
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : ComponentActivity() {
@@ -31,7 +32,7 @@ class MainActivity : ComponentActivity() {
         val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idioma = prefs.getString("idioma", "es") ?: "es"
         val locale = java.util.Locale(idioma)
-        java.util.Locale.setDefault(locale)
+        TextoAVoz.localeActual = locale
         val config = Configuration()
         config.setLocale(locale)
         super.attachBaseContext(newBase.createConfigurationContext(config))

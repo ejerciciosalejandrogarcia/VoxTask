@@ -58,9 +58,14 @@ import com.example.voxtask.ui.theme.ColoresClaros
 import com.example.voxtask.ui.theme.ColoresOscuros
 import com.example.voxtask.ui.theme.LocalThemeManager
 import com.example.voxtask.utils.PlantillaBase
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.PlantillaBaseViewModel
+import com.example.voxtask.utils.textoTitulo
 import java.util.Locale
-
+import android.Manifest
+import android.os.Build
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,15 +74,31 @@ fun AjustesScreen(
     plantillaBaseViewModel: PlantillaBaseViewModel,
     navController: NavController
 ) {
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
     val contexto = LocalContext.current
     val actividad = contexto as Activity
     val fondoUri by plantillaBaseViewModel.fondoUri.collectAsState()
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        plantillaBaseViewModel.actualizarFondo(uri)
+        uri?.let {
+            plantillaBaseViewModel.actualizarFondo(it)
+        }
     }
 
+    val permisos = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            imageLauncher.launch("image/*")
+        }
+    }
+    val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
     LaunchedEffect(Unit) {
         viewModel.inicializarIdioma(contexto)
     }
@@ -88,7 +109,7 @@ fun AjustesScreen(
         navController = navController
     ) { paddingValues ->
 
-        //Dialogos
+        // Dialogos
         if (viewModel.mostrarSelectorColor) {
             ColorInterfazDialog(
                 onDismiss = { viewModel.mostrarSelectorColor = false }
@@ -168,13 +189,14 @@ fun AjustesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(espaciado.l)                          // antes: 16.dp
         ) {
             item {
                 Text(
                     text = stringResource(R.string.ajustes),
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    fontSize = tamano.textoTitulo,             // antes: sin adaptar
+                    modifier = Modifier.padding(bottom = espaciado.l)  // antes: 16.dp
                 )
             }
             item {
@@ -222,7 +244,7 @@ fun AjustesScreen(
                         titulo = stringResource(R.string.cambiar_fondo),
                         descripcion = stringResource(R.string.personaliza_fondo)
                     ) {
-                        imageLauncher.launch("image/*")
+                        permisos.launch(permiso)
                     }
                 }
             }
@@ -245,27 +267,50 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
     val colorClaro by themeManager.colorClaro.collectAsState()
     val colorOscuro by themeManager.colorOscuro.collectAsState()
     val esModoOscuro = isSystemInDarkTheme()
+    val tamano = LocalTamanioPantalla.current
+    val espaciado = LocalEspaciado.current
+
+    val tamanoCirculo = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 40.dp
+        TamanioPantalla.MEDIO     -> 48.dp
+        TamanioPantalla.EXPANDIDO -> 56.dp
+    }
+    val altoGrid = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 100.dp
+        TamanioPantalla.MEDIO     -> 120.dp
+        TamanioPantalla.EXPANDIDO -> 150.dp
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(stringResource(R.string.opcion_color_interfaz), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.opcion_color_interfaz),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
         },
         text = {
             Column {
                 // Selector color modo claro
-                Text(stringResource(R.string.opcion_color_interfaz_modo_claro), style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
+                Text(
+                    stringResource(R.string.opcion_color_interfaz_modo_claro),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = espaciado.s)
+                )
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5),
-                    modifier = Modifier.fillMaxWidth().height(120.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(altoGrid)
                 ) {
                     items(ColoresClaros) { color ->
                         Box(
                             modifier = Modifier
-                                .padding(4.dp)
-                                .size(48.dp)
+                                .padding(espaciado.xs)
+                                .size(tamanoCirculo)
                                 .clip(CircleShape)
                                 .background(color)
                                 .clickable { themeManager.setColorClaro(color) }
@@ -278,21 +323,27 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(espaciado.l))
 
                 // Selector color modo oscuro
-                Text(stringResource(R.string.opcion_color_interfaz_modo_oscuro), style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
+                Text(
+                    stringResource(R.string.opcion_color_interfaz_modo_oscuro),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = espaciado.s) // antes: 8.dp
+                )
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5),
-                    modifier = Modifier.fillMaxWidth().height(120.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(altoGrid)
                 ) {
                     items(ColoresOscuros) { color ->
                         Box(
                             modifier = Modifier
-                                .padding(4.dp)
-                                .size(48.dp)
+                                .padding(espaciado.xs)
+                                .size(tamanoCirculo)
                                 .clip(CircleShape)
                                 .background(color)
                                 .clickable { themeManager.setColorOscuro(color) }
@@ -304,7 +355,6 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                         )
                     }
                 }
-
             }
         },
         confirmButton = {
@@ -314,6 +364,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         }
     )
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OpcionAjuste(
@@ -322,11 +373,13 @@ fun OpcionAjuste(
     descripcion: String,
     onClick: () -> Unit
 ) {
+    val espaciado = LocalEspaciado.current
+
     Card(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
+            .padding(bottom = espaciado.s),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         ListItem(

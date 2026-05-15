@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Perfil
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,14 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
+import com.example.voxtask.R
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun PerfilScreen(
     viewModelPlantilla: PlantillaBaseViewModel,
@@ -30,15 +35,15 @@ fun PerfilScreen(
 ) {
     // Observar el estado del ViewModel (StateFlow)
     val uiState by viewModel.estadoUi.collectAsStateWithLifecycle()
-
+    val contexto = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var mostrarSelector by remember { mutableStateOf(false) }
 
     // Manejo de mensajes de error o éxito
     LaunchedEffect(uiState.mensajeError) {
-        if (uiState.mensajeError.isNotEmpty()) {
+        uiState.mensajeError?.let { resId ->
             snackbarHostState.showSnackbar(
-                message = uiState.mensajeError,
+                message = contexto.getString(resId),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()
@@ -76,14 +81,14 @@ fun PerfilScreen(
                     if (drawableId != null) {
                         Image(
                             painter = painterResource(id = drawableId),
-                            contentDescription = "Avatar",
+                            contentDescription = stringResource(R.string.content_desc_avatar),
                             modifier = Modifier.fillMaxSize().clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Avatar",
+                            contentDescription = stringResource(R.string.content_desc_avatar),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(100.dp)
                         )
@@ -106,7 +111,7 @@ fun PerfilScreen(
                     OutlinedTextField(
                         value = uiState.nombreUsuario,
                         onValueChange = { viewModel.alCambiarNombreUsuario(it) },
-                        label = { Text("Nombre de usuario") },
+                        label = { Text(stringResource(R.string.hint_nombre_usuario)) },
                         enabled = uiState.modoEdicion,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
@@ -118,7 +123,7 @@ fun PerfilScreen(
                     OutlinedTextField(
                         value = uiState.nombre,
                         onValueChange = { viewModel.alCambiarNombre(it) },
-                        label = { Text("Nombre") },
+                        label = { Text(stringResource(R.string.hint_nombre)) },
                         enabled = uiState.modoEdicion,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
@@ -130,7 +135,7 @@ fun PerfilScreen(
                     OutlinedTextField(
                         value = uiState.primerApellido,
                         onValueChange = { viewModel.alCambiarPrimerApellido(it) },
-                        label = { Text("Primer apellido") },
+                        label = { Text(stringResource(R.string.hint_primer_apellido)) },
                         enabled = uiState.modoEdicion,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
@@ -142,7 +147,7 @@ fun PerfilScreen(
                     OutlinedTextField(
                         value = uiState.segundoApellido,
                         onValueChange = { viewModel.alCambiarSegundoApellido(it) },
-                        label = { Text("Segundo apellido") },
+                        label = { Text(stringResource(R.string.hint_segundo_apellido)) },
                         enabled = uiState.modoEdicion,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
@@ -161,7 +166,8 @@ fun PerfilScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (uiState.modoEdicion) "Guardar cambios" else "Editar perfil")
+                        Text(if (uiState.modoEdicion) stringResource(R.string.btn_guardar_cambios) else stringResource(R.string.btn_editar_perfil)
+                        )
                     }
 
                     if (uiState.modoEdicion) {
@@ -170,7 +176,7 @@ fun PerfilScreen(
                             onClick = { viewModel.conmutarModoEdicion() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Cancelar")
+                            Text(stringResource(R.string.btn_cancelar))
                         }
                     }
                 }
@@ -179,7 +185,7 @@ fun PerfilScreen(
             if (mostrarSelector) {
                 AlertDialog(
                     onDismissRequest = { mostrarSelector = false },
-                    title = { Text("Elige tu avatar") },
+                    title = { Text(stringResource(R.string.txt_titulo_selector_avatar)) },
                     text = {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -213,7 +219,7 @@ fun PerfilScreen(
                     confirmButton = {},
                     dismissButton = {
                         TextButton(onClick = { mostrarSelector = false }) {
-                            Text("Cerrar")
+                            Text(stringResource(R.string.btn_cerrar_avatar))
                         }
                     }
                 )

@@ -19,11 +19,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import android.content.Context
+import android.provider.Settings.Global.getString
+import androidx.compose.ui.res.stringResource
+import com.example.voxtask.R
+import com.google.android.gms.common.api.Scope
+
 data class InicioSesionUiState(
     val nombreUsuario: String = "",
     val contrasena: String = "",
     val inicioSesionExitoso: Boolean = false,
-    val mensajeError: String = ""
+    val mensajeError: Int? = null
 )
 
 class InicioSesionViewModel(
@@ -53,24 +58,24 @@ class InicioSesionViewModel(
 
         when {
             nombreUsuario.isBlank() || contrasena.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "CAMPOS_VACIOS")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_campos_vacios)
                 return
             }
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "USUARIO_INVALIDO")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_nombre_usuario_invalido)
                 return
             }
             !regexContrasenia.matches(contrasena) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = "CONTRASENIA_DEBIL")
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_contrasenia_debil)
                 return
             }
             else -> {
                 viewModelScope.launch {
                     val resultado = usuarioRepository.iniciarSesion(nombreUsuario, contrasena)
                     resultado.onSuccess {
-                        _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true, mensajeError = "")
+                        _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true, mensajeError = null)
                     }.onFailure {
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = it.message ?: "ERROR_CREDENTIALS")
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_credenciales_incorrectas)
                     }
                 }
             }
@@ -95,7 +100,7 @@ class InicioSesionViewModel(
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true)
                     }
                 } else {
-                    _estadoUi.value = _estadoUi.value.copy(mensajeError = "ERROR_GOOGLE")
+                    _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_google_auth)
                 }
             }
     }
@@ -122,23 +127,24 @@ class InicioSesionViewModel(
 
                 ref.set(nuevoUsuario)
                     .addOnSuccessListener { alTerminar() }
-                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError = "ERROR_FIRESTORE") }
+                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError =  R.string.err_firestore) }
             }
         }.addOnFailureListener {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = "ERROR_CONEXION")
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_conexion)
         }
     }
 
-    fun limpiarError() { _estadoUi.value = _estadoUi.value.copy(mensajeError = "") }
+    fun limpiarError() { _estadoUi.value = _estadoUi.value.copy(mensajeError = null) }
     fun limpiarEstadoInicioSesion() { _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = false) }
 
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            // He puesto el client_id de tipo 3 de tu JSON
+        val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")
+            .requestServerAuthCode("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")
             .requestEmail()
+            .requestScopes(Scope("https://www.googleapis.com/auth/gmail.readonly"))
             .build()
-
-        return GoogleSignIn.getClient(contexto, gso)
+        return GoogleSignIn.getClient(contexto, opciones)
     }
 }
+

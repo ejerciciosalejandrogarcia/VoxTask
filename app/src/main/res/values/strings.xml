@@ -10,6 +10,27 @@
     <string name="campo_correo">Su correo electronico</string>
     <string name="icono_mostrar_contrasenia">Mostrar contraseña</string>
     <string name="icono_limpiar">Limpiar</string>
+    <string name="txt_ir_inicio_sesion">Ir al inicio de sesión</string>
+    <string name="txt_cuenta_creada">Cuenta creada con éxito</string>
+    <string name="txt_cuenta_creada_descripcion">Ya puedes iniciar sesión con tus credenciales.</string>
+    <string name="hint_fecha_nacimiento">Fecha de nacimiento</string>
+    <string name="content_desc_seleccionar_fecha">Seleccionar fecha</string>
+    <string name="error_campos_vacios_registro">Rellena todos los campos</string>
+    <string name="error_nombre_usuario_invalido_registro">El nombre de usuario solo puede contener letras y números</string>
+    <string name="error_nombre_invalido_registro">El nombre solo puede contener letras</string>
+    <string name="error_primer_apellido_invalido_registro">El primer apellido solo puede contener letras</string>
+    <string name="error_segundo_apellido_invalido_registro">El segundo apellido solo puede contener letras</string>
+    <string name="error_correo_invalido">Correo electrónico no válido</string>
+    <string name="error_contrasenia_debil_registro">La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial</string>
+    <string name="error_registro_fallido">No se ha podido completar el registro. Inténtalo de nuevo.</string>
+
+
+    <!-- Ver Correo Screen -->
+    <string name="txt_correo_no_encontrado">No se encontró el correo.</string>
+    <string name="txt_destinatario_para">Para</string>
+    <string name="txt_destinatario_tu">tú</string>
+    <string name="error_cargar_correo">Error al cargar el correo: %1$s</string>
+
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hola, ¿cómo estás? %1$s. ¿Qué te gustaría que hiciera por ti?</string>
     <string name="txt_inicio_instrucciones">Elige una de las siguientes opciones y cuando estés listo mantén el botón de hablar</string>
@@ -34,6 +55,7 @@
     <string name="txt_mensaje_confirmacion_producto">¿Estás seguro de que quieres eliminar %s?</string>
     <string name="btn_eliminar_producto">Eliminar</string>
     <string name="btn_cancelar_producto">Cancelar</string>
+    <string name="txt_info_lista_compra">Di un producto para agregarlo, o di elimina y el producto para borrarlo</string>
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mes anterior</string>
@@ -87,12 +109,17 @@
     <string name="txt_placeholder_recuperar_contrasenia">Introduce tu correo</string>
     <string name="txt_limpiar">Limpiar</string>
     <string name="btn_recuperar_contrasenia">Enviar correo de recuperación</string>
-
+    <string name="error_email_vacio">Introduce tu correo electrónico</string>
+    <string name="error_email_invalido">Correo electrónico no válido</string>
+    <string name="error_envio_correo">Error al enviar el correo. Inténtalo de nuevo</string>
+    <string name="error_campos_vacios">Rellena todos los campos</string>
+    <string name="error_contrasena_debil">La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial</string>
+    <string name="error_contrasenas_no_coinciden">Las contraseñas no coinciden</string>
+    <string name="error_cambio_contrasena">Error al cambiar la contraseña</string>
 
     <!-- Contador Screen -->
     <string name="btn_parar">Parar</string>
     <string name="btn_iniciar">Iniciar</string>
-    <string name="btn_cancelar">Cancelar</string>
     <string name="txt_titulo_contador_pausado">Contador pausado</string>
     <string name="txt_titulo_contador_iniciado">Contador iniciado</string>
     <string name="txt_titulo_contador_encurso">Contador en curso</string>
@@ -103,13 +130,17 @@
     <string name="txt_title_reanudar">Reanudar</string>
     <string name="txt_title_pausar">Pausar</string>
     <string name="txt_title_cancelar">Cancelar</string>
+    <string name="txt_info_contador">Para crear el contador di cuanto tiempo quieres poner y crear uno nuevo cancela el contador actual y di nuevamente el tiempo que quieres poner</string>
 
     <!-- Correo Screen -->
     <string name="txt_title_advertencia_ver_correos">Conecta tu cuenta de Gmail para ver tus correos</string>
     <string name="txt_btn_conectar_gmail">Conectar Gmail</string>
     <string name="txt_title_no_correos">No tienes correos</string>
     <string name="txt_btne_crear_correo">Crear correo</string>
-
+    <string name="error_sin_sesion">No hay sesión activa</string>
+    <string name="error_general">Se ha producido un error. Inténtalo de nuevo</string>
+    <string name="error_cargar_correos">Error al cargar los correos</string>
+    <string name="error_cuenta_google_incorrecta">La cuenta Google no coincide con la cuenta de la aplicación</string>
     <!-- Enviar Correo Screen -->
     <string name="txt_enviarcorreo_paso_uno">Paso %1$d de 4</string>
     <string name="txt_enviarcorreo_vincular_cuenta">Vinculando cuenta...</string>
@@ -159,14 +190,55 @@
     <string name="txt_respuesta">Regístrate</string>
     <string name="txt_pregunta_contrasenia">¿Olvidaste tu contraseña?</string>
     <string name="txt_respuesta_contrasenia">Restablecer ahora</string>
-    <string name="err_campos_vacios">Por favor, rellena todos los campos obligatorios.</string>
-    <string name="err_nombre_usuario_invalido">El usuario solo puede contener letras y números.</string>
-    <string name="err_contrasenia_debil">La contraseña debe ser más fuerte (9+ caracteres, Mayús, Núm, Especial).</string>
+    <string name="err_campos_vacios">Rellena todos los campos</string>
+    <string name="err_nombre_usuario_invalido">El nombre de usuario solo puede contener letras y números</string>
+    <string name="err_contrasenia_debil">La contraseña debe tener mínimo 9 caracteres, una mayúscula, una minúscula, un número y un carácter especial</string>
     <string name="err_google_auth">Hubo un fallo al conectar con Google. Inténtalo de nuevo.</string>
-    <string name="err_credenciales_incorrectas">Usuario o contraseña no válidos.</string>
+    <string name="err_credenciales_incorrectas">Usuario o contraseña incorrectos</string>
     <string name="err_firestore">No se pudieron guardar los datos en la nube.</string>
     <string name="err_conexion">Error de red. Revisa tu conexión a internet.</string>
 
+    <!-- Nueva Contraseña Screen -->
+    <string name="txt_cargando_contrasena">Guardando contraseña...</string>
+    <string name="txt_contrasena_cambiada">¡Contraseña cambiada!</string>
+    <string name="txt_contrasena_cambiada_descripcion">Ya puedes iniciar sesión con tu nueva contraseña.</string>
+    <string name="btn_ir_inicio_sesion">Ir al inicio de sesión</string>
+    <string name="txt_titulo_nueva_contrasena">Nueva contraseña</string>
+    <string name="txt_descripcion_nueva_contrasena">Introduce tu nueva contraseña.</string>
+    <string name="hint_nueva_contrasena">Nueva contraseña</string>
+    <string name="hint_confirmar_contrasena">Confirmar contraseña</string>
+    <string name="btn_guardar_contrasena">Guardar contraseña</string>
 
 
+    <!-- Perfil Screen -->
+    <string name="content_desc_avatar">Avatar</string>
+    <string name="hint_nombre_usuario">Nombre de usuario</string>
+    <string name="hint_nombre">Nombre</string>
+    <string name="hint_primer_apellido">Primer apellido</string>
+    <string name="hint_segundo_apellido">Segundo apellido</string>
+    <string name="btn_guardar_cambios">Guardar cambios</string>
+    <string name="btn_editar_perfil">Editar perfil</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="txt_titulo_selector_avatar">Elige tu avatar</string>
+    <string name="btn_cerrar_avatar">Cerrar</string>
+    <string name="error_nombre_invalido">El nombre solo puede contener letras</string>
+    <string name="error_primer_apellido_invalido">El primer apellido solo puede contener letras</string>
+    <string name="error_segundo_apellido_invalido">El segundo apellido solo puede contener letras</string>
+    <string name="error_cargar_datos">Error al cargar datos</string>
+    <string name="error_guardar_perfil">Error al guardar el perfil</string>
+    <string name="error_actualizar_avatar">Error al actualizar el avatar</string>
+    <string name="msg_perfil_actualizado">Perfil actualizado correctamente</string>
+    <string name="msg_avatar_actualizado">Avatar actualizado</string>
+
+
+    <!-- Verificacion Screen -->
+    <string name="txt_verificar_correo">Verifica tu correo electrónico</string>
+    <string name="txt_codigo_enviado_a">Hemos enviado un código a:</string>
+    <string name="txt_enviando_codigo">Enviando código...</string>
+    <string name="txt_codigo_expirado">Código expirado</string>
+    <string name="txt_expira_en">Expira en %1$s</string>
+    <string name="btn_verificar_codigo">Verificar código</string>
+    <string name="btn_reenviar_codigo">Reenviar código</string>
+    <string name="error_enviar_codigo">Error al enviar el código: %1$s</string>
+    <string name="error_codigo_incorrecto">Código incorrecto, inténtalo de nuevo</string>
 </resources>

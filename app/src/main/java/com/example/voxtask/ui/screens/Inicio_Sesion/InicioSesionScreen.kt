@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Inicio_Sesion
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,11 +33,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
 
-
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun InicioSesionScreen(
     alIniciarSesionExitosamente: () -> Unit,
-    alNavegarARegistro: (String) -> Unit = {},   // ← acepta String
+    alNavegarARegistro: (String) -> Unit = {},
     alPulsarGoogle: () -> Unit,
     viewModel: InicioSesionViewModel = viewModel()
 ) {
@@ -43,6 +45,7 @@ fun InicioSesionScreen(
     var contrasenaVisible by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val contexto = LocalContext.current
 
     LaunchedEffect(estadoUi.inicioSesionExitoso) {
         if (estadoUi.inicioSesionExitoso) {
@@ -51,15 +54,7 @@ fun InicioSesionScreen(
 
         }
     }
-    LaunchedEffect(estadoUi.mensajeError) {
-        if (estadoUi.mensajeError.isNotEmpty()) {
-            snackbarHostState.showSnackbar(
-                message = estadoUi.mensajeError,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.limpiarError()
-        }
-    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -209,9 +204,9 @@ fun InicioSesionScreen(
 
                     // Mensaje de error
                     LaunchedEffect(estadoUi.mensajeError) {
-                        if (estadoUi.mensajeError.isNotEmpty()) {
+                        estadoUi.mensajeError?.let { resId ->
                             snackbarHostState.showSnackbar(
-                                message = estadoUi.mensajeError,
+                                message = contexto.getString(resId),
                                 duration = SnackbarDuration.Short
                             )
                             viewModel.limpiarError()

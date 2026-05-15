@@ -61,7 +61,7 @@ class ContadorService : Service() {
                 estaPausado = true
 
                 actualizarNotificacion(
-                    "Contador pausado",
+                    this.getString(R.string.txt_titulo_contador_pausado),
                     formatearTiempo(segundosRestantes),
                     pausado = true
                 )
@@ -107,8 +107,14 @@ class ContadorService : Service() {
                 segundosRestantes = restantes
 
                 actualizarNotificacion(
-                    titulo = if (restantes > 0) getString(R.string.txt_titulo_contador_pausado) else getString(R.string.txt_titulo_contador_terminado),
-                    contenido = if (restantes > 0) formatearTiempo(restantes) else getString(R.string.txt_titulo_contador_finalizado),
+                    titulo = if (restantes > 0)
+                        getString(R.string.txt_titulo_contador_iniciado)  // antes: txt_titulo_contador_pausado
+                    else
+                        getString(R.string.txt_titulo_contador_terminado),
+                    contenido = if (restantes > 0)
+                        formatearTiempo(restantes)
+                    else
+                        getString(R.string.txt_titulo_contador_finalizado),
                     pausado = false
                 )
 

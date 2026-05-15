@@ -166,10 +166,15 @@ class ContadorViewModel : ViewModel() {
         }
     }
 
-    fun iniciar() {
+    fun iniciar(contexto: Context) {
         val partes = tiempoFormato.split(":")
         val restantes = partes[0].toInt() * 3600 + partes[1].toInt() * 60 + partes[2].toInt()
         if (restantes <= 0) return
+
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_REANUDAR
+        }
+        contexto.startService(intent)
 
         corriendo = true
         countdownJob?.cancel()
@@ -187,7 +192,6 @@ class ContadorViewModel : ViewModel() {
             corriendo = false
         }
     }
-
     fun parar(contexto: Context) {
         corriendo = false
         countdownJob?.cancel()
@@ -215,14 +219,26 @@ class ContadorViewModel : ViewModel() {
     fun comprobarEstadoService() {
         viewModelScope.launch {
             while (true) {
-
-                if (!ContadorService.estaActivo && !ContadorService.estaPausado) {
-                    mostrarContador = false
-                    corriendo = false
-                    tiempoFormato = "00:00:00"
-                    countdownJob?.cancel()
+                when {
+                    !ContadorService.estaActivo && !ContadorService.estaPausado && mostrarContador -> {
+                        mostrarContador = false
+                        corriendo = false
+                        tiempoFormato = "00:00:00"
+                        countdownJob?.cancel()
+                    }
+                    ContadorService.estaPausado && corriendo -> {
+                        corriendo = false
+                        countdownJob?.cancel()
+                        val r = ContadorService.segundosRestantes
+                        val h = r / 3600
+                        val m = (r % 3600) / 60
+                        val s = r % 60
+                        tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                    }
+                    ContadorService.estaActivo && !corriendo && mostrarContador -> {
+                        iniciarContador(ContadorService.segundosRestantes)
+                    }
                 }
-
                 delay(300)
             }
         }

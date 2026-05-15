@@ -25,10 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.voxtask.R
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 
@@ -39,8 +42,10 @@ fun VerCorreoScreen(
     navController: NavController,
     correoId: String?
 ) {
+    val contexto = LocalContext.current
+
     LaunchedEffect(correoId) {
-        correoId?.let { viewModel.obtenerTokenYCorreo(it) }
+        correoId?.let { viewModel.obtenerTokenYCorreo(it,contexto) }
     }
 
     PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { padding ->
@@ -64,7 +69,7 @@ fun VerCorreoScreen(
                 }
                 viewModel.correo == null -> {
                     Text(
-                        text = "No se encontró el correo.",
+                        text = stringResource(R.string.txt_correo_no_encontrado),
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -148,12 +153,12 @@ fun VerCorreoScreen(
                                     .padding(horizontal = 20.dp, vertical = 12.dp)
                             ) {
                                 Text(
-                                    text = "Para",
+                                    text = stringResource(R.string.txt_destinatario_para),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "tú",
+                                    text = stringResource(R.string.txt_destinatario_tu),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
