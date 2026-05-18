@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +26,11 @@ import androidx.navigation.NavController
 import com.example.voxtask.R
 import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
+import com.example.voxtask.utils.textoTitulo
 import kotlinx.coroutines.delay
 
 @SuppressLint("LocalContextGetResourceValueCall")
@@ -38,6 +44,17 @@ fun VerificacionScreen(
     val codigoUnido = codigo.joinToString("")
     val contexto = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
+
+    // Valores adaptativos desde dimens.xml
+    val paddingHorizontal  = dimensionResource(R.dimen.verificacion_padding_horizontal)
+    val paddingCardH       = dimensionResource(R.dimen.verificacion_padding_card_horizontal)
+    val paddingCardV       = dimensionResource(R.dimen.verificacion_padding_card_vertical)
+    val alturaBoton        = dimensionResource(R.dimen.verificacion_altura_boton)
+    val campoAncho         = dimensionResource(R.dimen.verificacion_campo_ancho)
+    val campoAlto          = dimensionResource(R.dimen.verificacion_campo_alto)
+    val anchoMaximo        = tamano.anchoMaximoContenido
 
     var segundosRestantes by remember { mutableStateOf(300) }
     var expirado by remember { mutableStateOf(false) }
@@ -94,19 +111,26 @@ fun VerificacionScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 50.dp)
+                .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 36.dp),
+                .padding(horizontal = paddingHorizontal),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Limita el ancho en tabletas y plegables
+            val modificadorCard = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier.widthIn(max = anchoMaximo).fillMaxWidth()
+            } else {
+                Modifier.fillMaxWidth()
+            }
+
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = modificadorCard,
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
@@ -114,61 +138,69 @@ fun VerificacionScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 28.dp, vertical = 36.dp),
+                        .padding(horizontal = paddingCardH, vertical = paddingCardV),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = stringResource(R.string.app_name),
-                        fontSize = 34.sp,
+                        fontSize = tamano.textoTitulo,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary,
                         letterSpacing = (-0.5).sp
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(espaciado.s))
 
                     Text(
                         text = stringResource(R.string.txt_verificar_correo),
-                        fontSize = 18.sp,
+                        fontSize = tamano.textoBody,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(espaciado.s))
 
                     Text(
                         text = stringResource(R.string.txt_codigo_enviado_a),
-                        fontSize = 13.sp,
+                        fontSize = tamano.textoBody,
                         color = TextoGris
                     )
 
                     if (estadoUi.email.isNotEmpty()) {
                         Text(
                             text = estadoUi.email,
-                            fontSize = 13.sp,
+                            fontSize = tamano.textoBody,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(espaciado.l))
 
                     if (estadoUi.cargando) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = stringResource(R.string.txt_enviando_codigo), fontSize = 12.sp, color = TextoGris)
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.height(espaciado.s))
+                        Text(
+                            text = stringResource(R.string.txt_enviando_codigo),
+                            fontSize = tamano.textoBody,
+                            color = TextoGris
+                        )
                     } else {
                         Text(
                             text = if (expirado) stringResource(R.string.txt_codigo_expirado)
                             else stringResource(R.string.txt_expira_en, tiempoTexto),
-                            fontSize = 13.sp,
+                            fontSize = tamano.textoBody,
                             fontWeight = FontWeight.Medium,
                             color = colorContador
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(espaciado.xl))
 
+                    // Campos del código
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -189,7 +221,7 @@ fun VerificacionScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .size(width = 48.dp, height = 56.dp)
+                                    .size(width = campoAncho, height = campoAlto)
                                     .focusRequester(focusRequesters[i])
                                     .onKeyEvent { evento ->
                                         if (evento.key == Key.Backspace &&
@@ -206,7 +238,7 @@ fun VerificacionScreen(
                                 singleLine = true,
                                 enabled = !expirado && !estadoUi.cargando,
                                 textStyle = TextStyle(
-                                    fontSize = 20.sp,
+                                    fontSize = tamano.textoBody,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -228,12 +260,14 @@ fun VerificacionScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(espaciado.xl))
 
                     Button(
                         onClick = { viewModel.verificarCodigo(codigoUnido) },
                         enabled = codigoUnido.length == 5 && !expirado && !estadoUi.cargando,
-                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(alturaBoton),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -243,7 +277,7 @@ fun VerificacionScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.btn_verificar_codigo),
-                            fontSize = 16.sp,
+                            fontSize = tamano.textoBody,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             letterSpacing = 0.5.sp
@@ -251,7 +285,7 @@ fun VerificacionScreen(
                     }
 
                     if (expirado) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(espaciado.m))
                         TextButton(onClick = {
                             codigo = List(5) { "" }
                             expirado = false
@@ -261,7 +295,7 @@ fun VerificacionScreen(
                             Text(
                                 text = stringResource(R.string.btn_reenviar_codigo),
                                 color = MaterialTheme.colorScheme.primary,
-                                fontSize = 13.sp,
+                                fontSize = tamano.textoBody,
                                 fontWeight = FontWeight.Bold
                             )
                         }

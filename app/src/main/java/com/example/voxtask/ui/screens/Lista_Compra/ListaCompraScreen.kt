@@ -19,6 +19,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.TamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.TextoAVoz
 import com.example.voxtask.R
@@ -31,11 +36,32 @@ fun ListaCompraScreen(
     viewModel: ListaCompraViewModel,
     navController: NavController
 ) {
-    //Variables
     val contexto = LocalContext.current
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
     var itemAEliminar by remember { mutableStateOf<Producto?>(null) }
 
-    //Mensaje de confirmacion a la hora de eliminar un producto
+    // Valores adaptativos
+    val paddingContenido = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+    val paddingFilaHorizontal = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 24 dp
+        TamanioPantalla.EXPANDIDO -> 28.dp
+    }
+    val paddingFilaVertical = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.m       // 12 dp
+        TamanioPantalla.MEDIO     -> espaciado.l       // 16 dp
+        TamanioPantalla.EXPANDIDO -> espaciado.xl      // 24 dp
+    }
+
+    // Nuevo: ancho máximo del contenido para tabletas y plegables
+    val anchoMaximoContenido = tamano.anchoMaximoContenido
+
+    // Mensaje de confirmación a la hora de eliminar un producto
     itemAEliminar?.let { producto ->
         AlertDialog(
             onDismissRequest = { itemAEliminar = null },
@@ -67,46 +93,68 @@ fun ListaCompraScreen(
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(paddingContenido),             // antes: 16.dp fijo
+            contentAlignment = Alignment.TopCenter
         ) {
-            //Cuando no haya ningun producto en la lista se muestra el siguiente mensaje
-            if (viewModel.productos.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.txt_sin_producto_lista_compra),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Gray
-                    )
-                }
-                //Si hay productos en la lista se mostrara los productos con un icono para poder eliminar el producto en la lista
+            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+            val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier
+                    .widthIn(max = anchoMaximoContenido)
+                    .fillMaxSize()
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(viewModel.productos) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = item.nombre.replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
-                            IconButton(onClick = { itemAEliminar = item }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = stringResource(R.string.icono_eliminar_producto),
-                                    tint = Color.Red.copy(alpha = 0.7f)
+                Modifier.fillMaxSize()
+            }
+
+            Column(modifier = modificadorContenido) {
+                // Cuando no haya ningún producto en la lista
+                if (viewModel.productos.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.txt_sin_producto_lista_compra),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Gray,
+                            fontSize = tamano.textoBody
+                        )
+                    }
+                    // Si hay productos en la lista
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(espaciado.s) // antes: 8.dp
+                    ) {
+                        items(viewModel.productos) { item ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                                    .padding(
+                                        horizontal = paddingFilaHorizontal,  // antes: 16.dp fijo
+                                        vertical = paddingFilaVertical       // antes: 12.dp fijo
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = item.nombre.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = tamano.textoBody              // nuevo: texto adaptativo
                                 )
+                                IconButton(onClick = { itemAEliminar = item }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.icono_eliminar_producto),
+                                        tint = Color.Red.copy(alpha = 0.7f)
+                                    )
+                                }
                             }
                         }
                     }

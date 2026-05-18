@@ -5,8 +5,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Visibility
@@ -33,6 +35,12 @@ import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.screens.Cambiar_contrasenia.CambiarContraseniaViewModel
 import com.example.voxtask.ui.theme.*
 import com.example.voxtask.R
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.TamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
+import com.example.voxtask.utils.textoTitulo
 
 @Composable
 fun NuevaContraseniaScreen(
@@ -40,13 +48,61 @@ fun NuevaContraseniaScreen(
     viewModel: CambiarContraseniaViewModel = viewModel(),
     oobCode: String = ""
 ) {
-
     val estado by viewModel.estadoNueva.collectAsState()
     var verNueva by remember { mutableStateOf(false) }
     var verConfirmar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val estadoNueva by viewModel.estadoNueva.collectAsState()
     val contexto = LocalContext.current
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
+
+    // Valores adaptativos
+    val paddingHorizontalCard = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+    val paddingVerticalCard = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24 dp
+        TamanioPantalla.MEDIO     -> 36.dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+    val alturaBoton = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 54.dp
+        TamanioPantalla.MEDIO     -> 58.dp
+        TamanioPantalla.EXPANDIDO -> 64.dp
+    }
+    val tamanoIconoExito = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 80.dp
+        TamanioPantalla.MEDIO     -> 96.dp
+        TamanioPantalla.EXPANDIDO -> 112.dp
+    }
+    val tamanoCheckExito = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 48.dp
+        TamanioPantalla.MEDIO     -> 56.dp
+        TamanioPantalla.EXPANDIDO -> 64.dp
+    }
+
+    // Nuevo: tamaño de los círculos decorativos adaptativo
+    val tamanoCirculoGrande = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 280.dp
+        TamanioPantalla.MEDIO     -> 340.dp
+        TamanioPantalla.EXPANDIDO -> 400.dp
+    }
+    val tamanoCirculoMediano = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 160.dp
+        TamanioPantalla.MEDIO     -> 200.dp
+        TamanioPantalla.EXPANDIDO -> 240.dp
+    }
+    val tamanoCirculoPequeno = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 140.dp
+        TamanioPantalla.MEDIO     -> 180.dp
+        TamanioPantalla.EXPANDIDO -> 220.dp
+    }
+
+    // Nuevo: ancho máximo de la card para tabletas y plegables
+    val anchoMaximoCard = tamano.anchoMaximoContenido
 
     LaunchedEffect(estadoNueva.mensajeError) {
         estadoNueva.mensajeError?.let { resId ->
@@ -58,47 +114,98 @@ fun NuevaContraseniaScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 50.dp)
+                .padding(top = espaciado.xl)           // antes: 50.dp
                 .zIndex(10f)
         )
 
-        // Círculos decorativos
-        Box(modifier = Modifier.size(280.dp).offset(x = (-80).dp, y = (-60).dp)
-            .clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-        Box(modifier = Modifier.size(160.dp).offset(x = 270.dp, y = 40.dp)
-            .clip(CircleShape).background(MaterialTheme.colorScheme.primary).blur(2.dp))
-        Box(modifier = Modifier.size(300.dp).offset(x = 160.dp, y = 620.dp)
-            .clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-        Box(modifier = Modifier.size(140.dp).offset(x = (-40).dp, y = 700.dp)
-            .clip(CircleShape).background(MaterialTheme.colorScheme.primary).blur(1.dp))
+        // Círculo grande superior izquierda
+        Box(
+            modifier = Modifier
+                .size(tamanoCirculoGrande)
+                .offset(x = (-80).dp, y = (-60).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        // Círculo mediano superior derecha
+        Box(
+            modifier = Modifier
+                .size(tamanoCirculoMediano)
+                .offset(x = 270.dp, y = 40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .blur(2.dp)
+        )
+        // Círculo grande inferior derecha
+        Box(
+            modifier = Modifier
+                .size(tamanoCirculoGrande)
+                .offset(x = 160.dp, y = 620.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        // Círculo pequeño inferior izquierda
+        Box(
+            modifier = Modifier
+                .size(tamanoCirculoPequeno)
+                .offset(x = (-40).dp, y = 700.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .blur(1.dp)
+        )
 
+        // Nuevo: scroll para teclado abierto y pantallas pequeñas
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 36.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = paddingHorizontalCard),  // antes: 36.dp fijo
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Spacer(modifier = Modifier.height(espaciado.xl))
+
+            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+            val modificadorCard = if (anchoMaximoCard != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier.widthIn(max = anchoMaximoCard).fillMaxWidth()
+            } else {
+                Modifier.fillMaxWidth()
+            }
+
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = modificadorCard,
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 36.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = paddingVerticalCard, vertical = paddingVerticalCard), // antes: 28.dp, 36.dp
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     when {
                         // Cargando
                         estado.cargando -> {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(56.dp), strokeWidth = 3.dp)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(stringResource(R.string.txt_cargando_contrasena), color = Color.Gray, fontSize = 14.sp)
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(56.dp),
+                                strokeWidth = 3.dp
+                            )
+                            Spacer(modifier = Modifier.height(espaciado.l))    // antes: 16.dp
+                            Text(
+                                stringResource(R.string.txt_cargando_contrasena),
+                                color = Color.Gray,
+                                fontSize = tamano.textoBody                    // antes: 14.sp fijo
+                            )
                         }
 
                         // Éxito
@@ -108,40 +215,73 @@ fun NuevaContraseniaScreen(
 
                             AnimatedVisibility(visible = visible, enter = scaleIn() + fadeIn()) {
                                 Box(
-                                    modifier = Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+                                    modifier = Modifier
+                                        .size(tamanoIconoExito)                // antes: 80.dp fijo
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(48.dp))
+                                    Icon(
+                                        Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(tamanoCheckExito) // antes: 48.dp fijo
+                                    )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Text(stringResource(R.string.txt_contrasena_cambiada), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(stringResource(R.string.txt_contrasena_cambiada_descripcion),
-                                fontSize = 13.sp, color = Color.Gray, textAlign = TextAlign.Center)
-                            Spacer(modifier = Modifier.height(28.dp))
+                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 20.dp
+                            Text(
+                                stringResource(R.string.txt_contrasena_cambiada),
+                                fontSize = tamano.textoTitulo,                 // antes: 22.sp fijo
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
+                            Text(
+                                stringResource(R.string.txt_contrasena_cambiada_descripcion),
+                                fontSize = tamano.textoBody,                   // antes: 13.sp fijo
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
                             Button(
                                 onClick = {
                                     navController.navigate(VoxTaskScreen.Inicio_sesion.name) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
-                                modifier = Modifier.fillMaxWidth().height(54.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(alturaBoton),                      // antes: 54.dp fijo
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
-                                Text(stringResource(R.string.btn_ir_inicio_sesion), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(
+                                    stringResource(R.string.btn_ir_inicio_sesion),
+                                    fontSize = tamano.textoBody,               // antes: 15.sp fijo
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
                             }
                         }
 
                         // Formulario
                         else -> {
-                            Text(stringResource(R.string.txt_titulo_nueva_contrasena), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(stringResource(R.string.txt_descripcion_nueva_contrasena), fontSize = 13.sp,
-                                color = Color.Gray, textAlign = TextAlign.Center)
-                            Spacer(modifier = Modifier.height(28.dp))
+                            Text(
+                                stringResource(R.string.txt_titulo_nueva_contrasena),
+                                fontSize = tamano.textoTitulo,                 // antes: 26.sp fijo
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
+                            Text(
+                                stringResource(R.string.txt_descripcion_nueva_contrasena),
+                                fontSize = tamano.textoBody,                   // antes: 13.sp fijo
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
 
                             OutlinedTextField(
                                 value = estado.nuevaContrasena,
@@ -151,8 +291,11 @@ fun NuevaContraseniaScreen(
                                 visualTransformation = if (verNueva) VisualTransformation.None else PasswordVisualTransformation(),
                                 trailingIcon = {
                                     IconButton(onClick = { verNueva = !verNueva }) {
-                                        Icon(if (verNueva) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                            contentDescription = null, tint = TextoGris)
+                                        Icon(
+                                            if (verNueva) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                            contentDescription = null,
+                                            tint = TextoGris
+                                        )
                                     }
                                 },
                                 shape = RoundedCornerShape(14.dp),
@@ -167,7 +310,7 @@ fun NuevaContraseniaScreen(
                                     cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
-                            Spacer(modifier = Modifier.height(14.dp))
+                            Spacer(modifier = Modifier.height(espaciado.m))    // antes: 14.dp
                             OutlinedTextField(
                                 value = estado.confirmarContrasena,
                                 onValueChange = { viewModel.alCambiarConfirmarContrasena(it) },
@@ -176,8 +319,11 @@ fun NuevaContraseniaScreen(
                                 visualTransformation = if (verConfirmar) VisualTransformation.None else PasswordVisualTransformation(),
                                 trailingIcon = {
                                     IconButton(onClick = { verConfirmar = !verConfirmar }) {
-                                        Icon(if (verConfirmar) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                            contentDescription = null, tint = TextoGris)
+                                        Icon(
+                                            if (verConfirmar) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                            contentDescription = null,
+                                            tint = TextoGris
+                                        )
                                     }
                                 },
                                 shape = RoundedCornerShape(14.dp),
@@ -192,21 +338,29 @@ fun NuevaContraseniaScreen(
                                     cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
-                            Spacer(modifier = Modifier.height(28.dp))
+                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
                             Button(
                                 onClick = { viewModel.guardarNuevaContrasena(oobCode) },
-                                modifier = Modifier.fillMaxWidth().height(54.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(alturaBoton),                      // antes: 54.dp fijo
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                 enabled = !estado.cargando
                             ) {
-                                Text(stringResource(R.string.btn_guardar_contrasena), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(
+                                    stringResource(R.string.btn_guardar_contrasena),
+                                    fontSize = tamano.textoBody,               // antes: 15.sp fijo
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
                             }
                         }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(espaciado.xl))
         }
     }
-
 }

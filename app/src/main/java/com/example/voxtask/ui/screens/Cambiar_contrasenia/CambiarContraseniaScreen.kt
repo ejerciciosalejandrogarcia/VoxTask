@@ -1,11 +1,12 @@
 package com.example.voxtask.ui.screens.Cambiar_contrasenia
 
-
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Email
@@ -32,6 +33,7 @@ import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.textoTitulo
 import com.example.voxtask.utils.textoBody
+import com.example.voxtask.utils.anchoMaximoContenido
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
@@ -48,12 +50,12 @@ fun CambiarContrasenaScreen(
 
     // Valores adaptativos
     val paddingHorizontalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16.dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 32.dp
+        TamanioPantalla.COMPACTO  -> espaciado.l
+        TamanioPantalla.MEDIO     -> espaciado.xl
         TamanioPantalla.EXPANDIDO -> 48.dp
     }
     val paddingVerticalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24.dp
+        TamanioPantalla.COMPACTO  -> espaciado.xl
         TamanioPantalla.MEDIO     -> 40.dp
         TamanioPantalla.EXPANDIDO -> 48.dp
     }
@@ -66,6 +68,26 @@ fun CambiarContrasenaScreen(
         TamanioPantalla.COMPACTO  -> 52.dp
         TamanioPantalla.MEDIO     -> 64.dp
         TamanioPantalla.EXPANDIDO -> 80.dp
+    }
+
+    // Nuevo: ancho máximo de la card para tabletas y plegables
+    val anchoMaximoCard = tamano.anchoMaximoContenido
+
+    // Nuevo: tamaño de los círculos decorativos adaptativo
+    val tamanoCirculoGrande = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 280.dp
+        TamanioPantalla.MEDIO     -> 340.dp
+        TamanioPantalla.EXPANDIDO -> 400.dp
+    }
+    val tamanoCirculoMediano = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 160.dp
+        TamanioPantalla.MEDIO     -> 200.dp
+        TamanioPantalla.EXPANDIDO -> 240.dp
+    }
+    val tamanoCirculoPequeno = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 140.dp
+        TamanioPantalla.MEDIO     -> 180.dp
+        TamanioPantalla.EXPANDIDO -> 220.dp
     }
 
     LaunchedEffect(estadoUi.mensajeError) {
@@ -92,14 +114,14 @@ fun CambiarContrasenaScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = espaciado.xl)           // antes: 50.dp
+                .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
 
         // Círculo grande superior izquierda
         Box(
             modifier = Modifier
-                .size(280.dp)
+                .size(tamanoCirculoGrande)
                 .offset(x = (-80).dp, y = (-60).dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
@@ -108,7 +130,7 @@ fun CambiarContrasenaScreen(
         // Círculo mediano superior derecha
         Box(
             modifier = Modifier
-                .size(160.dp)
+                .size(tamanoCirculoMediano)
                 .offset(x = 270.dp, y = 40.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
@@ -118,7 +140,7 @@ fun CambiarContrasenaScreen(
         // Círculo grande inferior derecha
         Box(
             modifier = Modifier
-                .size(300.dp)
+                .size(tamanoCirculoGrande)
                 .offset(x = 160.dp, y = 620.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
@@ -127,22 +149,33 @@ fun CambiarContrasenaScreen(
         // Círculo pequeño inferior izquierda
         Box(
             modifier = Modifier
-                .size(140.dp)
+                .size(tamanoCirculoPequeno)
                 .offset(x = (-40).dp, y = 700.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
                 .blur(1.dp)
         )
 
+        // Nuevo: scroll para teclado abierto y pantallas pequeñas
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = paddingHorizontalCard),  // antes: 36.dp fijo
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = paddingHorizontalCard),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+            val modificadorCard = if (anchoMaximoCard != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier
+                    .widthIn(max = anchoMaximoCard)
+                    .fillMaxWidth()
+            } else {
+                Modifier.fillMaxWidth()
+            }
+
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = modificadorCard,
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
@@ -151,8 +184,8 @@ fun CambiarContrasenaScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            horizontal = paddingVerticalCard,  // antes: 28.dp fijo
-                            vertical = paddingVerticalCard     // antes: 36.dp fijo
+                            horizontal = paddingVerticalCard,
+                            vertical = paddingVerticalCard
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -163,33 +196,33 @@ fun CambiarContrasenaScreen(
                             imageVector = Icons.Default.Email,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(tamanoIconoEmail)  // antes: 64.dp fijo
+                            modifier = Modifier.size(tamanoIconoEmail)
                         )
-                        Spacer(modifier = Modifier.height(espaciado.l))     // antes: 16.dp
+                        Spacer(modifier = Modifier.height(espaciado.l))
                         Text(
                             text = stringResource(R.string.instrucciones_restablecer_email_uno),
-                            fontSize = tamano.textoTitulo,                  // antes: 24.sp fijo
+                            fontSize = tamano.textoTitulo,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(espaciado.m))     // antes: 12.dp
+                        Spacer(modifier = Modifier.height(espaciado.m))
                         Text(
                             text = stringResource(
                                 id = R.string.instrucciones_restablecer_email_dos,
                                 estadoUi.email
                             ),
-                            fontSize = tamano.textoBody,                    // antes: 14.sp fijo
+                            fontSize = tamano.textoBody,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             lineHeight = 20.sp
                         )
-                        Spacer(modifier = Modifier.height(espaciado.xl))    // antes: 28.dp
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         TextButton(onClick = { viewModel.enviarCorreoRecuperacion() }) {
                             Text(
                                 text = stringResource(R.string.btn_enviar_de_nuevo),
                                 color = MaterialTheme.colorScheme.primary,
-                                fontSize = tamano.textoBody,                // antes: 13.sp fijo
+                                fontSize = tamano.textoBody,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -198,21 +231,21 @@ fun CambiarContrasenaScreen(
                         // ── Formulario ──
                         Text(
                             text = stringResource(R.string.txt_titulo_recuperar_contrasenia),
-                            fontSize = tamano.textoTitulo,                  // antes: 26.sp fijo
+                            fontSize = tamano.textoTitulo,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                             letterSpacing = (-0.5).sp
                         )
-                        Spacer(modifier = Modifier.height(espaciado.s))     // antes: 8.dp
+                        Spacer(modifier = Modifier.height(espaciado.s))
                         Text(
                             text = stringResource(R.string.txt_titulo_recuperar_contrasenia_dos),
-                            fontSize = tamano.textoBody,                    // antes: 13.sp fijo
+                            fontSize = tamano.textoBody,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             lineHeight = 18.sp
                         )
-                        Spacer(modifier = Modifier.height(espaciado.xl))    // antes: 28.dp
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         OutlinedTextField(
                             value = estadoUi.email,
@@ -243,13 +276,13 @@ fun CambiarContrasenaScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(espaciado.xl))    // antes: 28.dp
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         Button(
                             onClick = { viewModel.enviarCorreoRecuperacion() },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(alturaBoton),                       // antes: 54.dp fijo
+                                .height(alturaBoton),
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
@@ -264,7 +297,7 @@ fun CambiarContrasenaScreen(
                             } else {
                                 Text(
                                     text = stringResource(R.string.btn_recuperar_contrasenia),
-                                    fontSize = tamano.textoBody,            // antes: 15.sp fijo
+                                    fontSize = tamano.textoBody,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )

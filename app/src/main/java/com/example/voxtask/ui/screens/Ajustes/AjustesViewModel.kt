@@ -2,8 +2,11 @@ package com.example.voxtask.ui.screens.Ajustes
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.speech.tts.Voice
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,7 +15,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.voxtask.utils.TextoAVoz
 import kotlinx.coroutines.launch
 import java.util.Locale
-
+import androidx.core.content.FileProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 class AjustesViewModel : ViewModel() {
 
     //Variables
@@ -99,5 +105,48 @@ class AjustesViewModel : ViewModel() {
             TextoAVoz.hablar(contexto, "Esto es una prueba")
         }
 
+    }
+
+
+    fun compartirAplicacion(contexto: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val apkCompartido = File(contexto.cacheDir, "VoxTask.apk")
+
+                // Copia el APK desde assets
+                contexto.assets.open("VoxTask.apk").use { input ->
+                    apkCompartido.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                apkCompartido.setReadable(true, false)
+
+                val uri = FileProvider.getUriForFile(
+                    contexto,
+                    "${contexto.packageName}.provider",
+                    apkCompartido
+                )
+
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/vnd.android.package-archive"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_TEXT, "Te comparto VoxTask, ¡instálala!")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+
+                withContext(Dispatchers.Main) {
+                    contexto.startActivity(
+                        Intent.createChooser(intent, "Compartir VoxTask")
+                    )
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(contexto, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 }

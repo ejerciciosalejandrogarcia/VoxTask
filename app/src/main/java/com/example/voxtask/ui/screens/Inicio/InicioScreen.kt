@@ -1,7 +1,6 @@
 package com.example.voxtask.ui.screens.Inicio
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -25,14 +24,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Usuario
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.TamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
+import com.example.voxtask.utils.textoTitulo
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import androidx.compose.runtime.collectAsState
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,13 +46,29 @@ fun InicioScreen(
     plantillaBaseViewModel: PlantillaBaseViewModel
 ) {
     val contexto = LocalContext.current
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
     val usuario = FirebaseAuth.getInstance().currentUser
     val uid = usuario?.uid
     var mostrarTextos by remember { mutableStateOf(false) }
 
-    // Estados para subtextos dinámicos
     var tieneLista by remember { mutableStateOf(false) }
     var tieneEventos by remember { mutableStateOf(false) }
+
+    // Valores adaptativos
+    val paddingHorizontal = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+    val paddingVertical = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24 dp
+        TamanioPantalla.MEDIO     -> 32.dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+
+    // Nuevo: ancho máximo del contenido para tabletas y plegables
+    val anchoMaximoContenido = tamano.anchoMaximoContenido
 
     LaunchedEffect(uid) {
         val nombreUsuarioGenerico = contexto.getString(R.string.txt_usuario_generico)
@@ -86,7 +105,6 @@ fun InicioScreen(
             } catch (e: Exception) { }
         }
 
-        // --- VOCES ACTUALIZADAS CON STRINGS ---
         if (!viewModel.bienvenidaDada) {
             TextoAVoz.hablar(
                 contexto,
@@ -122,15 +140,25 @@ fun InicioScreen(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 24.dp),
+                    .padding(horizontal = paddingHorizontal, vertical = paddingVertical), // antes: 20.dp, 24.dp
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 AnimatedVisibility(visible = mostrarTextos) {
+
+                    // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+                    val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                        Modifier
+                            .widthIn(max = anchoMaximoContenido)
+                            .fillMaxWidth()
+                    } else {
+                        Modifier.fillMaxWidth()
+                    }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        verticalArrangement = Arrangement.spacedBy(espaciado.m), // antes: 12.dp
+                        modifier = modificadorContenido
                     ) {
                         TarjetaMenu(
                             icono = Icons.Default.Email,
@@ -158,7 +186,7 @@ fun InicioScreen(
                             titulo = stringResource(R.string.txt_contador),
                             subtexto = stringResource(R.string.txt_inicio_sub_contador)
                         )
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(espaciado.xl))        // antes: 32.dp
                     }
                 }
             }
@@ -170,8 +198,23 @@ fun InicioScreen(
 fun TarjetaMenu(
     icono: ImageVector,
     titulo: String,
-    subtexto: String,
+    subtexto: String
 ) {
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
+
+    // Valores adaptativos
+    val paddingTarjeta = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 24 dp
+        TamanioPantalla.EXPANDIDO -> 28.dp
+    }
+    val tamanoIcono = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 32.dp
+        TamanioPantalla.MEDIO     -> 40.dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -182,26 +225,28 @@ fun TarjetaMenu(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(paddingTarjeta),                               // antes: 20.dp fijo
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(espaciado.l)  // antes: 16.dp
         ) {
             Icon(
                 imageVector = icono,
                 contentDescription = titulo,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(tamanoIcono)                   // antes: 32.dp fijo
             )
             Column {
                 Text(
                     text = titulo,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    fontSize = tamano.textoTitulo
                 )
                 Text(
                     text = subtexto,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = tamano.textoBody
                 )
             }
         }

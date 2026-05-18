@@ -5,8 +5,10 @@ import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
@@ -19,15 +21,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource  // <- IMPORT MUY IMPORTANTE
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.voxtask.ui.theme.*
 import java.util.Calendar
@@ -36,20 +39,38 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.zIndex
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
+import com.example.voxtask.utils.textoTitulo
+
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun RegistroUsuarioScreen(
     alRegistroExitoso: () -> Unit,
     viewModel: RegistroUsuarioViewModel = viewModel()
 ) {
-    //Variables
     val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val calendario = Calendar.getInstance()
     val snackbarHostState = remember { SnackbarHostState() }
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
 
+    // Valores adaptativos desde dimens.xml
+    val paddingHorizontal    = dimensionResource(R.dimen.registro_padding_horizontal)
+    val paddingCardH         = dimensionResource(R.dimen.registro_padding_card_horizontal)
+    val paddingCardV         = dimensionResource(R.dimen.registro_padding_card_vertical)
+    val alturaBoton          = dimensionResource(R.dimen.registro_altura_boton)
+    val tamanoIconoExito     = dimensionResource(R.dimen.registro_icono_exito)
+    val circuloGrande        = dimensionResource(R.dimen.registro_circulo_grande)
+    val circuloMediano       = dimensionResource(R.dimen.registro_circulo_mediano)
+    val circuloPequeno       = dimensionResource(R.dimen.registro_circulo_pequeno)
+    val circuloInferior      = dimensionResource(R.dimen.registro_circulo_inferior)
+    val espaciadoCampos      = dimensionResource(R.dimen.registro_espaciado_campos)
+    val anchoMaximo          = tamano.anchoMaximoContenido
 
     val selectorFecha = remember {
         DatePickerDialog(
@@ -62,6 +83,7 @@ fun RegistroUsuarioScreen(
             calendario.get(Calendar.DAY_OF_MONTH)
         )
     }
+
     LaunchedEffect(estadoUi.mensajeError) {
         estadoUi.mensajeError?.let { resId ->
             snackbarHostState.showSnackbar(
@@ -81,58 +103,66 @@ fun RegistroUsuarioScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 50.dp)
+                .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
-        //Círculo grande superior izquierda
+
+        // Círculo grande superior izquierda
         Box(
             modifier = Modifier
-                .size(280.dp)
+                .size(circuloGrande)
                 .offset(x = (-80).dp, y = (-60).dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
         )
 
-        //Círculo mediano superior derecha
+        // Círculo mediano superior derecha
         Box(
             modifier = Modifier
-                .size(160.dp)
+                .size(circuloMediano)
                 .offset(x = 270.dp, y = 40.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
                 .blur(2.dp)
         )
 
-        //Círculo grande inferior derecha
+        // Círculo grande inferior derecha
         Box(
             modifier = Modifier
-                .size(300.dp)
+                .size(circuloInferior)
                 .offset(x = 160.dp, y = 620.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
         )
 
-        //Círculo pequeño inferior izquierda
+        // Círculo pequeño inferior izquierda
         Box(
             modifier = Modifier
-                .size(140.dp)
+                .size(circuloPequeno)
                 .offset(x = (-40).dp, y = 700.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
                 .blur(1.dp)
         )
 
-
+        // Scroll para teclado abierto y pantallas pequeñas
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 36.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = paddingHorizontal),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Limita el ancho en tabletas y plegables
+            val modificadorCard = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier.widthIn(max = anchoMaximo).fillMaxWidth()
+            } else {
+                Modifier.fillMaxWidth()
+            }
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = modificadorCard,
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
@@ -140,26 +170,22 @@ fun RegistroUsuarioScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 28.dp, vertical = 36.dp),
+                        .padding(horizontal = paddingCardH, vertical = paddingCardV),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     if (estadoUi.registroUsuarioExitoso) {
 
                         var visible by remember { mutableStateOf(false) }
-
-                        LaunchedEffect(Unit) {
-                            visible = true
-                        }
+                        LaunchedEffect(Unit) { visible = true }
 
                         AnimatedVisibility(
                             visible = visible,
                             enter = scaleIn() + fadeIn()
                         ) {
-
                             Box(
                                 modifier = Modifier
-                                    .size(80.dp)
+                                    .size(tamanoIconoExito)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primary),
                                 contentAlignment = Alignment.Center
@@ -168,38 +194,36 @@ fun RegistroUsuarioScreen(
                                     Icons.Default.Check,
                                     contentDescription = null,
                                     tint = Color.White,
-                                    modifier = Modifier.size(48.dp)
+                                    modifier = Modifier.size(tamanoIconoExito * 0.6f)
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(espaciado.l))
 
                         Text(
                             text = stringResource(R.string.txt_cuenta_creada),
-                            fontSize = 22.sp,
+                            fontSize = tamano.textoTitulo,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(espaciado.s))
 
                         Text(
                             text = stringResource(R.string.txt_cuenta_creada_descripcion),
-                            fontSize = 13.sp,
+                            fontSize = tamano.textoBody,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
                         )
 
-                        Spacer(modifier = Modifier.height(28.dp))
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         Button(
-                            onClick = {
-                                alRegistroExitoso()
-                            },
+                            onClick = { alRegistroExitoso() },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(54.dp),
+                                .height(alturaBoton),
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
@@ -207,27 +231,25 @@ fun RegistroUsuarioScreen(
                         ) {
                             Text(
                                 stringResource(R.string.txt_ir_inicio_sesion),
-                                fontSize = 15.sp,
+                                fontSize = tamano.textoBody,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                         }
 
                     } else {
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                        // Título
+                        Spacer(modifier = Modifier.height(espaciado.s))
+
                         Text(
                             text = stringResource(R.string.app_name),
-                            fontSize = 34.sp,
+                            fontSize = tamano.textoTitulo,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
                             letterSpacing = (-0.5).sp
                         )
 
-
-
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         // Campo nombre de usuario
                         OutlinedTextField(
@@ -238,11 +260,7 @@ fun RegistroUsuarioScreen(
                             trailingIcon = {
                                 if (estadoUi.nombreUsuario.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.alCambiarNombreUsuario("") }) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = stringResource(R.string.icono_limpiar),
-                                            tint = TextoOscuro
-                                        )
+                                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.icono_limpiar), tint = TextoOscuro)
                                     }
                                 }
                             },
@@ -259,7 +277,7 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(espaciadoCampos))
 
                         // Campo nombre
                         OutlinedTextField(
@@ -270,11 +288,7 @@ fun RegistroUsuarioScreen(
                             trailingIcon = {
                                 if (estadoUi.nombre.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.alCambiarNombre("") }) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = stringResource(R.string.icono_limpiar),
-                                            tint = TextoOscuro
-                                        )
+                                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.icono_limpiar), tint = TextoOscuro)
                                     }
                                 }
                             },
@@ -291,7 +305,7 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(espaciadoCampos))
 
                         // Campo primer apellido
                         OutlinedTextField(
@@ -302,11 +316,7 @@ fun RegistroUsuarioScreen(
                             trailingIcon = {
                                 if (estadoUi.primer_apellido.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.alCambiarPrimerApellido("") }) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = stringResource(R.string.icono_limpiar),
-                                            tint = TextoOscuro
-                                        )
+                                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.icono_limpiar), tint = TextoOscuro)
                                     }
                                 }
                             },
@@ -323,9 +333,7 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
+                        Spacer(modifier = Modifier.height(espaciadoCampos))
 
                         // Campo segundo apellido
                         OutlinedTextField(
@@ -336,11 +344,7 @@ fun RegistroUsuarioScreen(
                             trailingIcon = {
                                 if (estadoUi.segundo_apellido.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.alCambiarSegundoApellido("") }) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = stringResource(R.string.icono_limpiar),
-                                            tint = TextoOscuro
-                                        )
+                                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.icono_limpiar), tint = TextoOscuro)
                                     }
                                 }
                             },
@@ -357,7 +361,7 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(espaciadoCampos))
 
                         // Campo fecha nacimiento
                         OutlinedTextField(
@@ -367,10 +371,7 @@ fun RegistroUsuarioScreen(
                             label = { Text(stringResource(R.string.hint_fecha_nacimiento)) },
                             trailingIcon = {
                                 IconButton(onClick = { selectorFecha.show() }) {
-                                    Icon(
-                                        Icons.Default.DateRange,
-                                        contentDescription = stringResource(R.string.content_desc_seleccionar_fecha)
-                                    )
+                                    Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.content_desc_seleccionar_fecha))
                                 }
                             },
                             modifier = Modifier
@@ -387,9 +388,10 @@ fun RegistroUsuarioScreen(
                                 cursorColor = MaterialTheme.colorScheme.primary
                             )
                         )
-                        Spacer(modifier = Modifier.height(14.dp))
 
-                        // Campo correo electronico
+                        Spacer(modifier = Modifier.height(espaciadoCampos))
+
+                        // Campo correo electrónico
                         OutlinedTextField(
                             value = estadoUi.correo_electronico,
                             onValueChange = { viewModel.alCambiarCorreoElectronico(it) },
@@ -398,11 +400,7 @@ fun RegistroUsuarioScreen(
                             trailingIcon = {
                                 if (estadoUi.correo_electronico.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.alCambiarCorreoElectronico("") }) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = stringResource(R.string.icono_limpiar),
-                                            tint = TextoOscuro
-                                        )
+                                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.icono_limpiar), tint = TextoOscuro)
                                     }
                                 }
                             },
@@ -419,7 +417,7 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(espaciadoCampos))
 
                         // Campo contraseña
                         OutlinedTextField(
@@ -450,16 +448,14 @@ fun RegistroUsuarioScreen(
                             )
                         )
 
-
-
-                        Spacer(modifier = Modifier.height(28.dp))
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         // Botón crear cuenta
                         Button(
                             onClick = { viewModel.registrarUsuario() },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(54.dp),
+                                .height(alturaBoton),
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
@@ -468,7 +464,7 @@ fun RegistroUsuarioScreen(
                         ) {
                             Text(
                                 text = stringResource(R.string.btn_registrar_usuario),
-                                fontSize = 16.sp,
+                                fontSize = tamano.textoBody,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 letterSpacing = 0.5.sp

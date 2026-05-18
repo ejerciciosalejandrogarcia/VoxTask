@@ -128,7 +128,7 @@ fun VoxTaskApp(
             composable(route = VoxTaskScreen.Inicio_sesion.name) {
                 InicioSesionScreen(
                     alIniciarSesionExitosamente = {
-                        navController.navigate(VoxTaskScreen.Verificacion.name) {
+                        navController.navigate(VoxTaskScreen.Inicio.name) {
                             popUpTo(VoxTaskScreen.Inicio_sesion.name) { inclusive = true }
                         }
                     },

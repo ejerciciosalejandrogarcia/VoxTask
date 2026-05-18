@@ -65,7 +65,12 @@ import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.textoTitulo
 import java.util.Locale
 import android.Manifest
+import android.content.Intent
 import android.os.Build
+import androidx.compose.material.icons.filled.Share
+import androidx.core.content.FileProvider
+import java.io.File
+
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -192,14 +197,6 @@ fun AjustesScreen(
                 .padding(espaciado.l)                          // antes: 16.dp
         ) {
             item {
-                Text(
-                    text = stringResource(R.string.ajustes),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = tamano.textoTitulo,             // antes: sin adaptar
-                    modifier = Modifier.padding(bottom = espaciado.l)  // antes: 16.dp
-                )
-            }
-            item {
                 OpcionAjuste(
                     icono = Icons.Default.RecordVoiceOver,
                     titulo = stringResource(R.string.cambiar_voz),
@@ -255,6 +252,15 @@ fun AjustesScreen(
                     descripcion = stringResource(R.string.ver_version_actual)
                 ) {
                     Toast.makeText(contexto, contexto.getString(R.string.version), Toast.LENGTH_SHORT).show()
+                }
+            }
+            item {
+                OpcionAjuste(
+                    icono = Icons.Default.Share,
+                    titulo = stringResource(R.string.compartir_app),
+                    descripcion = stringResource(R.string.compartir_app_descripcion)
+                ) {
+                    viewModel.compartirAplicacion(contexto)
                 }
             }
         }

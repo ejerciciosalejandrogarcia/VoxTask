@@ -10,11 +10,7 @@ fun ProveedorAdaptativo(
     contenido: @Composable () -> Unit
 ) {
     val tamano = tamanioPantalla.aTamanioPantalla()
-    val espaciado = when (tamano) {
-        TamanioPantalla.COMPACTO  -> EspaciadoCompacto
-        TamanioPantalla.MEDIO     -> EspaciadoMedio
-        TamanioPantalla.EXPANDIDO -> EspaciadoExpandido
-    }
+    val espaciado = espaciadoFromDimens() // ← lee del dimens.xml correcto automáticamente
 
     CompositionLocalProvider(
         LocalTamanioPantalla provides tamano,

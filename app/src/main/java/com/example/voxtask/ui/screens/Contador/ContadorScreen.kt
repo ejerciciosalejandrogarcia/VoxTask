@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
@@ -48,6 +49,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.example.voxtask.R
+import com.example.voxtask.utils.anchoMaximoContenido
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -64,25 +66,29 @@ fun ContadorScreen(
 
     // Valores adaptativos
     val tamanoCirculo = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 320.dp   // antes: 280.dp
-        TamanioPantalla.MEDIO     -> 350.dp   // antes: 310.dp
-        TamanioPantalla.EXPANDIDO -> 400.dp   // antes: 360.dp
+        TamanioPantalla.COMPACTO  -> 280.dp
+        TamanioPantalla.MEDIO     -> 340.dp
+        TamanioPantalla.EXPANDIDO -> 420.dp
     }
     val tamanoBoton = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 56.dp
-        TamanioPantalla.MEDIO     -> 64.dp
-        TamanioPantalla.EXPANDIDO -> 76.dp
+        TamanioPantalla.COMPACTO  -> 64.dp
+        TamanioPantalla.MEDIO     -> 76.dp
+        TamanioPantalla.EXPANDIDO -> 90.dp
     }
     val tamanoIconoBoton = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 26.dp
-        TamanioPantalla.MEDIO     -> 32.dp
-        TamanioPantalla.EXPANDIDO -> 40.dp
+        TamanioPantalla.COMPACTO  -> 32.dp
+        TamanioPantalla.MEDIO     -> 40.dp
+        TamanioPantalla.EXPANDIDO -> 50.dp
     }
     val paddingTop = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 120.dp   // antes: 160.dp
-        TamanioPantalla.MEDIO     -> 150.dp   // antes: 200.dp
-        TamanioPantalla.EXPANDIDO -> 180.dp   // antes: 240.dp
+        TamanioPantalla.COMPACTO  -> 160.dp
+        TamanioPantalla.MEDIO     -> 200.dp
+        TamanioPantalla.EXPANDIDO -> 260.dp
     }
+
+    // Nuevo: ancho máximo del contenido para tabletas y plegables
+    val anchoMaximoContenido = tamano.anchoMaximoContenido
+
     val lanzadorPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
@@ -132,18 +138,27 @@ fun ContadorScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = paddingTop),                        // antes: 200.dp fijo
+                    .padding(top = paddingTop),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AnimatedVisibility(visible = viewModel.mostrarContador) {
+
+                    // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+                    val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                        Modifier.widthIn(max = anchoMaximoContenido)
+                    } else {
+                        Modifier
+                    }
+
                     Column(
+                        modifier = modificadorContenido,
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(tamanoCirculo)                   // antes: 220.dp fijo
+                                .size(tamanoCirculo)
                                 .clip(CircleShape)
                                 .background(VerdePrimario.copy(alpha = 0.1f))
                                 .border(3.dp, VerdePrimario, CircleShape)
@@ -156,10 +171,10 @@ fun ContadorScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 32.dp
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(espaciado.l),  // antes: 16.dp
+                            horizontalArrangement = Arrangement.spacedBy(espaciado.l),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
@@ -171,7 +186,7 @@ fun ContadorScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .size(tamanoBoton)                 // antes: 64.dp fijo
+                                    .size(tamanoBoton)
                                     .clip(CircleShape)
                                     .background(VerdePrimario)
                             ) {
@@ -185,7 +200,7 @@ fun ContadorScreen(
                                     else
                                         stringResource(R.string.btn_iniciar),
                                     tint = Color.White,
-                                    modifier = Modifier.size(tamanoIconoBoton)  // antes: 32.dp fijo
+                                    modifier = Modifier.size(tamanoIconoBoton)
                                 )
                             }
 
@@ -194,7 +209,7 @@ fun ContadorScreen(
                                     viewModel.cancelar(contexto)
                                 },
                                 modifier = Modifier
-                                    .size(tamanoBoton)                 // antes: 64.dp fijo
+                                    .size(tamanoBoton)
                                     .clip(CircleShape)
                                     .background(Color.Red)
                             ) {
@@ -202,7 +217,7 @@ fun ContadorScreen(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = stringResource(R.string.btn_cancelar),
                                     tint = Color.White,
-                                    modifier = Modifier.size(tamanoIconoBoton)  // antes: 32.dp fijo
+                                    modifier = Modifier.size(tamanoIconoBoton)
                                 )
                             }
                         }

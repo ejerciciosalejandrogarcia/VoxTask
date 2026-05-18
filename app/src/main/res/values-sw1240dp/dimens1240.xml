@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <resources>
+    <!-- Ajustes Screen -->
+    <dimen name="espaciado_xs">8dp</dimen>
+    <dimen name="espaciado_s">16dp</dimen>
+    <dimen name="espaciado_m">24dp</dimen>
+    <dimen name="espaciado_l">32dp</dimen>
+    <dimen name="espaciado_xl">48dp</dimen>
+    <dimen name="espaciado_xxl">64dp</dimen>
+    <dimen name="ajustes_circulo_color">56dp</dimen>
+    <dimen name="ajustes_alto_grid">150dp</dimen>
+
+    <!-- RegistroUsuario -->
+    <dimen name="registro_padding_horizontal">80dp</dimen>
+    <dimen name="registro_padding_card_horizontal">56dp</dimen>
+    <dimen name="registro_padding_card_vertical">60dp</dimen>
+    <dimen name="registro_altura_boton">64dp</dimen>
+    <dimen name="registro_icono_exito">112dp</dimen>
+    <dimen name="registro_circulo_grande">400dp</dimen>
+    <dimen name="registro_circulo_mediano">240dp</dimen>
+    <dimen name="registro_circulo_pequeno">220dp</dimen>
+    <dimen name="registro_circulo_inferior">420dp</dimen>
+    <dimen name="registro_espaciado_campos">22dp</dimen>
+
+    <!-- VerCorreo -->
+    <dimen name="ver_correo_padding">32dp</dimen>
+    <dimen name="ver_correo_padding_horizontal">36dp</dimen>
+    <dimen name="ver_correo_padding_vertical_asunto">24dp</dimen>
+    <dimen name="ver_correo_padding_vertical_remitente">22dp</dimen>
+    <dimen name="ver_correo_avatar">64dp</dimen>
+    <dimen name="ver_correo_espaciado_remitente">20dp</dimen>
+
+
+    <!-- Verificacion -->
+    <dimen name="verificacion_padding_horizontal">120dp</dimen>
+    <dimen name="verificacion_padding_card_horizontal">56dp</dimen>
+    <dimen name="verificacion_padding_card_vertical">60dp</dimen>
+    <dimen name="verificacion_altura_boton">64dp</dimen>
+    <dimen name="verificacion_campo_ancho">68dp</dimen>
+    <dimen name="verificacion_campo_alto">76dp</dimen>
+
+
+
+
+    </resources>

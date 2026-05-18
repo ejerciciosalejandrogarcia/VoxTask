@@ -75,6 +75,10 @@
 
     <!-- Ajustes Screen -->
     <string name="ajustes">Ajustes</string>
+    <string name="compartir_app_mensaje">Comparte la aplicacion con tus amigos y familiare</string>
+    <string name="compartir_app_titulo">Compartir VoxTask</string>
+    <string name="compartir_app">Compartir aplicación</string>
+    <string name="compartir_app_descripcion">Comparte VoxTask con tus contactos</string>
     <string name="cambiar_voz">Cambiar voz</string>
     <string name="voz_actual">Voz actual</string>
     <string name="cambiar_idioma">Cambiar idioma</string>
@@ -164,7 +168,7 @@
     <string name="txt_enviarcorreo_modo_manual">Manual</string>
     <string name="txt_enviarcorreo_btn_enviar">Enviar correo</string>
     <string name="txt_enviarcorreo_estado_enviando">Enviando correo...</string>
-    <string name="txt_enviarcorreo_exito">✓ Correo enviado</string>
+    <string name="txt_enviarcorreo_exito">Correo enviado</string>
     <string name="txt_enviarcorreo_btn_otro">Enviar otro</string>
     <string name="txt_enviarcorreo_btn_reintentar">Intentar de nuevo</string>
     <string name="txt_enviarcorreo_resumen_para">Para: %1$s</string>

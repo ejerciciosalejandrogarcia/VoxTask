@@ -21,6 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.VoxTaskScreen
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.TamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -34,9 +39,30 @@ fun CorreoScreen(
     viewModel: CorreoViewModel,
     navController: NavController
 ) {
-    //Variables
     val contexto = LocalContext.current
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
     val uiState by viewModel.uiState.collectAsState()
+
+    // Valores adaptativos
+    val paddingContenido = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+    val tamanoBotonCrear = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 56.dp
+        TamanioPantalla.MEDIO     -> 64.dp
+        TamanioPantalla.EXPANDIDO -> 72.dp
+    }
+    val tamanoIconoCrear = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 28.dp
+        TamanioPantalla.MEDIO     -> 32.dp
+        TamanioPantalla.EXPANDIDO -> 38.dp
+    }
+
+    // Nuevo: ancho máximo del contenido para tabletas y plegables
+    val anchoMaximoContenido = tamano.anchoMaximoContenido
 
     val lanzadorGoogle = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -47,9 +73,7 @@ fun CorreoScreen(
                     .getSignedInAccountFromIntent(resultado.data)
                     .getResult(ApiException::class.java)
                 viewModel.guardarTokenYCargarCorreos(contexto, cuenta.serverAuthCode)
-            } catch (e: ApiException) {
-
-            }
+            } catch (e: ApiException) { }
         }
     }
 
@@ -57,86 +81,99 @@ fun CorreoScreen(
         viewModel.iniciar(contexto)
     }
 
-    PlantillaBase( viewModel=viewModelPlantilla,navController = navController) { padding ->
+    PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(paddingContenido),
             contentAlignment = Alignment.Center
         ) {
-            when (val estado = uiState) {
+            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+            val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier
+                    .widthIn(max = anchoMaximoContenido)
+                    .fillMaxSize()
+            } else {
+                Modifier.fillMaxSize()
+            }
 
-                is CorreoUiState.Cargando -> {
-                    CircularProgressIndicator()
-                }
+            Box(
+                modifier = modificadorContenido,
+                contentAlignment = Alignment.Center
+            ) {
+                when (val estado = uiState) {
 
-                is CorreoUiState.NecesitaConectarGoogle -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(24.dp)
-                    ) {
+                    is CorreoUiState.Cargando -> {
+                        CircularProgressIndicator()
+                    }
+
+                    is CorreoUiState.NecesitaConectarGoogle -> {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(paddingContenido)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.txt_title_advertencia_ver_correos),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(bottom = espaciado.xl)  // antes: 24.dp
+                            )
+                            Button(
+                                onClick = {
+                                    val cliente = viewModel.obtenerClienteGoogle(contexto)
+                                    lanzadorGoogle.launch(cliente.signInIntent)
+                                }
+                            ) {
+                                Text(stringResource(R.string.txt_btn_conectar_gmail))
+                            }
+                        }
+                    }
+
+                    is CorreoUiState.Exito -> {
+                        if (estado.correos.isEmpty()) {
+                            Text(stringResource(R.string.txt_title_no_correos))
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(espaciado.s)  // antes: 8.dp
+                            ) {
+                                items(estado.correos) { correo ->
+                                    TarjetaCorreo(correo, navController = navController)
+                                }
+                            }
+                        }
+                    }
+
+                    is CorreoUiState.Error -> {
                         Text(
-                            text = stringResource(R.string.txt_title_advertencia_ver_correos),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            text = stringResource(estado.mensaje),
+                            color = MaterialTheme.colorScheme.error
                         )
-                        Button(
-                            onClick = {
-                                val cliente = viewModel.obtenerClienteGoogle(contexto)
-                                lanzadorGoogle.launch(cliente.signInIntent)
-                            }
-                        ) {
-                            Text(stringResource(R.string.txt_btn_conectar_gmail))
-                        }
                     }
                 }
 
-                is CorreoUiState.Exito -> {
-                    if (estado.correos.isEmpty()) {
-                        Text(stringResource(R.string.txt_title_no_correos))
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(estado.correos) { correo ->
-                                TarjetaCorreo(correo,navController = navController)
-                            }
-                        }
-                    }
-                }
-
-                is CorreoUiState.Error -> {
-                    Text(
-                        text = stringResource( estado.mensaje),
-                        color = MaterialTheme.colorScheme.error
+                // Botón para crear un correo
+                Button(
+                    onClick = {
+                        navController.navigate(VoxTaskScreen.EnviarCorreo.name)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = espaciado.s, end = espaciado.xs)  // antes: 8.dp, 4.dp
+                        .size(tamanoBotonCrear),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.txt_btne_crear_correo),
+                        tint = Color.White,
+                        modifier = Modifier.size(tamanoIconoCrear)
                     )
                 }
             }
-
-            // Botón para crear un correo
-            Button(
-                onClick = {
-                    navController.navigate(VoxTaskScreen.EnviarCorreo.name)
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 8.dp, end = 4.dp)
-                    .size(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.txt_btne_crear_correo),
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-
         }
     }
 }
@@ -146,29 +183,40 @@ fun TarjetaCorreo(
     correo: com.example.voxtask.databases.model.Correo,
     navController: NavController
 ) {
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
+
+    // Valores adaptativos
+    val paddingTarjeta = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.m       // 12 dp
+        TamanioPantalla.MEDIO     -> espaciado.l       // 16 dp
+        TamanioPantalla.EXPANDIDO -> espaciado.xl      // 24 dp
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { navController.navigate("${VoxTaskScreen.VerCorreo.name}/${correo.id}") },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(paddingTarjeta)) {
             Text(
                 text = correo.asunto,
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = tamano.textoBody
             )
             Text(
                 text = "De: ${correo.remitente}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = espaciado.xs)    // antes: 4.dp
             )
             Text(
                 text = correo.fecha,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(top = espaciado.xs / 2) // antes: 2.dp
             )
         }
     }

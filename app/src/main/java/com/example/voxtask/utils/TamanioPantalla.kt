@@ -1,11 +1,14 @@
 package com.example.voxtask.utils
 
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.voxtask.R
 
 enum class TamanioPantalla { COMPACTO, MEDIO, EXPANDIDO }
 
@@ -20,15 +23,22 @@ data class Espaciado(
     val s: Dp,
     val m: Dp,
     val l: Dp,
-    val xl: Dp
+    val xl: Dp,
+    val xxl: Dp
 )
 
-val EspaciadoCompacto  = Espaciado(xs = 4.dp,  s = 8.dp,  m = 12.dp, l = 16.dp, xl = 24.dp)
-val EspaciadoMedio     = Espaciado(xs = 6.dp,  s = 12.dp, m = 16.dp, l = 24.dp, xl = 32.dp)
-val EspaciadoExpandido = Espaciado(xs = 8.dp,  s = 16.dp, m = 24.dp, l = 32.dp, xl = 48.dp)
+@Composable
+fun espaciadoFromDimens() = Espaciado(
+    xs  = dimensionResource(R.dimen.espaciado_xs),
+    s   = dimensionResource(R.dimen.espaciado_s),
+    m   = dimensionResource(R.dimen.espaciado_m),
+    l   = dimensionResource(R.dimen.espaciado_l),
+    xl  = dimensionResource(R.dimen.espaciado_xl),
+    xxl = dimensionResource(R.dimen.espaciado_xxl),
+)
 
-val LocalEspaciado        = compositionLocalOf { EspaciadoCompacto }
-val LocalTamanioPantalla  = compositionLocalOf { TamanioPantalla.COMPACTO }
+val LocalEspaciado       = compositionLocalOf { Espaciado(4.dp, 8.dp, 12.dp, 16.dp, 24.dp, 32.dp) }
+val LocalTamanioPantalla = compositionLocalOf { TamanioPantalla.COMPACTO }
 
 val TamanioPantalla.textoBody: TextUnit get() = when (this) {
     TamanioPantalla.COMPACTO  -> 14.sp

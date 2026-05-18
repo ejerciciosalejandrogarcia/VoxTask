@@ -26,8 +26,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.voxtask.utils.LocalEspaciado
+import com.example.voxtask.utils.LocalTamanioPantalla
+import com.example.voxtask.utils.TamanioPantalla
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
+import com.example.voxtask.utils.textoTitulo
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.TextoAVoz
 import java.time.LocalDate
@@ -48,29 +53,50 @@ fun RecordatorioScreen(
     navController: NavController
 ) {
     val contexto = LocalContext.current
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
 
-    //Conecta al ViewModel con TextoAVoz
+    // Valores adaptativos
+    val paddingContenido = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
+        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
+        TamanioPantalla.EXPANDIDO -> 48.dp
+    }
+
+    // Nuevo: ancho máximo del contenido para tabletas y plegables
+    val anchoMaximoContenido = tamano.anchoMaximoContenido
+
     LaunchedEffect(Unit) {
         TextoAVoz.hablar(contexto, "Di 'crea evento para el día que quieras''")
-
         viewModel.onHablar = { mensaje ->
             CoroutineScope(Dispatchers.Main).launch {
                 TextoAVoz.hablar(contexto, mensaje)
             }
         }
     }
+
     PlantillaBase(
         viewModel = viewModelPlantilla,
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(paddingContenido),             // antes: 16.dp fijo
+            contentAlignment = Alignment.TopCenter
         ) {
-            Calendario(viewModel = viewModel)
+            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+            val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier.widthIn(max = anchoMaximoContenido).fillMaxSize()
+            } else {
+                Modifier.fillMaxSize()
+            }
+
+            Column(modifier = modificadorContenido) {
+                Calendario(viewModel = viewModel)
+            }
         }
     }
 }
@@ -78,6 +104,29 @@ fun RecordatorioScreen(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Calendario(viewModel: RecordatorioViewModel) {
+    val espaciado = LocalEspaciado.current
+    val tamano = LocalTamanioPantalla.current
+
+    // Valores adaptativos
+    val tamanoTituloMes = tamano.textoTitulo
+    val tamanoTextoDia = tamano.textoBody
+    val tamanoTextoEvento = tamano.textoBody
+    val tamanoIndicadorEvento = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 8.dp
+        TamanioPantalla.MEDIO     -> 10.dp
+        TamanioPantalla.EXPANDIDO -> 12.dp
+    }
+    val tamanoIconoEliminar = when (tamano) {
+        TamanioPantalla.COMPACTO  -> 18.dp
+        TamanioPantalla.MEDIO     -> 22.dp
+        TamanioPantalla.EXPANDIDO -> 26.dp
+    }
+    val paddingFilaEvento = when (tamano) {
+        TamanioPantalla.COMPACTO  -> espaciado.m       // 12 dp horizontal, 8 dp vertical
+        TamanioPantalla.MEDIO     -> espaciado.l
+        TamanioPantalla.EXPANDIDO -> espaciado.xl
+    }
+
     var mesActual by remember { mutableStateOf(YearMonth.now()) }
     val hoy = LocalDate.now()
 
@@ -88,27 +137,24 @@ fun Calendario(viewModel: RecordatorioViewModel) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono para retroceder de mes
             IconButton(onClick = { mesActual = mesActual.minusMonths(1) }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.icono_mes_anterior))
             }
-            //Mes actual
             Text(
                 text = mesActual.month
                     .getDisplayName(TextStyle.FULL, Locale("es"))
                     .replaceFirstChar { it.uppercase() } + " ${mesActual.year}",
-                fontSize = 20.sp,
+                fontSize = tamanoTituloMes,             // antes: 20.sp fijo
                 fontWeight = FontWeight.Bold
             )
-            // Icono para avanzar de mes
             IconButton(onClick = { mesActual = mesActual.plusMonths(1) }) {
                 Icon(Icons.Default.ArrowForward, contentDescription = stringResource(R.string.icono_mes_siguiente))
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
 
-        // Días de la semana del calendario
+        // Días de la semana
         val diasSemana = stringArrayResource(R.array.dias_semana)
         Row(modifier = Modifier.fillMaxWidth()) {
             diasSemana.forEach { dia ->
@@ -117,13 +163,13 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 13.sp,
+                    fontSize = tamanoTextoDia,              // antes: 13.sp fijo
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(espaciado.xs))   // antes: 4.dp
 
         val primerDia = mesActual.atDay(1).dayOfWeek.value
         val totalDias = mesActual.lengthOfMonth()
@@ -142,8 +188,6 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                         val fecha = mesActual.atDay(dia)
                         val esHoy = fecha == hoy
                         val seleccionado = viewModel.diaSeleccionado == fecha
-
-                        // Eventos de este día
                         val tieneEventos = viewModel.eventos.any {
                             it.dia == dia &&
                                     it.mes == mesActual.monthValue &&
@@ -182,7 +226,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                         ) {
                             Text(
                                 text = dia.toString(),
-                                fontSize = 14.sp,
+                                fontSize = tamanoTextoDia,                  // antes: 14.sp fijo
                                 fontWeight = if (esHoy || tieneEventos) FontWeight.Bold else FontWeight.Normal,
                                 color = when {
                                     esHoy -> MaterialTheme.colorScheme.onPrimary
@@ -196,7 +240,7 @@ fun Calendario(viewModel: RecordatorioViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(espaciado.l))    // antes: 16.dp
 
         // Eventos del día seleccionado
         val eventosDia = viewModel.diaSeleccionado?.let { fecha ->
@@ -207,7 +251,6 @@ fun Calendario(viewModel: RecordatorioViewModel) {
             }
         } ?: emptyList()
 
-        //Titulo
         if (viewModel.diaSeleccionado != null) {
             Text(
                 text = stringResource(
@@ -218,22 +261,20 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                         .replaceFirstChar { it.uppercase() }
                 ),
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
+                fontSize = tamanoTituloMes,                // antes: 16.sp fijo
+                modifier = Modifier.padding(bottom = espaciado.s) // antes: 8.dp
             )
 
-            //Si no hay evento para el dia seleccionado mostrar el siguiente mensaje
             if (eventosDia.isEmpty()) {
                 Text(
                     text = stringResource(R.string.txt_sin_eventos_dia_seleccionado),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    fontSize = 14.sp
+                    fontSize = tamanoTextoEvento           // antes: 14.sp fijo
                 )
-                //Si no mostrar una lista con los eventos asignados a ese dia seleccionado
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(espaciado.xs) // antes: 4.dp
                 ) {
                     items(eventosDia) { evento ->
                         Row(
@@ -241,29 +282,27 @@ fun Calendario(viewModel: RecordatorioViewModel) {
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .padding(horizontal = paddingFilaEvento, vertical = espaciado.s), // antes: 12.dp, 8.dp
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(8.dp)
+                                    .size(tamanoIndicadorEvento)               // antes: 8.dp fijo
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primary)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            //Asunto del evento
+                            Spacer(modifier = Modifier.width(espaciado.s))     // antes: 8.dp
                             Text(
                                 text = evento.asunto.replaceFirstChar { it.uppercase() },
-                                fontSize = 14.sp,
+                                fontSize = tamanoTextoEvento,                  // antes: 14.sp fijo
                                 modifier = Modifier.weight(1f)
                             )
-                            //Icono para eliminar evento
                             IconButton(onClick = { viewModel.eliminarEvento(evento) }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = stringResource(R.string.icono_eliminar_evento),
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(tamanoIconoEliminar) // antes: 18.dp fijo
                                 )
                             }
                         }
