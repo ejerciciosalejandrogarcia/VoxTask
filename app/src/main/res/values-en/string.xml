@@ -213,7 +213,6 @@
     <string name="hint_nombre_usuario">Username</string>
     <string name="hint_nombre">Name</string>
     <string name="hint_primer_apellido">First surname</string>
-    <string name="hint_second_apellido">Second surname</string>
     <string name="btn_guardar_cambios">Save changes</string>
     <string name="btn_editar_perfil">Edit profile</string>
     <string name="btn_cancelar">Cancel</string>

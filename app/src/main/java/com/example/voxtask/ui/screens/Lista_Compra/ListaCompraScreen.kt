@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,22 +43,9 @@ fun ListaCompraScreen(
     var itemAEliminar by remember { mutableStateOf<Producto?>(null) }
 
     // Valores adaptativos
-    val paddingContenido = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val paddingFilaHorizontal = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 24 dp
-        TamanioPantalla.EXPANDIDO -> 28.dp
-    }
-    val paddingFilaVertical = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.m       // 12 dp
-        TamanioPantalla.MEDIO     -> espaciado.l       // 16 dp
-        TamanioPantalla.EXPANDIDO -> espaciado.xl      // 24 dp
-    }
-
+    val paddingContenido = dimensionResource(R.dimen.lista_compra_padding_contenido)
+    val paddingFilaHorizontal = dimensionResource(R.dimen.lista_compra_padding_fila_horizontal)
+    val paddingFilaVertical = dimensionResource(R.dimen.lista_compra_padding_fila_vertical)
     // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 

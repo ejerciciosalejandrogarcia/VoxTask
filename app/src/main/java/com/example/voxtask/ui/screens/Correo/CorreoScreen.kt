@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,21 +46,9 @@ fun CorreoScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     // Valores adaptativos
-    val paddingContenido = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val tamanoBotonCrear = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 56.dp
-        TamanioPantalla.MEDIO     -> 64.dp
-        TamanioPantalla.EXPANDIDO -> 72.dp
-    }
-    val tamanoIconoCrear = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 28.dp
-        TamanioPantalla.MEDIO     -> 32.dp
-        TamanioPantalla.EXPANDIDO -> 38.dp
-    }
+    val paddingContenido = dimensionResource(R.dimen.correo_padding_contenido)
+    val tamanoBotonCrear = dimensionResource(R.dimen.correo_boton_crear)
+    val tamanoIconoCrear = dimensionResource(R.dimen.correo_icono_crear)
 
     // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido

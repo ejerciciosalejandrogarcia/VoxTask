@@ -4,6 +4,7 @@ package com.example.voxtask.ui.screens.Inicio
 import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.example.voxtask.utils.TextoAVoz
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -34,14 +35,21 @@ class InicioViewModel : ViewModel() {
 
     //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
     private fun procesarComando(texto: String) {
+        val textoLower = texto.lowercase()
+        val idioma = TextoAVoz.localeActual.language
+
+        val comandoContador    = when (idioma) { "en" -> "counter"; "fr" -> "compteur"; "de" -> "zähler"; "it" -> "contatore"; "pt" -> "contador"; else -> "contador" }
+        val comandoCorreo      = when (idioma) { "en" -> "email";   "fr" -> "courriel"; "de" -> "mail";   "it" -> "posta";     "pt" -> "correio";  else -> "correo" }
+        val comandoRecordatorio = when (idioma) { "en" -> "reminder"; "fr" -> "rappel"; "de" -> "erinnerung"; "it" -> "promemoria"; "pt" -> "lembrete"; else -> "recordatorio" }
+        val comandoLista       = when (idioma) { "en" -> "list";    "fr" -> "liste";    "de" -> "liste";  "it" -> "lista";     "pt" -> "lista";    else -> "lista" }
+
         when {
-            texto.contains("contador", ignoreCase = true) -> abrirContador()
-            texto.contains("correo", ignoreCase = true) -> abrirCorreo()
-            texto.contains("recordatorio", ignoreCase = true) -> abrirRecordatorio()
-            texto.contains("lista", ignoreCase = true) -> abrirListaCompra()
+            textoLower.contains(comandoContador)     -> abrirContador()
+            textoLower.contains(comandoCorreo)       -> abrirCorreo()
+            textoLower.contains(comandoRecordatorio) -> abrirRecordatorio()
+            textoLower.contains(comandoLista)        -> abrirListaCompra()
         }
     }
-
 
     fun cerrarSesion(contexto: Context, actividad: Activity, alCerrar: () -> Unit) {
         val uid = auth.currentUser?.uid

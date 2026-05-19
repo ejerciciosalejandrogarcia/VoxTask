@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.services.ContadorService
+import com.example.voxtask.utils.TextoAVoz
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,9 +75,35 @@ class ContadorViewModel : ViewModel() {
                 val unidad = if (sig1.toIntOrNull() != null) sig2 else sig1
 
                 when {
-                    unidad.startsWith("hora") -> totalSegundos += numero * 3600
-                    unidad.startsWith("minuto") || unidad.startsWith("min") -> totalSegundos += numero * 60
-                    unidad.startsWith("segundo") || unidad.startsWith("seg") -> totalSegundos += numero
+                    // Horas
+                    unidad.startsWith(when (TextoAVoz.localeActual.language) {
+                        "en" -> "hour"
+                        "fr" -> "heure"
+                        "de" -> "stunde"
+                        "it" -> "ora"
+                        "pt" -> "hora"
+                        else -> "hora" // español
+                    }) -> totalSegundos += numero * 3600
+
+                    // Minutos
+                    unidad.startsWith(when (TextoAVoz.localeActual.language) {
+                        "en" -> "min"
+                        "fr" -> "min"
+                        "de" -> "min"
+                        "it" -> "min"
+                        "pt" -> "min"
+                        else -> "min" // español
+                    }) -> totalSegundos += numero * 60
+
+                    // Segundos
+                    unidad.startsWith(when (TextoAVoz.localeActual.language) {
+                        "en" -> "sec"
+                        "fr" -> "sec"
+                        "de" -> "sek"
+                        "it" -> "sec"
+                        "pt" -> "seg"
+                        else -> "seg" // español
+                    }) -> totalSegundos += numero
                 }
                 android.util.Log.d("CONTADOR", "Número: $numero, Unidad: $unidad")
             }

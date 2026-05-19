@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.NuevaContrasenia
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
@@ -21,6 +22,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,6 +44,7 @@ import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun NuevaContraseniaScreen(
     navController: NavController,
@@ -58,49 +61,14 @@ fun NuevaContraseniaScreen(
     val tamano = LocalTamanioPantalla.current
 
     // Valores adaptativos
-    val paddingHorizontalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val paddingVerticalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24 dp
-        TamanioPantalla.MEDIO     -> 36.dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val alturaBoton = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 54.dp
-        TamanioPantalla.MEDIO     -> 58.dp
-        TamanioPantalla.EXPANDIDO -> 64.dp
-    }
-    val tamanoIconoExito = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 80.dp
-        TamanioPantalla.MEDIO     -> 96.dp
-        TamanioPantalla.EXPANDIDO -> 112.dp
-    }
-    val tamanoCheckExito = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 48.dp
-        TamanioPantalla.MEDIO     -> 56.dp
-        TamanioPantalla.EXPANDIDO -> 64.dp
-    }
-
-    // Nuevo: tamaño de los círculos decorativos adaptativo
-    val tamanoCirculoGrande = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 280.dp
-        TamanioPantalla.MEDIO     -> 340.dp
-        TamanioPantalla.EXPANDIDO -> 400.dp
-    }
-    val tamanoCirculoMediano = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 160.dp
-        TamanioPantalla.MEDIO     -> 200.dp
-        TamanioPantalla.EXPANDIDO -> 240.dp
-    }
-    val tamanoCirculoPequeno = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 140.dp
-        TamanioPantalla.MEDIO     -> 180.dp
-        TamanioPantalla.EXPANDIDO -> 220.dp
-    }
-
+    val paddingHorizontalCard = dimensionResource(R.dimen.nueva_contrasenia_padding_horizontal)
+    val paddingVerticalCard = dimensionResource(R.dimen.nueva_contrasenia_padding_vertical)
+    val alturaBoton = dimensionResource(R.dimen.nueva_contrasenia_altura_boton)
+    val tamanoIconoExito = dimensionResource(R.dimen.nueva_contrasenia_icono_exito)
+    val tamanoCheckExito = dimensionResource(R.dimen.nueva_contrasenia_check_exito)
+    val tamanoCirculoGrande = dimensionResource(R.dimen.nueva_contrasenia_circulo_grande)
+    val tamanoCirculoMediano = dimensionResource(R.dimen.nueva_contrasenia_circulo_mediano)
+    val tamanoCirculoPequeno = dimensionResource(R.dimen.nueva_contrasenia_circulo_pequeno)
     // Nuevo: ancho máximo de la card para tabletas y plegables
     val anchoMaximoCard = tamano.anchoMaximoContenido
 

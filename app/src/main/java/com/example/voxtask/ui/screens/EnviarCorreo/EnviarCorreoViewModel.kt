@@ -119,6 +119,8 @@ class EnviarCorreoViewModel : ViewModel() {
     fun procesarVoz(texto: String, contexto: Context) {
         if (necesitaVincularGoogle || cargandoToken) return
         val textoLimpio = texto.lowercase().trim()
+        val idioma = TextoAVoz.localeActual.language
+
         viewModelScope.launch {
             when (paso) {
                 PasoEnvio.DESTINATARIO -> {
@@ -132,11 +134,15 @@ class EnviarCorreoViewModel : ViewModel() {
                     TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_modo))
                 }
                 PasoEnvio.MODO -> {
-                    modo = if (textoLimpio.contains("ia") ||
-                        textoLimpio.contains("inteligencia") ||
-                        textoLimpio.contains("artificial") ||
-                        textoLimpio.contains("cree") ||
-                        textoLimpio.contains("generar")) "ia" else "manual"
+                    val comandosIa = when (idioma) {
+                        "en" -> listOf("ai", "artificial", "intelligence", "generate", "create")
+                        "fr" -> listOf("ia", "intelligence", "artificielle", "générer", "créer")
+                        "de" -> listOf("ki", "künstlich", "intelligenz", "generieren", "erstellen")
+                        "it" -> listOf("ia", "intelligenza", "artificiale", "generare", "creare")
+                        "pt" -> listOf("ia", "inteligência", "artificial", "gerar", "criar")
+                        else -> listOf("ia", "inteligencia", "artificial", "cree", "generar")
+                    }
+                    modo = if (comandosIa.any { textoLimpio.contains(it) }) "ia" else "manual"
                     paso = PasoEnvio.MENSAJE
                     if (modo == "ia") {
                         TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_mensaje_ia))

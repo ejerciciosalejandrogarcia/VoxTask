@@ -72,7 +72,7 @@
     <string name="icono_eliminar_evento">Eliminar evento</string>
     <string name="txt_sin_eventos_dia_seleccionado">No hay eventos este día</string>
     <string name="txt_eventos_dia_seleccionado">Eventos del %1$d de %2$s</string>
-
+    <string name="txt_selecciona_dia">Selecciona un día\npara ver sus eventos</string>
     <!-- Ajustes Screen -->
     <string name="ajustes">Ajustes</string>
     <string name="compartir_app_mensaje">Comparte la aplicacion con tus amigos y familiare</string>

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -48,22 +50,9 @@ fun PerfilScreen(
     var mostrarSelector by remember { mutableStateOf(false) }
 
     // Valores adaptativos
-    val paddingContenido = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val tamanoAvatar = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 100.dp
-        TamanioPantalla.MEDIO     -> 120.dp
-        TamanioPantalla.EXPANDIDO -> 140.dp
-    }
-    val tamanoAvatarSelector = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 60.dp
-        TamanioPantalla.MEDIO     -> 72.dp
-        TamanioPantalla.EXPANDIDO -> 84.dp
-    }
-
+    val paddingContenido = dimensionResource(R.dimen.perfil_padding_contenido)
+    val tamanoAvatar = dimensionResource(R.dimen.perfil_tamano_avatar)
+    val tamanoAvatarSelector = dimensionResource(R.dimen.perfil_tamano_avatar_selector)
     // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
@@ -230,8 +219,9 @@ fun PerfilScreen(
                     text = {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(espaciado.m), // antes: 12.dp
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()), // <- Esto activa el scroll horizontal
+                                    verticalAlignment = Alignment.CenterVertically
                         ) {
                             viewModel.avatarOpciones.forEach { nombre ->
                                 val drawableId = nombreAvatar(nombre)

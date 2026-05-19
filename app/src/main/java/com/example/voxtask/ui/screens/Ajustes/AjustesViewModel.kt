@@ -28,6 +28,7 @@ class AjustesViewModel : ViewModel() {
     var mostrarSelectorIdioma by mutableStateOf(false)
     var idiomaActual by mutableStateOf("Español")
     var mostrarSelectorColor by mutableStateOf(false)
+    var idiomaVozActual by mutableStateOf("")
     val idiomasDisponibles = listOf(
         Pair("es", "Español"),
         Pair("en", "English"),
@@ -40,18 +41,27 @@ class AjustesViewModel : ViewModel() {
 
     // Funcion que carga las voces y los textos
     fun cargarVoces(contexto: android.content.Context) {
+        val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+        val idiomaActualCodigo = prefs.getString("idioma", "es") ?: "es"
+
+        val filtrarVoces: (List<Voice>) -> List<Voice> = { voces ->
+            voces
+                .filter {
+                    !it.isNetworkConnectionRequired &&
+                            it.locale.language == idiomaActualCodigo
+                }
+                .distinctBy { it.locale.country } // <- Una sola voz por región/acento
+                .sortedBy { it.locale.getDisplayName(java.util.Locale("es", "ES")) }
+        }
+
         if (TextoAVoz.obtenerVoces().isEmpty()) {
             android.speech.tts.TextToSpeech(contexto) { status ->
                 if (status == android.speech.tts.TextToSpeech.SUCCESS) {
-                    vocesDisponibles = TextoAVoz.obtenerVoces()
-                        .filter { !it.isNetworkConnectionRequired }
-                        .sortedBy { it.locale.getDisplayName(java.util.Locale("es", "ES")) }
+                    vocesDisponibles = filtrarVoces(TextoAVoz.obtenerVoces())
                 }
             }
         } else {
-            vocesDisponibles = TextoAVoz.obtenerVoces()
-                .filter { !it.isNetworkConnectionRequired }
-                .sortedBy { it.locale.getDisplayName(java.util.Locale("es", "ES")) }
+            vocesDisponibles = filtrarVoces(TextoAVoz.obtenerVoces())
         }
     }
 
@@ -102,24 +112,28 @@ class AjustesViewModel : ViewModel() {
         mostrarSelectorVoz = false
 
         viewModelScope.launch {
-            TextoAVoz.hablar(contexto, "Esto es una prueba")
+            val mensajePrueba = when (voz?.locale?.language) {
+                "en" -> "This is a test"
+                "fr" -> "Ceci est un test"
+                "de" -> "Das ist ein Test"
+                "it" -> "Questo è un test"
+                "pt" -> "Isso é um teste"
+                else -> "Esto es una prueba"
+            }
+            TextoAVoz.hablar(contexto, mensajePrueba)
         }
-
     }
 
 
     fun compartirAplicacion(contexto: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                // Coge el APK de la propia app instalada
+                val apkOrigen = File(contexto.applicationInfo.sourceDir)
                 val apkCompartido = File(contexto.cacheDir, "VoxTask.apk")
 
-                // Copia el APK desde assets
-                contexto.assets.open("VoxTask.apk").use { input ->
-                    apkCompartido.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-
+                // Copia el APK instalado al cache
+                apkOrigen.copyTo(apkCompartido, overwrite = true)
                 apkCompartido.setReadable(true, false)
 
                 val uri = FileProvider.getUriForFile(

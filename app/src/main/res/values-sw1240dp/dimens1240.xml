@@ -10,7 +10,7 @@
     <dimen name="ajustes_circulo_color">56dp</dimen>
     <dimen name="ajustes_alto_grid">150dp</dimen>
 
-    <!-- RegistroUsuario -->
+    <!-- RegistroUsuario Screen-->
     <dimen name="registro_padding_horizontal">80dp</dimen>
     <dimen name="registro_padding_card_horizontal">56dp</dimen>
     <dimen name="registro_padding_card_vertical">60dp</dimen>
@@ -22,7 +22,7 @@
     <dimen name="registro_circulo_inferior">420dp</dimen>
     <dimen name="registro_espaciado_campos">22dp</dimen>
 
-    <!-- VerCorreo -->
+    <!-- VerCorreo Screen-->
     <dimen name="ver_correo_padding">32dp</dimen>
     <dimen name="ver_correo_padding_horizontal">36dp</dimen>
     <dimen name="ver_correo_padding_vertical_asunto">24dp</dimen>
@@ -31,7 +31,7 @@
     <dimen name="ver_correo_espaciado_remitente">20dp</dimen>
 
 
-    <!-- Verificacion -->
+    <!-- Verificacion Screen-->
     <dimen name="verificacion_padding_horizontal">120dp</dimen>
     <dimen name="verificacion_padding_card_horizontal">56dp</dimen>
     <dimen name="verificacion_padding_card_vertical">60dp</dimen>
@@ -41,5 +41,78 @@
 
 
 
+    <!-- CambiarContrasena Screen -->
+    <dimen name="cambiar_contrasena_padding_card_horizontal">48dp</dimen>
+    <dimen name="cambiar_contrasena_padding_card_vertical">48dp</dimen>
+    <dimen name="cambiar_contrasena_altura_boton">60dp</dimen>
+    <dimen name="cambiar_contrasena_icono_email">80dp</dimen>
+    <dimen name="cambiar_contrasena_circulo_grande">400dp</dimen>
+    <dimen name="cambiar_contrasena_circulo_mediano">240dp</dimen>
+    <dimen name="cambiar_contrasena_circulo_pequeno">220dp</dimen>
 
-    </resources>
+    <!-- Contador Screen -->
+    <dimen name="contador_circulo">420dp</dimen>
+    <dimen name="contador_circulo_landscape">420dp</dimen>
+    <dimen name="contador_boton">90dp</dimen>
+    <dimen name="contador_icono_boton">50dp</dimen>
+
+
+    <!-- Correo Screen -->
+    <dimen name="correo_padding_contenido">48dp</dimen>
+    <dimen name="correo_boton_crear">72dp</dimen>
+    <dimen name="correo_icono_crear">38dp</dimen>
+    <dimen name="correo_padding_tarjeta">24dp</dimen>
+
+
+    <!-- EnviarCorreo Screen -->
+    <dimen name="enviar_correo_padding_horizontal">48dp</dimen>
+    <dimen name="enviar_correo_padding_vertical">48dp</dimen>
+    <dimen name="enviar_correo_padding_vertical_landscape">48dp</dimen>
+    <dimen name="enviar_correo_padding_vincular">48dp</dimen>
+    <dimen name="enviar_correo_padding_vincular_landscape">48dp</dimen>
+
+
+    <!-- Inicio Screen -->
+    <dimen name="inicio_padding_horizontal">48dp</dimen>
+    <dimen name="inicio_padding_vertical">48dp</dimen>
+    <dimen name="inicio_padding_tarjeta">28dp</dimen>
+    <dimen name="inicio_icono_tarjeta">48dp</dimen>
+
+    <!-- InicioSesion Screen -->
+    <dimen name="inicio_sesion_padding_card_horizontal">48dp</dimen>
+    <dimen name="inicio_sesion_padding_card_vertical">48dp</dimen>
+    <dimen name="inicio_sesion_altura_boton_principal">64dp</dimen>
+    <dimen name="inicio_sesion_altura_boton_google">52dp</dimen>
+    <dimen name="inicio_sesion_circulo_grande">400dp</dimen>
+    <dimen name="inicio_sesion_circulo_mediano">240dp</dimen>
+    <dimen name="inicio_sesion_circulo_pequeno">220dp</dimen>
+
+    <!-- ListaCompra Screen -->
+    <dimen name="lista_compra_padding_contenido">48dp</dimen>
+    <dimen name="lista_compra_padding_fila_horizontal">28dp</dimen>
+    <dimen name="lista_compra_padding_fila_vertical">24dp</dimen>
+
+
+
+    <!-- NuevaContrasenia Screen -->
+    <dimen name="nueva_contrasenia_padding_horizontal">48dp</dimen>
+    <dimen name="nueva_contrasenia_padding_vertical">48dp</dimen>
+    <dimen name="nueva_contrasenia_altura_boton">64dp</dimen>
+    <dimen name="nueva_contrasenia_icono_exito">112dp</dimen>
+    <dimen name="nueva_contrasenia_check_exito">64dp</dimen>
+    <dimen name="nueva_contrasenia_circulo_grande">400dp</dimen>
+    <dimen name="nueva_contrasenia_circulo_mediano">240dp</dimen>
+    <dimen name="nueva_contrasenia_circulo_pequeno">220dp</dimen>
+
+    <!-- Perfil Screen -->
+    <dimen name="perfil_padding_contenido">48dp</dimen>
+    <dimen name="perfil_tamano_avatar">140dp</dimen>
+    <dimen name="perfil_tamano_avatar_selector">84dp</dimen>
+
+
+    <!-- Recordatorio Screen -->
+    <dimen name="recordatorio_padding_contenido">48dp</dimen>
+    <dimen name="recordatorio_indicador_evento">12dp</dimen>
+    <dimen name="recordatorio_icono_eliminar">26dp</dimen>
+    <dimen name="recordatorio_padding_fila_evento">24dp</dimen>
+</resources>

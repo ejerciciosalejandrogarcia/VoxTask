@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,46 +50,16 @@ fun CambiarContrasenaScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Valores adaptativos
-    val paddingHorizontalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l
-        TamanioPantalla.MEDIO     -> espaciado.xl
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val paddingVerticalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.xl
-        TamanioPantalla.MEDIO     -> 40.dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val alturaBoton = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 50.dp
-        TamanioPantalla.MEDIO     -> 54.dp
-        TamanioPantalla.EXPANDIDO -> 60.dp
-    }
-    val tamanoIconoEmail = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 52.dp
-        TamanioPantalla.MEDIO     -> 64.dp
-        TamanioPantalla.EXPANDIDO -> 80.dp
-    }
+    val paddingHorizontalCard = dimensionResource(R.dimen.cambiar_contrasena_padding_card_horizontal)
+    val paddingVerticalCard = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
+    val alturaBoton = dimensionResource(R.dimen.cambiar_contrasena_altura_boton)
+    val tamanoIconoEmail = dimensionResource(R.dimen.cambiar_contrasena_icono_email)
+    val tamanoCirculoGrande = dimensionResource(R.dimen.cambiar_contrasena_circulo_grande)
+    val tamanoCirculoMediano = dimensionResource(R.dimen.cambiar_contrasena_circulo_mediano)
+    val tamanoCirculoPequeno = dimensionResource(R.dimen.cambiar_contrasena_circulo_pequeno)
 
     // Nuevo: ancho máximo de la card para tabletas y plegables
     val anchoMaximoCard = tamano.anchoMaximoContenido
-
-    // Nuevo: tamaño de los círculos decorativos adaptativo
-    val tamanoCirculoGrande = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 280.dp
-        TamanioPantalla.MEDIO     -> 340.dp
-        TamanioPantalla.EXPANDIDO -> 400.dp
-    }
-    val tamanoCirculoMediano = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 160.dp
-        TamanioPantalla.MEDIO     -> 200.dp
-        TamanioPantalla.EXPANDIDO -> 240.dp
-    }
-    val tamanoCirculoPequeno = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 140.dp
-        TamanioPantalla.MEDIO     -> 180.dp
-        TamanioPantalla.EXPANDIDO -> 220.dp
-    }
 
     LaunchedEffect(estadoUi.mensajeError) {
         if (estadoUi.mensajeError != 0) {

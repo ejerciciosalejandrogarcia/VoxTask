@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-        <!-- Ajustes Screen -->
-        <dimen name="espaciado_xs">4dp</dimen>
-        <dimen name="espaciado_s">8dp</dimen>
-        <dimen name="espaciado_m">12dp</dimen>
-        <dimen name="espaciado_l">16dp</dimen>
-        <dimen name="espaciado_xl">24dp</dimen>
-        <dimen name="espaciado_xxl">32dp</dimen>
-        <dimen name="ajustes_circulo_color">40dp</dimen>
-        <dimen name="ajustes_alto_grid">100dp</dimen>
+    <!-- Ajustes Screen -->
+    <dimen name="espaciado_xs">4dp</dimen>
+    <dimen name="espaciado_s">8dp</dimen>
+    <dimen name="espaciado_m">12dp</dimen>
+    <dimen name="espaciado_l">16dp</dimen>
+    <dimen name="espaciado_xl">24dp</dimen>
+    <dimen name="espaciado_xxl">32dp</dimen>
+    <dimen name="ajustes_circulo_color">40dp</dimen>
+    <dimen name="ajustes_alto_grid">100dp</dimen>
 
-    <!-- RegistroUsuario -->
+    <!-- RegistroUsuario Screen-->
     <dimen name="registro_padding_horizontal">24dp</dimen>
     <dimen name="registro_padding_card_horizontal">28dp</dimen>
     <dimen name="registro_padding_card_vertical">36dp</dimen>
@@ -22,7 +22,7 @@
     <dimen name="registro_circulo_inferior">300dp</dimen>
     <dimen name="registro_espaciado_campos">14dp</dimen>
 
-    <!-- VerCorreo -->
+    <!-- VerCorreo Screen-->
     <dimen name="ver_correo_padding">24dp</dimen>
     <dimen name="ver_correo_padding_horizontal">28dp</dimen>
     <dimen name="ver_correo_padding_vertical_asunto">20dp</dimen>
@@ -31,11 +31,86 @@
     <dimen name="ver_correo_espaciado_remitente">16dp</dimen>
 
 
-    <!-- Verificacion -->
+    <!-- Verificacion Screen-->
     <dimen name="verificacion_padding_horizontal">36dp</dimen>
     <dimen name="verificacion_padding_card_horizontal">28dp</dimen>
     <dimen name="verificacion_padding_card_vertical">36dp</dimen>
     <dimen name="verificacion_altura_boton">54dp</dimen>
     <dimen name="verificacion_campo_ancho">48dp</dimen>
     <dimen name="verificacion_campo_alto">56dp</dimen>
+
+    <!-- CambiarContrasena Screen -->
+    <dimen name="cambiar_contrasena_padding_card_horizontal">24dp</dimen>
+    <dimen name="cambiar_contrasena_padding_card_vertical">24dp</dimen>
+    <dimen name="cambiar_contrasena_altura_boton">50dp</dimen>
+    <dimen name="cambiar_contrasena_icono_email">52dp</dimen>
+    <dimen name="cambiar_contrasena_circulo_grande">280dp</dimen>
+    <dimen name="cambiar_contrasena_circulo_mediano">160dp</dimen>
+    <dimen name="cambiar_contrasena_circulo_pequeno">140dp</dimen>
+
+
+    <!-- Contador Screen -->
+    <dimen name="contador_circulo">280dp</dimen>
+    <dimen name="contador_circulo_landscape">180dp</dimen>
+    <dimen name="contador_boton">64dp</dimen>
+    <dimen name="contador_icono_boton">32dp</dimen>
+
+
+    <!-- Correo Screen -->
+    <dimen name="correo_padding_contenido">16dp</dimen>
+    <dimen name="correo_boton_crear">56dp</dimen>
+    <dimen name="correo_icono_crear">28dp</dimen>
+    <dimen name="correo_padding_tarjeta">12dp</dimen>
+
+    <!-- EnviarCorreo Screen -->
+    <dimen name="enviar_correo_padding_horizontal">16dp</dimen>
+    <dimen name="enviar_correo_padding_vertical">16dp</dimen>
+    <dimen name="enviar_correo_padding_vertical_landscape">8dp</dimen>
+    <dimen name="enviar_correo_padding_vincular">24dp</dimen>
+    <dimen name="enviar_correo_padding_vincular_landscape">12dp</dimen>
+
+    <!-- Inicio Screen -->
+    <dimen name="inicio_padding_horizontal">16dp</dimen>
+    <dimen name="inicio_padding_vertical">24dp</dimen>
+    <dimen name="inicio_padding_tarjeta">16dp</dimen>
+    <dimen name="inicio_icono_tarjeta">32dp</dimen>
+
+
+    <!-- InicioSesion Screen -->
+    <dimen name="inicio_sesion_padding_card_horizontal">24dp</dimen>
+    <dimen name="inicio_sesion_padding_card_vertical">24dp</dimen>
+    <dimen name="inicio_sesion_altura_boton_principal">54dp</dimen>
+    <dimen name="inicio_sesion_altura_boton_google">40dp</dimen>
+    <dimen name="inicio_sesion_circulo_grande">280dp</dimen>
+    <dimen name="inicio_sesion_circulo_mediano">160dp</dimen>
+    <dimen name="inicio_sesion_circulo_pequeno">140dp</dimen>
+
+    <!-- ListaCompra Screen -->
+    <dimen name="lista_compra_padding_contenido">16dp</dimen>
+    <dimen name="lista_compra_padding_fila_horizontal">16dp</dimen>
+    <dimen name="lista_compra_padding_fila_vertical">12dp</dimen>
+
+    <!-- NuevaContrasenia Screen -->
+    <dimen name="nueva_contrasenia_padding_horizontal">16dp</dimen>
+    <dimen name="nueva_contrasenia_padding_vertical">24dp</dimen>
+    <dimen name="nueva_contrasenia_altura_boton">54dp</dimen>
+    <dimen name="nueva_contrasenia_icono_exito">80dp</dimen>
+    <dimen name="nueva_contrasenia_check_exito">48dp</dimen>
+    <dimen name="nueva_contrasenia_circulo_grande">280dp</dimen>
+    <dimen name="nueva_contrasenia_circulo_mediano">160dp</dimen>
+    <dimen name="nueva_contrasenia_circulo_pequeno">140dp</dimen>
+
+
+    <!-- Perfil Screen -->
+    <dimen name="perfil_padding_contenido">16dp</dimen>
+    <dimen name="perfil_tamano_avatar">100dp</dimen>
+    <dimen name="perfil_tamano_avatar_selector">60dp</dimen>
+
+    <!-- Recordatorio Screen -->
+    <dimen name="recordatorio_padding_contenido">16dp</dimen>
+    <dimen name="recordatorio_indicador_evento">8dp</dimen>
+    <dimen name="recordatorio_icono_eliminar">18dp</dimen>
+    <dimen name="recordatorio_padding_fila_evento">12dp</dimen>
+
+
 </resources>

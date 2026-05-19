@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.databases.model.Producto
 import com.example.voxtask.databases.repository.ProductoRepository
+import com.example.voxtask.utils.TextoAVoz
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -44,8 +45,25 @@ class ListaCompraViewModel : ViewModel() {
 
     //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
     private fun procesarComando(texto: String) {
-        val prefijosEliminar = listOf("elimina ", "quita ", "borra ")
-        val prefijosAgregar = listOf("agrega ", "añade ", "pon ")
+        val idioma = TextoAVoz.localeActual.language
+
+        val prefijosEliminar = when (idioma) {
+            "en" -> listOf("delete ", "remove ", "erase ")
+            "fr" -> listOf("supprime ", "enlève ", "efface ")
+            "de" -> listOf("lösche ", "entferne ", "streiche ")
+            "it" -> listOf("elimina ", "rimuovi ", "cancella ")
+            "pt" -> listOf("elimina ", "remove ", "apaga ")
+            else -> listOf("elimina ", "quita ", "borra ")
+        }
+
+        val prefijosAgregar = when (idioma) {
+            "en" -> listOf("add ", "put ", "include ")
+            "fr" -> listOf("ajoute ", "mets ", "inclus ")
+            "de" -> listOf("füge ", "hinzufügen ", "ergänze ")
+            "it" -> listOf("aggiungi ", "metti ", "inserisci ")
+            "pt" -> listOf("adiciona ", "põe ", "inclui ")
+            else -> listOf("agrega ", "añade ", "pon ")
+        }
 
         val prefijoEliminar = prefijosEliminar.find { texto.startsWith(it) }
         val prefijoAgregar = prefijosAgregar.find { texto.startsWith(it) }
@@ -60,12 +78,10 @@ class ListaCompraViewModel : ViewModel() {
                 if (nombre.isNotEmpty()) agregarProducto(nombre)
             }
             texto.isNotEmpty() -> {
-                // Texto sin prefijo → agregar directamente
                 agregarProducto(texto.trim())
             }
         }
     }
-
     //Funcion para agregar un producto en la lista de la compra
     private fun agregarProducto(nombre: String) {
         viewModelScope.launch {

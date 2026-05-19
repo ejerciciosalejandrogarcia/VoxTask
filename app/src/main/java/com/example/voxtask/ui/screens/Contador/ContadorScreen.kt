@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -61,32 +65,23 @@ fun ContadorScreen(
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
+    val configuracion = LocalConfiguration.current
     val usuario = FirebaseAuth.getInstance().currentUser
     val uid = usuario?.uid
 
-    // Valores adaptativos
-    val tamanoCirculo = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 280.dp
-        TamanioPantalla.MEDIO     -> 340.dp
-        TamanioPantalla.EXPANDIDO -> 420.dp
-    }
-    val tamanoBoton = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 64.dp
-        TamanioPantalla.MEDIO     -> 76.dp
-        TamanioPantalla.EXPANDIDO -> 90.dp
-    }
-    val tamanoIconoBoton = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 32.dp
-        TamanioPantalla.MEDIO     -> 40.dp
-        TamanioPantalla.EXPANDIDO -> 50.dp
-    }
-    val paddingTop = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 160.dp
-        TamanioPantalla.MEDIO     -> 200.dp
-        TamanioPantalla.EXPANDIDO -> 260.dp
-    }
+    // ── Detectar landscape ────────────────────────────────────────────────────
+    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
-    // Nuevo: ancho máximo del contenido para tabletas y plegables
+    // ── Tamaños adaptativos ───────────────────────────────────────────────────
+    // En landscape reducimos el círculo para que quepa sin scroll cuando es posible
+    val tamanoCirculo = if (esLandscape) {
+        dimensionResource(R.dimen.contador_circulo_landscape)
+    } else {
+        dimensionResource(R.dimen.contador_circulo)
+    }
+    val tamanoBoton = dimensionResource(R.dimen.contador_boton)
+    val tamanoIconoBoton = dimensionResource(R.dimen.contador_icono_boton)
+
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
     val lanzadorPermiso = rememberLauncherForActivityResult(
@@ -134,92 +129,91 @@ fun ContadorScreen(
         textoInformacion = stringResource(R.string.txt_info_contador),
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto, contexto) }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = paddingTop),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AnimatedVisibility(visible = viewModel.mostrarContador) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center          // centrado vertical real
+        ) {
+            AnimatedVisibility(visible = viewModel.mostrarContador) {
 
-                    // Nuevo: limita el ancho en tabletas y plegables, centrado automático
-                    val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
-                        Modifier.widthIn(max = anchoMaximoContenido)
-                    } else {
-                        Modifier
+                val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                    Modifier.widthIn(max = anchoMaximoContenido)
+                } else {
+                    Modifier
+                }
+
+                // ── Column con scroll: si el contenido no cabe (landscape en
+                //    móvil pequeño) el usuario puede deslizar hacia abajo ──────
+                Column(
+                    modifier = modificadorContenido
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = espaciado.xl),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(tamanoCirculo)
+                            .clip(CircleShape)
+                            .background(VerdePrimario.copy(alpha = 0.1f))
+                            .border(3.dp, VerdePrimario, CircleShape)
+                    ) {
+                        Text(
+                            text = viewModel.tiempoFormato,
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = VerdePrimario
+                        )
                     }
 
-                    Column(
-                        modifier = modificadorContenido,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Spacer(modifier = Modifier.height(espaciado.xl))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(espaciado.l),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
+                        IconButton(
+                            onClick = {
+                                if (viewModel.corriendo) {
+                                    viewModel.parar(contexto)
+                                } else {
+                                    viewModel.iniciar(contexto)
+                                }
+                            },
                             modifier = Modifier
-                                .size(tamanoCirculo)
+                                .size(tamanoBoton)
                                 .clip(CircleShape)
-                                .background(VerdePrimario.copy(alpha = 0.1f))
-                                .border(3.dp, VerdePrimario, CircleShape)
+                                .background(VerdePrimario)
                         ) {
-                            Text(
-                                text = viewModel.tiempoFormato,
-                                style = MaterialTheme.typography.displayMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = VerdePrimario
+                            Icon(
+                                imageVector = if (viewModel.corriendo)
+                                    Icons.Default.Pause
+                                else
+                                    Icons.Default.PlayArrow,
+                                contentDescription = if (viewModel.corriendo)
+                                    stringResource(R.string.btn_parar)
+                                else
+                                    stringResource(R.string.btn_iniciar),
+                                tint = Color.White,
+                                modifier = Modifier.size(tamanoIconoBoton)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(espaciado.xl))
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(espaciado.l),
-                            verticalAlignment = Alignment.CenterVertically
+                        IconButton(
+                            onClick = { viewModel.cancelar(contexto) },
+                            modifier = Modifier
+                                .size(tamanoBoton)
+                                .clip(CircleShape)
+                                .background(Color.Red)
                         ) {
-                            IconButton(
-                                onClick = {
-                                    if (viewModel.corriendo) {
-                                        viewModel.parar(contexto)
-                                    } else {
-                                        viewModel.iniciar(contexto)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .size(tamanoBoton)
-                                    .clip(CircleShape)
-                                    .background(VerdePrimario)
-                            ) {
-                                Icon(
-                                    imageVector = if (viewModel.corriendo)
-                                        Icons.Default.Pause
-                                    else
-                                        Icons.Default.PlayArrow,
-                                    contentDescription = if (viewModel.corriendo)
-                                        stringResource(R.string.btn_parar)
-                                    else
-                                        stringResource(R.string.btn_iniciar),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(tamanoIconoBoton)
-                                )
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    viewModel.cancelar(contexto)
-                                },
-                                modifier = Modifier
-                                    .size(tamanoBoton)
-                                    .clip(CircleShape)
-                                    .background(Color.Red)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.btn_cancelar),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(tamanoIconoBoton)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.btn_cancelar),
+                                tint = Color.White,
+                                modifier = Modifier.size(tamanoIconoBoton)
+                            )
                         }
                     }
                 }

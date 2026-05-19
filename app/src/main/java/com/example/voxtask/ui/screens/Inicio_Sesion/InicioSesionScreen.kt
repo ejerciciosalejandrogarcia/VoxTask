@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,44 +57,13 @@ fun InicioSesionScreen(
     val tamano = LocalTamanioPantalla.current
 
     // Valores adaptativos
-    val paddingHorizontalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24 dp
-        TamanioPantalla.MEDIO     -> 36.dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val paddingVerticalCard = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24 dp
-        TamanioPantalla.MEDIO     -> 36.dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val alturaBotonPrincipal = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 54.dp
-        TamanioPantalla.MEDIO     -> 58.dp
-        TamanioPantalla.EXPANDIDO -> 64.dp
-    }
-    val alturaBotonGoogle = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 40.dp
-        TamanioPantalla.MEDIO     -> 46.dp
-        TamanioPantalla.EXPANDIDO -> 52.dp
-    }
-
-    // Nuevo: tamaño de los círculos decorativos adaptativo
-    val tamanoCirculoGrande = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 280.dp
-        TamanioPantalla.MEDIO     -> 340.dp
-        TamanioPantalla.EXPANDIDO -> 400.dp
-    }
-    val tamanoCirculoMediano = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 160.dp
-        TamanioPantalla.MEDIO     -> 200.dp
-        TamanioPantalla.EXPANDIDO -> 240.dp
-    }
-    val tamanoCirculoPequeno = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 140.dp
-        TamanioPantalla.MEDIO     -> 180.dp
-        TamanioPantalla.EXPANDIDO -> 220.dp
-    }
-
+    val paddingHorizontalCard = dimensionResource(R.dimen.inicio_sesion_padding_card_horizontal)
+    val paddingVerticalCard = dimensionResource(R.dimen.inicio_sesion_padding_card_vertical)
+    val alturaBotonPrincipal = dimensionResource(R.dimen.inicio_sesion_altura_boton_principal)
+    val alturaBotonGoogle = dimensionResource(R.dimen.inicio_sesion_altura_boton_google)
+    val tamanoCirculoGrande = dimensionResource(R.dimen.inicio_sesion_circulo_grande)
+    val tamanoCirculoMediano = dimensionResource(R.dimen.inicio_sesion_circulo_mediano)
+    val tamanoCirculoPequeno = dimensionResource(R.dimen.inicio_sesion_circulo_pequeno)
     // Nuevo: ancho máximo de la card para tabletas y plegables
     val anchoMaximoCard = tamano.anchoMaximoContenido
 

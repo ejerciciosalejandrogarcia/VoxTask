@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Ajustes
-
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -45,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -62,14 +65,16 @@ import com.example.voxtask.utils.LocalTamanioPantalla
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.PlantillaBaseViewModel
+import com.example.voxtask.utils.anchoMaximoContenido
+import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
 import java.util.Locale
 import android.Manifest
-import android.content.Intent
 import android.os.Build
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Share
-import androidx.core.content.FileProvider
-import java.io.File
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,29 +89,25 @@ fun AjustesScreen(
     val contexto = LocalContext.current
     val actividad = contexto as Activity
     val fondoUri by plantillaBaseViewModel.fondoUri.collectAsState()
+
+    // — igual que VerificacionScreen —
+    val anchoMaximo = tamano.anchoMaximoContenido
+
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let {
-            plantillaBaseViewModel.actualizarFondo(it)
-        }
-    }
+    ) { uri -> uri?.let { plantillaBaseViewModel.actualizarFondo(it) } }
 
     val permisos = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            imageLauncher.launch("image/*")
-        }
-    }
+    ) { isGranted -> if (isGranted) imageLauncher.launch("image/*") }
+
     val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_IMAGES
     } else {
         Manifest.permission.READ_EXTERNAL_STORAGE
     }
-    LaunchedEffect(Unit) {
-        viewModel.inicializarIdioma(contexto)
-    }
+
+    LaunchedEffect(Unit) { viewModel.inicializarIdioma(contexto) }
 
     PlantillaBase(
         viewModel = plantillaBaseViewModel,
@@ -114,22 +115,28 @@ fun AjustesScreen(
         navController = navController
     ) { paddingValues ->
 
-        // Dialogos
+        // Diálogos
         if (viewModel.mostrarSelectorColor) {
-            ColorInterfazDialog(
-                onDismiss = { viewModel.mostrarSelectorColor = false }
-            )
+            ColorInterfazDialog(onDismiss = { viewModel.mostrarSelectorColor = false })
         }
+
         if (viewModel.mostrarSelectorVoz) {
-            LaunchedEffect(Unit) {
-                viewModel.cargarVoces(contexto)
-            }
+            LaunchedEffect(Unit) { viewModel.cargarVoces(contexto) }
             AlertDialog(
                 onDismissRequest = { viewModel.mostrarSelectorVoz = false },
-                title = { Text(stringResource(R.string.selecciona_voz)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.selecciona_voz),
+                        fontSize = tamano.textoTitulo,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 text = {
                     if (viewModel.vocesDisponibles.isEmpty()) {
-                        Text(stringResource(R.string.no_voces))
+                        Text(
+                            text = stringResource(R.string.no_voces),
+                            fontSize = tamano.textoBody
+                        )
                     } else {
                         LazyColumn {
                             items(viewModel.vocesDisponibles) { voz ->
@@ -139,7 +146,7 @@ fun AjustesScreen(
                                 ) {
                                     Text(
                                         text = voz.locale.getDisplayName(Locale("es", "ES")),
-                                        style = MaterialTheme.typography.labelSmall,
+                                        fontSize = tamano.textoBody,
                                         color = MaterialTheme.colorScheme.outline
                                     )
                                 }
@@ -150,7 +157,10 @@ fun AjustesScreen(
                 confirmButton = {},
                 dismissButton = {
                     TextButton(onClick = { viewModel.mostrarSelectorVoz = false }) {
-                        Text(stringResource(R.string.cancelar))
+                        Text(
+                            text = stringResource(R.string.cancelar),
+                            fontSize = tamano.textoBody
+                        )
                     }
                 }
             )
@@ -159,22 +169,26 @@ fun AjustesScreen(
         if (viewModel.mostrarSelectorIdioma) {
             AlertDialog(
                 onDismissRequest = { viewModel.mostrarSelectorIdioma = false },
-                title = { Text(stringResource(R.string.selecciona_idioma)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.selecciona_idioma),
+                        fontSize = tamano.textoTitulo,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 text = {
                     LazyColumn {
                         items(viewModel.idiomasDisponibles) { (codigo, nombre) ->
                             TextButton(
                                 onClick = {
                                     viewModel.mostrarSelectorIdioma = false
-                                    viewModel.cargarIdiomas(contexto, codigo) {
-                                        actividad.recreate()
-                                    }
+                                    viewModel.cargarIdiomas(contexto, codigo) { actividad.recreate() }
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
                                     text = nombre,
-                                    style = MaterialTheme.typography.labelSmall,
+                                    fontSize = tamano.textoBody,
                                     color = MaterialTheme.colorScheme.outline
                                 )
                             }
@@ -184,83 +198,104 @@ fun AjustesScreen(
                 confirmButton = {},
                 dismissButton = {
                     TextButton(onClick = { viewModel.mostrarSelectorIdioma = false }) {
-                        Text(stringResource(R.string.cancelar))
+                        Text(
+                            text = stringResource(R.string.cancelar),
+                            fontSize = tamano.textoBody
+                        )
                     }
                 }
             )
         }
 
-        LazyColumn(
+        // Contenedor con ancho máximo igual que VerificacionScreen
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(espaciado.l)                          // antes: 16.dp
+                .padding(paddingValues),
+            contentAlignment = Alignment.TopCenter
         ) {
-            item {
-                OpcionAjuste(
-                    icono = Icons.Default.RecordVoiceOver,
-                    titulo = stringResource(R.string.cambiar_voz),
-                    descripcion = "${stringResource(R.string.voz_actual)}: ${viewModel.vozActual}"
-                ) { viewModel.mostrarSelectorVoz = true }
+            val modificadorLista = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
+                Modifier
+                    .widthIn(max = anchoMaximo)
+                    .fillMaxWidth()
+            } else {
+                Modifier.fillMaxWidth()
             }
-            item {
-                OpcionAjuste(
-                    icono = Icons.Default.Language,
-                    titulo = stringResource(R.string.cambiar_idioma),
-                    descripcion = "${stringResource(R.string.idioma_actual)}: ${viewModel.idiomaActual}"
-                ) { viewModel.mostrarSelectorIdioma = true }
-            }
-            item {
-                OpcionAjuste(
-                    icono = Icons.Default.AccountCircle,
-                    titulo = stringResource(R.string.mi_perfil),
-                    descripcion = stringResource(R.string.ver_editar_perfil)
-                ) { navController.navigate(VoxTaskScreen.Perfil.name) }
-            }
-            item {
-                OpcionAjuste(
-                    icono = Icons.Default.Palette,
-                    titulo = stringResource(R.string.color_interfaz),
-                    descripcion = stringResource(R.string.personaliza_colores)
-                ) {
-                    viewModel.mostrarSelectorColor = true
-                }
-            }
-            item {
-                if (fondoUri != null) {
+
+            LazyColumn(
+                modifier = modificadorLista.padding(espaciado.l)
+            ) {
+                item {
                     OpcionAjuste(
-                        icono = Icons.Default.Wallpaper,
-                        titulo = stringResource(R.string.quitar_fondo),
-                        descripcion = stringResource(R.string.descripcion_quitar_fondo)
-                    ) {
-                        plantillaBaseViewModel.actualizarFondo(null)
-                    }
-                } else {
+                        icono = Icons.Default.RecordVoiceOver,
+                        titulo = stringResource(R.string.cambiar_voz),
+                        descripcion = buildString {
+                            append("${stringResource(R.string.voz_actual)}: ${viewModel.vozActual}")
+                            if (viewModel.idiomaVozActual.isNotEmpty()) {
+                                append(" · ${viewModel.idiomaVozActual}")
+                            }
+                        },
+                        tamanoTexto = tamano
+                    ) { viewModel.mostrarSelectorVoz = true }
+                }
+                item {
                     OpcionAjuste(
-                        icono = Icons.Default.Wallpaper,
-                        titulo = stringResource(R.string.cambiar_fondo),
-                        descripcion = stringResource(R.string.personaliza_fondo)
-                    ) {
-                        permisos.launch(permiso)
+                        icono = Icons.Default.Language,
+                        titulo = stringResource(R.string.cambiar_idioma),
+                        descripcion = "${stringResource(R.string.idioma_actual)}: ${viewModel.idiomaActual}",
+                        tamanoTexto = tamano
+                    ) { viewModel.mostrarSelectorIdioma = true }
+                }
+                item {
+                    OpcionAjuste(
+                        icono = Icons.Default.AccountCircle,
+                        titulo = stringResource(R.string.mi_perfil),
+                        descripcion = stringResource(R.string.ver_editar_perfil),
+                        tamanoTexto = tamano
+                    ) { navController.navigate(VoxTaskScreen.Perfil.name) }
+                }
+                item {
+                    OpcionAjuste(
+                        icono = Icons.Default.Palette,
+                        titulo = stringResource(R.string.color_interfaz),
+                        descripcion = stringResource(R.string.personaliza_colores),
+                        tamanoTexto = tamano
+                    ) { viewModel.mostrarSelectorColor = true }
+                }
+                item {
+                    if (fondoUri != null) {
+                        OpcionAjuste(
+                            icono = Icons.Default.Wallpaper,
+                            titulo = stringResource(R.string.quitar_fondo),
+                            descripcion = stringResource(R.string.descripcion_quitar_fondo),
+                            tamanoTexto = tamano
+                        ) { plantillaBaseViewModel.actualizarFondo(null) }
+                    } else {
+                        OpcionAjuste(
+                            icono = Icons.Default.Wallpaper,
+                            titulo = stringResource(R.string.cambiar_fondo),
+                            descripcion = stringResource(R.string.personaliza_fondo),
+                            tamanoTexto = tamano
+                        ) { permisos.launch(permiso) }
                     }
                 }
-            }
-            item {
-                OpcionAjuste(
-                    icono = Icons.Default.Info,
-                    titulo = stringResource(R.string.version_app),
-                    descripcion = stringResource(R.string.ver_version_actual)
-                ) {
-                    Toast.makeText(contexto, contexto.getString(R.string.version), Toast.LENGTH_SHORT).show()
+                item {
+                    OpcionAjuste(
+                        icono = Icons.Default.Info,
+                        titulo = stringResource(R.string.version_app),
+                        descripcion = stringResource(R.string.ver_version_actual),
+                        tamanoTexto = tamano
+                    ) {
+                        Toast.makeText(contexto, contexto.getString(R.string.version), Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
-            item {
-                OpcionAjuste(
-                    icono = Icons.Default.Share,
-                    titulo = stringResource(R.string.compartir_app),
-                    descripcion = stringResource(R.string.compartir_app_descripcion)
-                ) {
-                    viewModel.compartirAplicacion(contexto)
+                item {
+                    OpcionAjuste(
+                        icono = Icons.Default.Share,
+                        titulo = stringResource(R.string.compartir_app),
+                        descripcion = stringResource(R.string.compartir_app_descripcion),
+                        tamanoTexto = tamano
+                    ) { viewModel.compartirAplicacion(contexto) }
                 }
             }
         }
@@ -272,7 +307,6 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
     val themeManager = LocalThemeManager.current
     val colorClaro by themeManager.colorClaro.collectAsState()
     val colorOscuro by themeManager.colorOscuro.collectAsState()
-    val esModoOscuro = isSystemInDarkTheme()
     val tamano = LocalTamanioPantalla.current
     val espaciado = LocalEspaciado.current
 
@@ -291,31 +325,39 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = {
             Text(
-                stringResource(R.string.opcion_color_interfaz),
-                style = MaterialTheme.typography.titleLarge,
+                text = stringResource(R.string.opcion_color_interfaz),
+                fontSize = tamano.textoTitulo,
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
-            Column {
-                // Selector color modo claro
+            // La columna principal mantiene su scroll vertical por si la pantalla es muy pequeña
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // ───────────────────────────────────────────────────────────
+                // PALETA MODO CLARO (Deslizable Horizontalmente)
+                // ───────────────────────────────────────────────────────────
                 Text(
-                    stringResource(R.string.opcion_color_interfaz_modo_claro),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(R.string.opcion_color_interfaz_modo_claro),
+                    fontSize = tamano.textoBody,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = espaciado.s)
                 )
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
+                // Usamos una Row con horizontalScroll y un estado de scroll independiente para cada paleta
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(altoGrid)
+                        .horizontalScroll(rememberScrollState()) // <- Esto activa el scroll horizontal
+                        .padding(vertical = espaciado.xs),
+                    horizontalArrangement = Arrangement.spacedBy(espaciado.xs) // Espaciado automático entre círculos
                 ) {
-                    items(ColoresClaros) { color ->
+                    ColoresClaros.forEach { color ->
                         Box(
                             modifier = Modifier
-                                .padding(espaciado.xs)
                                 .size(tamanoCirculo)
                                 .clip(CircleShape)
                                 .background(color)
@@ -331,24 +373,27 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(espaciado.l))
 
-                // Selector color modo oscuro
+                // ───────────────────────────────────────────────────────────
+                // PALETA MODO OSCURO (Deslizable Horizontalmente)
+                // ───────────────────────────────────────────────────────────
                 Text(
-                    stringResource(R.string.opcion_color_interfaz_modo_oscuro),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(R.string.opcion_color_interfaz_modo_oscuro),
+                    fontSize = tamano.textoBody,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = espaciado.s) // antes: 8.dp
+                    modifier = Modifier.padding(bottom = espaciado.s)
                 )
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
+                // Segunda Row con su propio scroll independiente
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(altoGrid)
+                        .horizontalScroll(rememberScrollState()) // <- Esto activa el scroll horizontal
+                        .padding(vertical = espaciado.xs),
+                    horizontalArrangement = Arrangement.spacedBy(espaciado.xs)
                 ) {
-                    items(ColoresOscuros) { color ->
+                    ColoresOscuros.forEach { color ->
                         Box(
                             modifier = Modifier
-                                .padding(espaciado.xs)
                                 .size(tamanoCirculo)
                                 .clip(CircleShape)
                                 .background(color)
@@ -365,7 +410,11 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.model_cerrar), color = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = stringResource(R.string.model_cerrar),
+                    fontSize = tamano.textoBody,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     )
@@ -377,6 +426,7 @@ fun OpcionAjuste(
     icono: ImageVector,
     titulo: String,
     descripcion: String,
+    tamanoTexto: TamanioPantalla,          // ← nuevo parámetro
     onClick: () -> Unit
 ) {
     val espaciado = LocalEspaciado.current
@@ -389,13 +439,31 @@ fun OpcionAjuste(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         ListItem(
-            headlineContent = { Text(titulo, style = MaterialTheme.typography.titleMedium) },
-            supportingContent = { Text(descripcion, style = MaterialTheme.typography.bodySmall) },
+            headlineContent = {
+                Text(
+                    text = titulo,
+                    fontSize = tamanoTexto.textoBody,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = descripcion,
+                    fontSize = tamanoTexto.textoBody
+                )
+            },
             leadingContent = {
                 Icon(
                     imageVector = icono,
                     contentDescription = titulo,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(
+                        when (tamanoTexto) {
+                            TamanioPantalla.COMPACTO  -> 24.dp
+                            TamanioPantalla.MEDIO     -> 28.dp
+                            TamanioPantalla.EXPANDIDO -> 32.dp
+                        }
+                    )
                 )
             }
         )

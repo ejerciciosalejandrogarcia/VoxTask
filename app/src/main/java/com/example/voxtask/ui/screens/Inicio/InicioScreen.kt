@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,17 +57,8 @@ fun InicioScreen(
     var tieneEventos by remember { mutableStateOf(false) }
 
     // Valores adaptativos
-    val paddingHorizontal = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 32 dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-    val paddingVertical = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.xl      // 24 dp
-        TamanioPantalla.MEDIO     -> 32.dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
-
+    val paddingHorizontal = dimensionResource(R.dimen.inicio_padding_horizontal)
+    val paddingVertical = dimensionResource(R.dimen.inicio_padding_vertical)
     // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
@@ -204,16 +196,8 @@ fun TarjetaMenu(
     val tamano = LocalTamanioPantalla.current
 
     // Valores adaptativos
-    val paddingTarjeta = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.l       // 16 dp
-        TamanioPantalla.MEDIO     -> espaciado.xl      // 24 dp
-        TamanioPantalla.EXPANDIDO -> 28.dp
-    }
-    val tamanoIcono = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 32.dp
-        TamanioPantalla.MEDIO     -> 40.dp
-        TamanioPantalla.EXPANDIDO -> 48.dp
-    }
+    val paddingTarjeta = dimensionResource(R.dimen.inicio_padding_tarjeta)
+    val tamanoIcono = dimensionResource(R.dimen.inicio_icono_tarjeta)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
