@@ -22,7 +22,7 @@ class UsuarioRepository : UsuarioDao {
             val uid = authResult.user?.uid
                 ?: return Result.failure(Exception("No se pudo obtener el UID"))
 
-            // Guardar datos extra en Firestore
+            // Guardar datos
             val usuarioConId = usuario.copy(id = uid, contrasenia = "")
             coleccion.document(uid).set(usuarioConId).await()
 

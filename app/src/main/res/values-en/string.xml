@@ -3,9 +3,9 @@
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Create account</string>
-    <string name="campo_nombre">Your name</string>
-    <string name="campo_primer_ap">Your first surname</string>
-    <string name="campo_segundo_ap">Your second surname</string>
+    <string name="campo_nombre">Your first name</string>
+    <string name="campo_primer_ap">Your first last name</string>
+    <string name="campo_segundo_ap">Your second last name</string>
     <string name="campo_fecha_naci">Your date of birth</string>
     <string name="campo_correo">Your email address</string>
     <string name="icono_mostrar_contrasenia">Show password</string>
@@ -16,12 +16,12 @@
     <string name="hint_fecha_nacimiento">Date of birth</string>
     <string name="content_desc_seleccionar_fecha">Select date</string>
     <string name="error_campos_vacios_registro">Please fill in all fields</string>
-    <string name="error_nombre_usuario_invalido_registro">Username can only contain letters and numbers</string>
-    <string name="error_nombre_invalido_registro">Name can only contain letters</string>
-    <string name="error_primer_apellido_invalido_registro">First surname can only contain letters</string>
-    <string name="error_segundo_apellido_invalido_registro">Second surname can only contain letters</string>
+    <string name="error_nombre_usuario_invalido_registro">The username can only contain letters and numbers</string>
+    <string name="error_nombre_invalido_registro">The name can only contain letters</string>
+    <string name="error_primer_apellido_invalido_registro">The first last name can only contain letters</string>
+    <string name="error_segundo_apellido_invalido_registro">The second last name can only contain letters</string>
     <string name="error_correo_invalido">Invalid email address</string>
-    <string name="error_contrasenia_debil_registro">Password must be at least 9 characters long, with one uppercase letter, one lowercase letter, one number, and one special character</string>
+    <string name="error_contrasenia_debil_registro">The password must be at least 9 characters long, include an uppercase letter, a lowercase letter, a number, and a special character</string>
     <string name="error_registro_fallido">Could not complete registration. Please try again.</string>
 
     <!-- Ver Correo Screen -->
@@ -32,13 +32,13 @@
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hello, how are you %1$s? What would you like me to do for you?</string>
-    <string name="txt_inicio_instrucciones">Choose one of the following options and hold the speak button when you are ready</string>
-    <string name="txt_inicio_sub_correo">Check my email</string>
+    <string name="txt_inicio_instrucciones">Choose one of the following options and, when you are ready, press and hold the speak button</string>
+    <string name="txt_inicio_sub_correo">View my email</string>
     <string name="txt_inicio_sub_recordatorios_ver">View my reminders</string>
-    <string name="txt_inicio_sub_recordatorios_crear">Create reminder</string>
+    <string name="txt_inicio_sub_recordatorios_crear">Create a reminder</string>
     <string name="txt_inicio_sub_lista_ver">View my shopping list</string>
-    <string name="txt_inicio_sub_lista_crear">Create shopping list</string>
-    <string name="txt_inicio_sub_contador">Set a timer</string>
+    <string name="txt_inicio_sub_lista_crear">Create a shopping list</string>
+    <string name="txt_inicio_sub_contador">Create a timer</string>
     <string name="txt_usuario_generico">User</string>
     <string name="txt_correo">Email</string>
     <string name="txt_recordatorio">Reminders</string>
@@ -55,7 +55,7 @@
     <string name="txt_mensaje_confirmacion_producto">Are you sure you want to delete %s?</string>
     <string name="btn_eliminar_producto">Delete</string>
     <string name="btn_cancelar_producto">Cancel</string>
-    <string name="txt_info_lista_compra">Say a product to add it, or say delete and the product name to remove it</string>
+    <string name="txt_info_lista_compra">Say a product to add it, or say \"delete\" followed by the product name to remove it</string>
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Previous month</string>
@@ -70,17 +70,22 @@
         <item>Sun</item>
     </string-array>
     <string name="icono_eliminar_evento">Delete event</string>
-    <string name="txt_sin_eventos_dia_seleccionado">No events on this day</string>
+    <string name="txt_sin_eventos_dia_seleccionado">No events today</string>
     <string name="txt_eventos_dia_seleccionado">Events for %2$s %1$d</string>
+    <string name="txt_selecciona_dia">Select a day\nto view its events</string>
 
     <!-- Ajustes Screen -->
     <string name="ajustes">Settings</string>
+    <string name="compartir_app_mensaje">Share the application with your friends and family</string>
+    <string name="compartir_app_titulo">Share VoxTask</string>
+    <string name="compartir_app">Share app</string>
+    <string name="compartir_app_descripcion">Share VoxTask with your contacts</string>
     <string name="cambiar_voz">Change voice</string>
     <string name="voz_actual">Current voice</string>
     <string name="cambiar_idioma">Change language</string>
     <string name="idioma_actual">Current language</string>
     <string name="mi_perfil">My profile</string>
-    <string name="ver_editar_perfil">View and edit your information</string>
+    <string name="ver_editar_perfil">View and edit your profile info</string>
     <string name="color_interfaz">Interface color</string>
     <string name="personaliza_colores">Customize app colors</string>
     <string name="selecciona_voz">Select a voice</string>
@@ -91,9 +96,9 @@
     <string name="cambiar_fondo">Change background</string>
     <string name="personaliza_fondo">Customize app background</string>
     <string name="version_app">Version</string>
-    <string name="ver_version_actual">Check current version</string>
+    <string name="ver_version_actual">View current version</string>
     <string name="quitar_fondo">Remove background</string>
-    <string name="descripcion_quitar_fondo">Return to default background</string>
+    <string name="descripcion_quitar_fondo">Revert to default background</string>
     <string name="opcion_color_interfaz">Interface color</string>
     <string name="opcion_color_interfaz_modo_claro">Light mode color</string>
     <string name="opcion_color_interfaz_modo_oscuro">Dark mode color</string>
@@ -102,7 +107,7 @@
     <!-- Cambiar contrasenia Screen -->
     <string name="instrucciones_restablecer_email_uno">Email sent</string>
     <string name="instrucciones_restablecer_email_dos">Check your inbox at\n%1$s\nand follow the instructions to reset your password.</string>
-    <string name="btn_enviar_de_nuevo">Send again</string>
+    <string name="btn_enviar_de_nuevo">Resend</string>
     <string name="txt_titulo_recuperar_contrasenia">Recover password</string>
     <string name="txt_titulo_recuperar_contrasenia_dos">Enter your email and we will send you a link to reset your password</string>
     <string name="txt_placeholder_recuperar_contrasenia">Enter your email</string>
@@ -112,7 +117,7 @@
     <string name="error_email_invalido">Invalid email address</string>
     <string name="error_envio_correo">Error sending email. Please try again</string>
     <string name="error_campos_vacios">Please fill in all fields</string>
-    <string name="error_contrasena_debil">Password must be at least 9 characters long, with one uppercase letter, one lowercase letter, one number, and one special character</string>
+    <string name="error_contrasena_debil">The password must be at least 9 characters long, include an uppercase letter, a lowercase letter, a number, and a special character</string>
     <string name="error_contrasenas_no_coinciden">Passwords do not match</string>
     <string name="error_cambio_contrasena">Error changing password</string>
 
@@ -121,14 +126,15 @@
     <string name="btn_iniciar">Start</string>
     <string name="txt_titulo_contador_pausado">Timer paused</string>
     <string name="txt_titulo_contador_iniciado">Timer started</string>
-    <string name="txt_titulo_contador_encurso">Timer in progress</string>
+    <string name="txt_titulo_contador_encurso">Timer running</string>
     <string name="txt_titulo_contador_terminado">Time\'s up!</string>
     <string name="txt_titulo_contador_finalizado">The timer has finished</string>
     <string name="txt_name_canal">VoxTask Timer</string>
-    <string name="txt_descripcion">Shows the countdown timer</string>
+    <string name="txt_descripcion">Shows the timer countdown</string>
     <string name="txt_title_reanudar">Resume</string>
     <string name="txt_title_pausar">Pause</string>
     <string name="txt_title_cancelar">Cancel</string>
+    <string name="txt_info_contador">To set a timer, state how much time you want. To create a new one, cancel the current timer and state the new duration</string>
 
     <!-- Correo Screen -->
     <string name="txt_title_advertencia_ver_correos">Connect your Gmail account to view your emails</string>
@@ -138,7 +144,7 @@
     <string name="error_sin_sesion">No active session</string>
     <string name="error_general">An error occurred. Please try again</string>
     <string name="error_cargar_correos">Error loading emails</string>
-    <string name="error_cuenta_google_incorrecta">The Google account does not match the app account</string>
+    <string name="error_cuenta_google_incorrecta">The Google account does not match the application account</string>
 
     <!-- Enviar Correo Screen -->
     <string name="txt_enviarcorreo_paso_uno">Step %1$d of 4</string>
@@ -146,24 +152,24 @@
     <string name="txt_enviarcorreo_paso_destinatario_pregunta">Who are you sending the email to?</string>
     <string name="txt_enviarcorreo_paso_destinatario_description">Say the recipient\'s email address</string>
     <string name="txt_enviarcorreo_pregunta_asunto">What is the subject?</string>
-    <string name="txt_enviarcorreo_descripcion_asunto">Say the email subject</string>
+    <string name="txt_enviarcorreo_descripcion_asunto">Say the subject of the email</string>
     <string name="txt_enviarcorreo_pregunta_modo">How do you want to write the message?</string>
-    <string name="txt_enviarcorreo_descripcion_modo">Say \"myself\" to write it yourself\nSay \"artificial intelligence\" to have the AI create it</string>
+    <string name="txt_enviarcorreo_descripcion_modo">Say \"myself\" to type it yourself\nSay \"artificial intelligence\" to let AI create it</string>
     <string name="txt_enviarcorreo_pregunta_mensaje_ia">What is the email about?</string>
     <string name="txt_enviarcorreo_pregunta_mensaje_manual">Dictate the message</string>
-    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Say the main topic or idea</string>
-    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Say the full content of the email</string>
-    <string name="txt_enviarcorreo_titulo_confirmacion">Is this how you want to send it?</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Say the topic or main idea</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Say the complete content of the email</string>
+    <string name="txt_enviarcorreo_titulo_confirmacion">Do you want to send it like this?</string>
     <string name="txt_enviarcorreo_subtitulo_confirmacion">Review the details before sending</string>
     <string name="txt_enviarcorreo_etiqueta_para">To</string>
     <string name="txt_enviarcorreo_etiqueta_asunto">Subject</string>
     <string name="txt_enviarcorreo_etiqueta_mensaje">Message</string>
     <string name="txt_enviarcorreo_etiqueta_modo">Mode</string>
-    <string name="txt_enviarcorreo_modo_ia">AI Generated</string>
+    <string name="txt_enviarcorreo_modo_ia">AI-Generated</string>
     <string name="txt_enviarcorreo_modo_manual">Manual</string>
     <string name="txt_enviarcorreo_btn_enviar">Send email</string>
     <string name="txt_enviarcorreo_estado_enviando">Sending email...</string>
-    <string name="txt_enviarcorreo_exito">✓ Email sent</string>
+    <string name="txt_enviarcorreo_exito">Email sent</string>
     <string name="txt_enviarcorreo_btn_otro">Send another</string>
     <string name="txt_enviarcorreo_btn_reintentar">Try again</string>
     <string name="txt_enviarcorreo_resumen_para">To: %1$s</string>
@@ -174,8 +180,8 @@
     <string name="txt_enviarcorreo_btn_vincular">Link Google account</string>
     <string name="txt_enviarcorreo_btn_guardar">Save</string>
     <string name="txt_enviarcorreo_btn_editar">Edit</string>
-    <string name="txt_enviarcorreo_vincular_cuenta_exito">Account linked successfully. Who would you like to send it to?</string>
-    <string name="txt_enviarcorreo_error_token">Error getting token: %1$s</string>
+    <string name="txt_enviarcorreo_vincular_cuenta_exito">Account linked successfully. Who do you want to send it to?</string>
+    <string name="txt_enviarcorreo_error_token">Error obtaining token: %1$s</string>
     <string name="txt_enviarcorreo_error_auth">Authentication error: %1$s</string>
     <string name="txt_enviarcorreo_error_generico">There was an error sending the email.</string>
 
@@ -190,9 +196,9 @@
     <string name="txt_pregunta_contrasenia">Forgot your password?</string>
     <string name="txt_respuesta_contrasenia">Reset now</string>
     <string name="err_campos_vacios">Please fill in all fields</string>
-    <string name="err_nombre_usuario_invalido">Username can only contain letters and numbers</string>
-    <string name="err_contrasenia_debil">Password must be at least 9 characters long, with one uppercase letter, one lowercase letter, one number, and one special character</string>
-    <string name="err_google_auth">Failed to connect with Google. Please try again.</string>
+    <string name="err_nombre_usuario_invalido">The username can only contain letters and numbers</string>
+    <string name="err_contrasenia_debil">The password must be at least 9 characters long, include an uppercase letter, a lowercase letter, a number, and a special character</string>
+    <string name="err_google_auth">Google connection failed. Please try again.</string>
     <string name="err_credenciales_incorrectas">Incorrect username or password</string>
     <string name="err_firestore">Could not save data to the cloud.</string>
     <string name="err_conexion">Network error. Please check your internet connection.</string>
@@ -211,16 +217,17 @@
     <!-- Perfil Screen -->
     <string name="content_desc_avatar">Avatar</string>
     <string name="hint_nombre_usuario">Username</string>
-    <string name="hint_nombre">Name</string>
-    <string name="hint_primer_apellido">First surname</string>
+    <string name="hint_nombre">First name</string>
+    <string name="hint_primer_apellido">First last name</string>
+    <string name="hint_segundo_apellido">Second last name</string>
     <string name="btn_guardar_cambios">Save changes</string>
     <string name="btn_editar_perfil">Edit profile</string>
     <string name="btn_cancelar">Cancel</string>
     <string name="txt_titulo_selector_avatar">Choose your avatar</string>
     <string name="btn_cerrar_avatar">Close</string>
-    <string name="error_nombre_invalido">Name can only contain letters</string>
-    <string name="error_primer_apellido_invalido">First surname can only contain letters</string>
-    <string name="error_segundo_apellido_invalido">Second surname can only contain letters</string>
+    <string name="error_nombre_invalido">The name can only contain letters</string>
+    <string name="error_primer_apellido_invalido">The first last name can only contain letters</string>
+    <string name="error_segundo_apellido_invalido">The second last name can only contain letters</string>
     <string name="error_cargar_datos">Error loading data</string>
     <string name="error_guardar_perfil">Error saving profile</string>
     <string name="error_actualizar_avatar">Error updating avatar</string>
@@ -228,7 +235,7 @@
     <string name="msg_avatar_actualizado">Avatar updated</string>
 
     <!-- Verificacion Screen -->
-    <string name="txt_verificar_correo">Verify your email</string>
+    <string name="txt_verificar_correo">Verify your email address</string>
     <string name="txt_codigo_enviado_a">We have sent a code to:</string>
     <string name="txt_enviando_codigo">Sending code...</string>
     <string name="txt_codigo_expirado">Code expired</string>

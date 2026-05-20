@@ -3,64 +3,63 @@
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Criar conta</string>
-    <string name="campo_nombre">Seu nome</string>
-    <string name="campo_primer_ap">Seu primeiro sobrenome</string>
-    <string name="campo_segundo_ap">Seu segundo sobrenome</string>
-    <string name="campo_fecha_naci">Sua data de nascimento</string>
-    <string name="campo_correo">Seu e-mail</string>
-    <string name="icono_mostrar_contrasenia">Mostrar senha</string>
+    <string name="campo_nombre">O seu nome</string>
+    <string name="campo_primer_ap">O seu primeiro apelido</string>
+    <string name="campo_segundo_ap">O seu segundo apelido</string>
+    <string name="campo_fecha_naci">A sua data de nascimento</string>
+    <string name="campo_correo">O seu e-mail</string>
+    <string name="icono_mostrar_contrasenia">Mostrar palavra-passe</string>
     <string name="icono_limpiar">Limpar</string>
-    <string name="txt_ir_inicio_sesion">Ir para o login</string>
+    <string name="txt_ir_inicio_sesion">Ir para o início de sessão</string>
     <string name="txt_cuenta_creada">Conta criada com sucesso</string>
-    <string name="txt_cuenta_creada_descripcion">Agora você já pode iniciar sessão com suas credenciais.</string>
+    <string name="txt_cuenta_creada_descripcion">Já pode iniciar sessão com as suas credenciais.</string>
     <string name="hint_fecha_nacimiento">Data de nascimento</string>
     <string name="content_desc_seleccionar_fecha">Selecionar data</string>
     <string name="error_campos_vacios_registro">Preencha todos os campos</string>
-    <string name="error_nombre_usuario_invalido_registro">O nome de usuário só pode conter letras e números</string>
+    <string name="error_nombre_usuario_invalido_registro">O nome de utilizador só pode conter letras e números</string>
     <string name="error_nombre_invalido_registro">O nome só pode conter letras</string>
-    <string name="error_primer_apellido_invalido_registro">O primeiro sobrenome só pode conter letras</string>
-    <string name="error_segundo_apellido_invalido_registro">O segundo sobrenome só pode conter letras</string>
+    <string name="error_primer_apellido_invalido_registro">O primeiro apelido só pode conter letras</string>
+    <string name="error_segundo_apellido_invalido_registro">O segundo apelido só pode conter letras</string>
     <string name="error_correo_invalido">E-mail inválido</string>
-    <string name="error_contrasenia_debil_registro">A senha deve ter no mínimo 9 caracteres, uma maiúscula, uma minúscula, um número e um caractere especial</string>
-    <string name="error_registro_fallido">Não foi possível completar o registro. Tente novamente.</string>
-
+    <string name="error_contrasenia_debil_registro">A palavra-passe deve ter no mínimo 9 caracteres, uma letra maiúscula, uma minúscula, um número e um carácter especial</string>
+    <string name="error_registro_fallido">Não foi possível concluir o registo. Tente novamente.</string>
 
     <!-- Ver Correo Screen -->
     <string name="txt_correo_no_encontrado">E-mail não encontrado.</string>
     <string name="txt_destinatario_para">Para</string>
-    <string name="txt_destinatario_tu">você</string>
+    <string name="txt_destinatario_tu">tu</string>
     <string name="error_cargar_correo">Erro ao carregar o e-mail: %1$s</string>
 
     <!-- Inicio Screen -->
-    <string name="txt_inicio_bienvenida">Olá, como você está %1$s? O que gostaria que eu fizesse por você?</string>
-    <string name="txt_inicio_instrucciones">Escolha uma das seguintes opções e, quando estiver pronto, mantenha o botão de falar pressionado</string>
-    <string name="txt_inicio_sub_correo">Ver meu e-mail</string>
-    <string name="txt_inicio_sub_recordatorios_ver">Ver meus lembretes</string>
+    <string name="txt_inicio_bienvenida">Olá, como estás %1$s? O que gostarias que fizesse por ti?</string>
+    <string name="txt_inicio_instrucciones">Escolhe uma das seguintes opções e, quando estiveres pronto, mantém premido o botão de falar</string>
+    <string name="txt_inicio_sub_correo">Ver o meu e-mail</string>
+    <string name="txt_inicio_sub_recordatorios_ver">Ver os meus lembretes</string>
     <string name="txt_inicio_sub_recordatorios_crear">Criar lembrete</string>
-    <string name="txt_inicio_sub_lista_ver">Ver minha lista de compras</string>
+    <string name="txt_inicio_sub_lista_ver">Ver a minha lista de compras</string>
     <string name="txt_inicio_sub_lista_crear">Criar lista de compras</string>
     <string name="txt_inicio_sub_contador">Criar um temporizador</string>
-    <string name="txt_usuario_generico">Usuário</string>
+    <string name="txt_usuario_generico">Utilizador</string>
     <string name="txt_correo">E-mail</string>
     <string name="txt_recordatorio">Lembretes</string>
     <string name="txt_lista_compra">Lista de compras</string>
     <string name="txt_contador">Temporizador</string>
     <string name="btn_inicio">Início</string>
     <string name="btn_hablar">Falar</string>
-    <string name="btn_ajustes">Ajustes</string>
+    <string name="btn_ajustes">Definições</string>
 
     <!-- Lista Compra Screen -->
-    <string name="icono_eliminar_producto">Excluir produto</string>
-    <string name="txt_sin_producto_lista_compra">Diga um produto para adicioná-lo</string>
-    <string name="txt_titulo_mensaje_confirmacion_producto">Excluir produto</string>
-    <string name="txt_mensaje_confirmacion_producto">Tem certeza de que deseja excluir %s?</string>
-    <string name="btn_eliminar_producto">Excluir</string>
+    <string name="icono_eliminar_producto">Eliminar produto</string>
+    <string name="txt_sin_producto_lista_compra">Diz um produto para o adicionar</string>
+    <string name="txt_titulo_mensaje_confirmacion_producto">Eliminar produto</string>
+    <string name="txt_mensaje_confirmacion_producto">Tens a certeza de que queres eliminar %s?</string>
+    <string name="btn_eliminar_producto">Eliminar</string>
     <string name="btn_cancelar_producto">Cancelar</string>
-    <string name="txt_info_lista_compra">Diga um produto para adicioná-lo, ou diga \"excluir\" e o nome do produto para removê-lo</string>
+    <string name="txt_info_lista_compra">Diz um produto para o adicionar, ou diz \"elimina\" e o nome do produto para o apagar</string>
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mês anterior</string>
-    <string name="icono_mes_siguiente">Próximo mês</string>
+    <string name="icono_mes_siguiente">Mês seguinte</string>
     <string-array name="dias_semana">
         <item>Seg</item>
         <item>Ter</item>
@@ -70,93 +69,98 @@
         <item>Sáb</item>
         <item>Dom</item>
     </string-array>
-    <string name="icono_eliminar_evento">Excluir evento</string>
+    <string name="icono_eliminar_evento">Eliminar evento</string>
     <string name="txt_sin_eventos_dia_seleccionado">Não há eventos neste dia</string>
     <string name="txt_eventos_dia_seleccionado">Eventos de %1$d de %2$s</string>
+    <string name="txt_selecciona_dia">Seleciona um dia\npara ver os seus eventos</string>
 
     <!-- Ajustes Screen -->
-    <string name="ajustes">Ajustes</string>
+    <string name="ajustes">Definições</string>
+    <string name="compartir_app_mensaje">Partilha a aplicação com os teus amigos e familiares</string>
+    <string name="compartir_app_titulo">Partilhar VoxTask</string>
+    <string name="compartir_app">Partilhar aplicação</string>
+    <string name="compartir_app_descripcion">Partilha a VoxTask com os teus contactos</string>
     <string name="cambiar_voz">Alterar voz</string>
     <string name="voz_actual">Voz atual</string>
     <string name="cambiar_idioma">Alterar idioma</string>
     <string name="idioma_actual">Idioma atual</string>
-    <string name="mi_perfil">Meu perfil</string>
-    <string name="ver_editar_perfil">Ver e editar sua informação</string>
+    <string name="mi_perfil">O meu perfil</string>
+    <string name="ver_editar_perfil">Ver e editar as tuas informações</string>
     <string name="color_interfaz">Cor da interface</string>
-    <string name="personaliza_colores">Personalize as cores do app</string>
-    <string name="selecciona_voz">Selecione uma voz</string>
-    <string name="selecciona_idioma">Selecione um idioma</string>
+    <string name="personaliza_colores">Personaliza as cores da app</string>
+    <string name="selecciona_voz">Seleciona uma voz</string>
+    <string name="selecciona_idioma">Seleciona um idioma</string>
     <string name="no_voces">Não há vozes disponíveis.</string>
     <string name="cancelar">Cancelar</string>
     <string name="version">Versão: 1.0</string>
     <string name="cambiar_fondo">Alterar fundo</string>
-    <string name="personaliza_fondo">Personalize o fundo do app</string>
+    <string name="personaliza_fondo">Personaliza o fundo da app</string>
     <string name="version_app">Versão</string>
-    <string name="ver_version_actual">Consultar a versão atual</string>
+    <string name="ver_version_actual">Consulta a versão atual</string>
     <string name="quitar_fondo">Remover fundo</string>
-    <string name="descripcion_quitar_fondo">Voltar ao fundo padrão</string>
+    <string name="descripcion_quitar_fondo">Voltar ao fundo predefinido</string>
     <string name="opcion_color_interfaz">Cor da interface</string>
-    <string name="opcion_color_interfaz_modo_claro">Cor modo claro</string>
-    <string name="opcion_color_interfaz_modo_oscuro">Cor modo escuro</string>
+    <string name="opcion_color_interfaz_modo_claro">Cor do modo claro</string>
+    <string name="opcion_color_interfaz_modo_oscuro">Cor do modo escuro</string>
     <string name="model_cerrar">Fechar</string>
-
 
     <!-- Cambiar contrasenia Screen -->
     <string name="instrucciones_restablecer_email_uno">E-mail enviado</string>
-    <string name="instrucciones_restablecer_email_dos">Verifique sua caixa de entrada em\n%1$s\ne siga as instruções para redefinir sua senha.</string>
+    <string name="instrucciones_restablecer_email_dos">Verifica a tua caixa de entrada em\n%1$s\ne segue as instruções para redefinir a tua palavra-passe.</string>
     <string name="btn_enviar_de_nuevo">Enviar novamente</string>
-    <string name="txt_titulo_recuperar_contrasenia">Recuperar senha</string>
-    <string name="txt_titulo_recuperar_contrasenia_dos">Digite seu e-mail e enviaremos um link para redefinir sua senha</string>
-    <string name="txt_placeholder_recuperar_contrasenia">Digite seu e-mail</string>
+    <string name="txt_titulo_recuperar_contrasenia">Recuperar palavra-passe</string>
+    <string name="txt_titulo_recuperar_contrasenia_dos">Introduz o teu e-mail e enviaremos um link para redefinires a tua palavra-passe</string>
+    <string name="txt_placeholder_recuperar_contrasenia">Introduz o teu e-mail</string>
     <string name="txt_limpiar">Limpar</string>
     <string name="btn_recuperar_contrasenia">Enviar e-mail de recuperação</string>
-    <string name="error_email_vacio">Digite seu e-mail</string>
+    <string name="error_email_vacio">Introduz o teu e-mail</string>
     <string name="error_email_invalido">E-mail inválido</string>
     <string name="error_envio_correo">Erro ao enviar o e-mail. Tente novamente</string>
     <string name="error_campos_vacios">Preencha todos os campos</string>
-    <string name="error_contrasena_debil">A senha deve ter no mínimo 9 caracteres, uma maiúscula, uma minúscula, um número e um caractere especial</string>
-    <string name="error_contrasenas_no_coinciden">As senhas não coincidem</string>
-    <string name="error_cambio_contrasena">Erro ao alterar a senha</string>
+    <string name="error_contrasena_debil">A palavra-passe deve ter no mínimo 9 caracteres, uma letra maiúscula, uma minúscula, um número e um carácter especial</string>
+    <string name="error_contrasenas_no_coinciden">As palavras-passe não coincidem</string>
+    <string name="error_cambio_contrasena">Erro ao alterar a palavra-passe</string>
 
     <!-- Contador Screen -->
     <string name="btn_parar">Parar</string>
     <string name="btn_iniciar">Iniciar</string>
-    <string name="txt_titulo_contador_pausado">Temporizador pausado</string>
+    <string name="txt_titulo_contador_pausado">Temporizador em pausa</string>
     <string name="txt_titulo_contador_iniciado">Temporizador iniciado</string>
     <string name="txt_titulo_contador_encurso">Temporizador em curso</string>
     <string name="txt_titulo_contador_terminado">Tempo esgotado!</string>
     <string name="txt_titulo_contador_finalizado">O temporizador terminou</string>
     <string name="txt_name_canal">Temporizador VoxTask</string>
-    <string name="txt_descripcion">Mostra a contagem regressiva do temporizador</string>
+    <string name="txt_descripcion">Mostra a contagem decrescente do temporizador</string>
     <string name="txt_title_reanudar">Retomar</string>
     <string name="txt_title_pausar">Pausar</string>
     <string name="txt_title_cancelar">Cancelar</string>
+    <string name="txt_info_contador">Para criar o temporizador diz quanto tempo queres definir. Para criar um novo, cancela o temporizador atual e diz novamente o tempo que queres colocar</string>
 
     <!-- Correo Screen -->
-    <string name="txt_title_advertencia_ver_correos">Conecte sua conta do Gmail para ver seus e-mails</string>
-    <string name="txt_btn_conectar_gmail">Conectar Gmail</string>
-    <string name="txt_title_no_correos">Você não tem e-mails</string>
+    <string name="txt_title_advertencia_ver_correos">Associa a tua conta Gmail para veres os teus e-mails</string>
+    <string name="txt_btn_conectar_gmail">Associar Gmail</string>
+    <string name="txt_title_no_correos">Não tens e-mails</string>
     <string name="txt_btne_crear_correo">Criar e-mail</string>
-    <string name="error_sin_sesion">Não há sessão ativa</string>
+    <string name="error_sin_sesion">Não há nenhuma sessão ativa</string>
     <string name="error_general">Ocorreu um erro. Tente novamente</string>
     <string name="error_cargar_correos">Erro ao carregar os e-mails</string>
-    <string name="error_cuenta_google_incorrecta">A conta do Google não coincide com a conta do aplicativo</string>
+    <string name="error_cuenta_google_incorrecta">A conta Google não coincide com a conta da aplicação</string>
 
     <!-- Enviar Correo Screen -->
     <string name="txt_enviarcorreo_paso_uno">Passo %1$d de 4</string>
-    <string name="txt_enviarcorreo_vincular_cuenta">Vinculando conta...</string>
-    <string name="txt_enviarcorreo_paso_destinatario_pregunta">Para quem você está enviando o e-mail?</string>
-    <string name="txt_enviarcorreo_paso_destinatario_description">Diga o e-mail do destinatário</string>
+    <string name="txt_enviarcorreo_vincular_cuenta">A associar conta...</string>
+    <string name="txt_enviarcorreo_paso_destinatario_pregunta">Para quem vais enviar o e-mail?</string>
+    <string name="txt_enviarcorreo_paso_destinatario_description">Diz o e-mail do destinatário</string>
     <string name="txt_enviarcorreo_pregunta_asunto">Qual é o assunto?</string>
-    <string name="txt_enviarcorreo_descripcion_asunto">Diga o assunto do e-mail</string>
-    <string name="txt_enviarcorreo_pregunta_modo">Como você quer escrever a mensagem?</string>
-    <string name="txt_enviarcorreo_descripcion_modo">Diga \"eu mesmo\" para escrever\nDiga \"inteligência artificial\" para que a IA crie</string>
+    <string name="txt_enviarcorreo_descripcion_asunto">Diz o assunto do e-mail</string>
+    <string name="txt_enviarcorreo_pregunta_modo">Como queres escrever a mensagem?</string>
+    <string name="txt_enviarcorreo_descripcion_modo">Diz \"eu mesmo\" para a escreveres tu\nDiz \"inteligência artificial\" para que a IA a crie</string>
     <string name="txt_enviarcorreo_pregunta_mensaje_ia">Sobre o que trata o e-mail?</string>
-    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Ditado da mensagem</string>
-    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Diga o tema ou ideia principal</string>
-    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Diga o conteúdo completo do e-mail</string>
-    <string name="txt_enviarcorreo_titulo_confirmacion">Quer enviar assim?</string>
-    <string name="txt_enviarcorreo_subtitulo_confirmacion">Revise os dados antes de enviar</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Dita a mensagem</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Diz o tema ou a ideia principal</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Diz o conteúdo completo do e-mail</string>
+    <string name="txt_enviarcorreo_titulo_confirmacion">Queres enviar assim?</string>
+    <string name="txt_enviarcorreo_subtitulo_confirmacion">Reveja os dados antes de enviar</string>
     <string name="txt_enviarcorreo_etiqueta_para">Para</string>
     <string name="txt_enviarcorreo_etiqueta_asunto">Assunto</string>
     <string name="txt_enviarcorreo_etiqueta_mensaje">Mensagem</string>
@@ -164,78 +168,76 @@
     <string name="txt_enviarcorreo_modo_ia">Gerado por IA</string>
     <string name="txt_enviarcorreo_modo_manual">Manual</string>
     <string name="txt_enviarcorreo_btn_enviar">Enviar e-mail</string>
-    <string name="txt_enviarcorreo_estado_enviando">Enviando e-mail...</string>
-    <string name="txt_enviarcorreo_exito">✓ E-mail enviado</string>
+    <string name="txt_enviarcorreo_estado_enviando">A enviar e-mail...</string>
+    <string name="txt_enviarcorreo_exito">E-mail enviado</string>
     <string name="txt_enviarcorreo_btn_otro">Enviar outro</string>
     <string name="txt_enviarcorreo_btn_reintentar">Tentar novamente</string>
     <string name="txt_enviarcorreo_resumen_para">Para: %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Assunto: %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Modo: %1$s</string>
-    <string name="txt_enviarcorreo_google_requerido">Conta do Google necessária</string>
-    <string name="txt_enviarcorreo_google_descripcion">Para enviar e-mails, você precisa vincular sua conta do Google com permissão do Gmail.</string>
-    <string name="txt_enviarcorreo_btn_vincular">Vincular conta do Google</string>
-    <string name="txt_enviarcorreo_btn_guardar">Salvar</string>
+    <string name="txt_enviarcorreo_google_requerido">Conta Google necessária</string>
+    <string name="txt_enviarcorreo_google_descripcion">Para enviar e-mails, precisas de associar a tua conta Google com permissão para o Gmail.</string>
+    <string name="txt_enviarcorreo_btn_vincular">Associar conta Google</string>
+    <string name="txt_enviarcorreo_btn_guardar">Guardar</string>
     <string name="txt_enviarcorreo_btn_editar">Editar</string>
-    <string name="txt_enviarcorreo_vincular_cuenta_exito">Conta vinculada corretamente. Para quem você quer enviar?</string>
-    <string name="txt_enviarcorreo_error_token">Erro ao obter token: %1$s</string>
+    <string name="txt_enviarcorreo_vincular_cuenta_exito">Conta associada corretamente. Para quem a queres enviar?</string>
+    <string name="txt_enviarcorreo_error_token">Erro ao obter o token: %1$s</string>
     <string name="txt_enviarcorreo_error_auth">Erro de autenticação: %1$s</string>
-    <string name="txt_enviarcorreo_error_generico">Houve um erro ao enviar o e-mail.</string>
+    <string name="txt_enviarcorreo_error_generico">Ocorreu um erro ao enviar o e-mail.</string>
 
     <!-- Inicio de Sesión Screen -->
-    <string name="campo_nombre_usuario">Nome de usuário</string>
-    <string name="campo_contrasenia">Senha</string>
+    <string name="campo_nombre_usuario">Nome de utilizador</string>
+    <string name="campo_contrasenia">Palavra-passe</string>
     <string name="btn_iniciar_sesion">Iniciar sessão</string>
     <string name="txt_o">ou</string>
-    <string name="txt_iniciar_google">Continuar com Google</string>
-    <string name="txt_pregunta">Não tem uma conta?</string>
-    <string name="txt_respuesta">Registre-se</string>
-    <string name="txt_pregunta_contrasenia">Esqueceu sua senha?</string>
+    <string name="txt_iniciar_google">Continuar com o Google</string>
+    <string name="txt_pregunta">Não tens conta?</string>
+    <string name="txt_respuesta">Regista-te</string>
+    <string name="txt_pregunta_contrasenia">Esqueceste-te da tua palavra-passe?</string>
     <string name="txt_respuesta_contrasenia">Redefinir agora</string>
     <string name="err_campos_vacios">Preencha todos os campos</string>
-    <string name="err_nombre_usuario_invalido">O nome de usuário só pode conter letras e números</string>
-    <string name="err_contrasenia_debil">A senha deve ter no mínimo 9 caracteres, uma maiúscula, uma minúscula, um número e um caractere especial</string>
-    <string name="err_google_auth">Houve uma falha ao conectar com o Google. Tente novamente.</string>
-    <string name="err_credenciales_incorrectas">Usuário ou senha incorretos</string>
-    <string name="err_firestore">Não foi possível salvar os dados na nuvem.</string>
-    <string name="err_conexion">Erro de rede. Verifique sua conexão com a internet.</string>
+    <string name="err_nombre_usuario_invalido">O nome de utilizador só pode conter letras e números</string>
+    <string name="err_contrasenia_debil">A palavra-passe deve ter no mínimo 9 caracteres, uma letra maiúscula, uma minúscula, um número e um carácter especial</string>
+    <string name="err_google_auth">Houve uma falha ao ligar ao Google. Tente novamente.</string>
+    <string name="err_credenciales_incorrectas">Utilizador ou palavra-passe incorretos</string>
+    <string name="err_firestore">Não foi possível guardar os dados na nuvem.</string>
+    <string name="err_conexion">Erro de rede. Verifique a sua ligação à internet.</string>
 
     <!-- Nueva Contraseña Screen -->
-    <string name="txt_cargando_contrasena">Salvando senha...</string>
-    <string name="txt_contrasena_cambiada">Senha alterada!</string>
-    <string name="txt_contrasena_cambiada_descripcion">Agora você já pode iniciar sessão com sua nova senha.</string>
-    <string name="btn_ir_inicio_sesion">Ir para o login</string>
-    <string name="txt_titulo_nueva_contrasena">Nova senha</string>
-    <string name="txt_descripcion_nueva_contrasena">Digite sua nova senha.</string>
-    <string name="hint_nueva_contrasena">Nova senha</string>
-    <string name="hint_confirmar_contrasena">Confirmar senha</string>
-    <string name="btn_guardar_contrasena">Salvar senha</string>
-
+    <string name="txt_cargando_contrasena">A guardar palavra-passe...</string>
+    <string name="txt_contrasena_cambiada">Palavra-passe alterada!</string>
+    <string name="txt_contrasena_cambiada_descripcion">Já podes iniciar sessão com a tua nova palavra-passe.</string>
+    <string name="btn_ir_inicio_sesion">Ir para o início de sessão</string>
+    <string name="txt_titulo_nueva_contrasena">Nova palavra-passe</string>
+    <string name="txt_descripcion_nueva_contrasena">Introduz a tua nova palavra-passe.</string>
+    <string name="hint_nueva_contrasena">Nova palavra-passe</string>
+    <string name="hint_confirmar_contrasena">Confirmar palavra-passe</string>
+    <string name="btn_guardar_contrasena">Guardar palavra-passe</string>
 
     <!-- Perfil Screen -->
     <string name="content_desc_avatar">Avatar</string>
-    <string name="hint_nombre_usuario">Nome de usuário</string>
+    <string name="hint_nombre_usuario">Nome de utilizador</string>
     <string name="hint_nombre">Nome</string>
-    <string name="hint_primer_apellido">Primeiro sobrenome</string>
-    <string name="hint_segundo_apellido">Segundo sobrenome</string>
-    <string name="btn_guardar_cambios">Salvar alterações</string>
+    <string name="hint_primer_apellido">Primeiro apelido</string>
+    <string name="hint_segundo_apellido">Segundo apelido</string>
+    <string name="btn_guardar_cambios">Guardar alterações</string>
     <string name="btn_editar_perfil">Editar perfil</string>
     <string name="btn_cancelar">Cancelar</string>
-    <string name="txt_titulo_selector_avatar">Escolha seu avatar</string>
+    <string name="txt_titulo_selector_avatar">Escolhe o teu avatar</string>
     <string name="btn_cerrar_avatar">Fechar</string>
     <string name="error_nombre_invalido">O nome só pode conter letras</string>
-    <string name="error_primer_apellido_invalido">O primeiro sobrenome só pode conter letras</string>
-    <string name="error_segundo_apellido_invalido">O segundo sobrenome só pode conter letras</string>
-    <string name="error_cargar_datos">Erro ao carregar dados</string>
-    <string name="error_guardar_perfil">Erro ao salvar o perfil</string>
+    <string name="error_primer_apellido_invalido">O primeiro apelido só pode conter letras</string>
+    <string name="error_segundo_apellido_invalido">O segundo apelido só pode conter letras</string>
+    <string name="error_cargar_datos">Erro ao carregar os dados</string>
+    <string name="error_guardar_perfil">Erro ao guardar o perfil</string>
     <string name="error_actualizar_avatar">Erro ao atualizar o avatar</string>
-    <string name="msg_perfil_actualizado">Perfil atualizado com sucesso</string>
+    <string name="msg_perfil_actualizado">Perfil atualizado corretamente</string>
     <string name="msg_avatar_actualizado">Avatar atualizado</string>
 
-
     <!-- Verificacion Screen -->
-    <string name="txt_verificar_correo">Verifique seu e-mail</string>
-    <string name="txt_codigo_enviado_a">Enviamos um código para:</string>
-    <string name="txt_enviando_codigo">Enviando código...</string>
+    <string name="txt_verificar_correo">Verifica o teu e-mail</string>
+    <string name="txt_codigo_enviado_a">Enviámos un código para:</string>
+    <string name="txt_enviando_codigo">A enviar código...</string>
     <string name="txt_codigo_expirado">Código expirado</string>
     <string name="txt_expira_en">Expira em %1$s</string>
     <string name="btn_verificar_codigo">Verificar código</string>

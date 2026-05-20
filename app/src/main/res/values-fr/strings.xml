@@ -3,37 +3,36 @@
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Créer un compte</string>
-    <string name="campo_nombre">Votre nom</string>
+    <string name="campo_nombre">Votre prénom</string>
     <string name="campo_primer_ap">Votre premier nom de famille</string>
     <string name="campo_segundo_ap">Votre deuxième nom de famille</string>
     <string name="campo_fecha_naci">Votre date de naissance</string>
     <string name="campo_correo">Votre adresse e-mail</string>
     <string name="icono_mostrar_contrasenia">Afficher le mot de passe</string>
     <string name="icono_limpiar">Effacer</string>
-    <string name="txt_ir_inicio_sesion">Aller à la connexion</string>
+    <string name="txt_ir_inicio_sesion">Aller à la page de connexion</string>
     <string name="txt_cuenta_creada">Compte créé avec succès</string>
     <string name="txt_cuenta_creada_descripcion">Vous pouvez maintenant vous connecter avec vos identifiants.</string>
     <string name="hint_fecha_nacimiento">Date de naissance</string>
-    <string name="content_desc_seleccionar_fecha">Sélectionner une date</string>
+    <string name="content_desc_seleccionar_fecha">Sélectionner la date</string>
     <string name="error_campos_vacios_registro">Veuillez remplir tous les champs</string>
     <string name="error_nombre_usuario_invalido_registro">Le nom d\'utilisateur ne peut contenir que des lettres et des chiffres</string>
-    <string name="error_nombre_invalido_registro">Le nom ne peut contenir que des lettres</string>
-    <string name="error_primer_apellido_invalido_registro">Le premier nom ne peut contenir que des lettres</string>
-    <string name="error_segundo_apellido_invalido_registro">Le deuxième nom ne peut contenir que des lettres</string>
+    <string name="error_nombre_invalido_registro">Le prénom ne peut contenir que des lettres</string>
+    <string name="error_primer_apellido_invalido_registro">Le premier nom de famille ne peut contenir que des lettres</string>
+    <string name="error_segundo_apellido_invalido_registro">Le deuxième nom de famille ne peut contenir que des lettres</string>
     <string name="error_correo_invalido">Adresse e-mail non valide</string>
-    <string name="error_contrasenia_debil_registro">Le mot de passe doit comporter au moins 9 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</string>
-    <string name="error_registro_fallido">Impossible de terminer l\'inscription. Veuillez réessayer.</string>
-
+    <string name="error_contrasenia_debil_registro">Le mot de passe doit contenir au moins 9 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</string>
+    <string name="error_registro_fallido">Impossible d\'effectuer l\'inscription. Veuillez réessayer.</string>
 
     <!-- Ver Correo Screen -->
-    <string name="txt_correo_no_encontrado">E-mail non trouvé.</string>
-    <string name="txt_destinatario_para">À</string>
-    <string name="txt_destinatario_tu">vous</string>
+    <string name="txt_correo_no_encontrado">E-mail introuvable.</string>
+    <string name="txt_destinatario_para">Pour</string>
+    <string name="txt_destinatario_tu">toi</string>
     <string name="error_cargar_correo">Erreur lors du chargement de l\'e-mail : %1$s</string>
 
     <!-- Inicio Screen -->
-    <string name="txt_inicio_bienvenida">Bonjour, comment allez-vous %1$s ? Que puis-je faire pour vous ?</string>
-    <string name="txt_inicio_instrucciones">Choisissez l\'une des options suivantes et maintenez le bouton de parole lorsque vous êtes prêt</string>
+    <string name="txt_inicio_bienvenida">Bonjour, comment vas-tu %1$s ? Que puis-je faire pour toi ?</string>
+    <string name="txt_inicio_instrucciones">Choisis l\'une des options suivantes et, quand tu es prêt, maintiens le bouton de parole enfoncé</string>
     <string name="txt_inicio_sub_correo">Voir mes e-mails</string>
     <string name="txt_inicio_sub_recordatorios_ver">Voir mes rappels</string>
     <string name="txt_inicio_sub_recordatorios_crear">Créer un rappel</string>
@@ -44,19 +43,19 @@
     <string name="txt_correo">E-mail</string>
     <string name="txt_recordatorio">Rappels</string>
     <string name="txt_lista_compra">Liste de courses</string>
-    <string name="txt_contador">Minuteur</string>
+    <string name="txt_contador">Miniteur</string>
     <string name="btn_inicio">Accueil</string>
     <string name="btn_hablar">Parler</string>
     <string name="btn_ajustes">Paramètres</string>
 
     <!-- Lista Compra Screen -->
     <string name="icono_eliminar_producto">Supprimer le produit</string>
-    <string name="txt_sin_producto_lista_compra">Dites un produit pour l\'ajouter</string>
+    <string name="txt_sin_producto_lista_compra">Dis un produit pour l\'ajouter</string>
     <string name="txt_titulo_mensaje_confirmacion_producto">Supprimer le produit</string>
-    <string name="txt_mensaje_confirmacion_producto">Êtes-vous sûr de vouloir supprimer %s ?</string>
+    <string name="txt_mensaje_confirmacion_producto">Es-tu sûr de vouloir supprimer %s ?</string>
     <string name="btn_eliminar_producto">Supprimer</string>
     <string name="btn_cancelar_producto">Annuler</string>
-    <string name="txt_info_lista_compra">Dites un produit pour l\'ajouter, ou dites supprime suivi du produit pour l\'enlever</string>
+    <string name="txt_info_lista_compra">Dis un produit pour l\'ajouter, ou dis supprime suivi du produit pour l\'effacer</string>
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mois précédent</string>
@@ -73,24 +72,29 @@
     <string name="icono_eliminar_evento">Supprimer l\'événement</string>
     <string name="txt_sin_eventos_dia_seleccionado">Aucun événement ce jour-là</string>
     <string name="txt_eventos_dia_seleccionado">Événements du %1$d %2$s</string>
+    <string name="txt_selecciona_dia">Sélectionne un jour\npour voir ses événements</string>
 
     <!-- Ajustes Screen -->
     <string name="ajustes">Paramètres</string>
-    <string name="cambiar_voz">Changer la voix</string>
+    <string name="compartir_app_mensaje">Partage l\'application avec tes amis et ta famille</string>
+    <string name="compartir_app_titulo">Partager VoxTask</string>
+    <string name="compartir_app">Partager l\'application</string>
+    <string name="compartir_app_descripcion">Partage VoxTask avec tes contacts</string>
+    <string name="cambiar_voz">Changer de voix</string>
     <string name="voz_actual">Voix actuelle</string>
-    <string name="cambiar_idioma">Changer la langue</string>
+    <string name="cambiar_idioma">Changer de langue</string>
     <string name="idioma_actual">Langue actuelle</string>
     <string name="mi_perfil">Mon profil</string>
-    <string name="ver_editar_perfil">Voir et modifier vos informations</string>
+    <string name="ver_editar_perfil">Voir et modifier tes informations</string>
     <string name="color_interfaz">Couleur de l\'interface</string>
-    <string name="personaliza_colores">Personnalisez les couleurs de l\'application</string>
-    <string name="selecciona_voz">Sélectionnez une voix</string>
-    <string name="selecciona_idioma">Sélectionnez une langue</string>
+    <string name="personaliza_colores">Personnalise les couleurs de l\'appli</string>
+    <string name="selecciona_voz">Sélectionne une voix</string>
+    <string name="selecciona_idioma">Sélectionne une langue</string>
     <string name="no_voces">Aucune voix disponible.</string>
     <string name="cancelar">Annuler</string>
     <string name="version">Version : 1.0</string>
-    <string name="cambiar_fondo">Changer le fond</string>
-    <string name="personaliza_fondo">Personnalisez le fond de l\'application</string>
+    <string name="cambiar_fondo">Changer de fond</string>
+    <string name="personaliza_fondo">Personnalise le fond de l\'appli</string>
     <string name="version_app">Version</string>
     <string name="ver_version_actual">Consulter la version actuelle</string>
     <string name="quitar_fondo">Supprimer le fond</string>
@@ -100,21 +104,20 @@
     <string name="opcion_color_interfaz_modo_oscuro">Couleur mode sombre</string>
     <string name="model_cerrar">Fermer</string>
 
-
     <!-- Cambiar contrasenia Screen -->
     <string name="instrucciones_restablecer_email_uno">E-mail envoyé</string>
-    <string name="instrucciones_restablecer_email_dos">Consultez votre boîte de réception à\n%1$s\net suivez les instructions pour réinitialiser votre mot de passe.</string>
+    <string name="instrucciones_restablecer_email_dos">Consulte ta boîte de réception à l\'adresse\n%1$s\net suis les instructions pour réinitialiser ton mot de passe.</string>
     <string name="btn_enviar_de_nuevo">Renvoyer</string>
     <string name="txt_titulo_recuperar_contrasenia">Récupérer le mot de passe</string>
-    <string name="txt_titulo_recuperar_contrasenia_dos">Entrez votre e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe</string>
-    <string name="txt_placeholder_recuperar_contrasenia">Entrez votre e-mail</string>
+    <string name="txt_titulo_recuperar_contrasenia_dos">Saisis ton e-mail et nous t\'enverrons un lien pour réinitialiser ton mot de passe</string>
+    <string name="txt_placeholder_recuperar_contrasenia">Saisis ton e-mail</string>
     <string name="txt_limpiar">Effacer</string>
     <string name="btn_recuperar_contrasenia">Envoyer l\'e-mail de récupération</string>
-    <string name="error_email_vacio">Entrez votre adresse e-mail</string>
+    <string name="error_email_vacio">Saisis ton adresse e-mail</string>
     <string name="error_email_invalido">Adresse e-mail non valide</string>
-    <string name="error_envio_correo">Erreur lors de l\'envoi de l\'e-mail. Réessayez.</string>
+    <string name="error_envio_correo">Erreur lors de l\'envoi de l\'e-mail. Veuillez réessayer</string>
     <string name="error_campos_vacios">Veuillez remplir tous les champs</string>
-    <string name="error_contrasena_debil">Le mot de passe doit comporter au moins 9 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</string>
+    <string name="error_contrasena_debil">Le mot de passe doit contenir au moins 9 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</string>
     <string name="error_contrasenas_no_coinciden">Les mots de passe ne correspondent pas</string>
     <string name="error_cambio_contrasena">Erreur lors du changement de mot de passe</string>
 
@@ -127,56 +130,57 @@
     <string name="txt_titulo_contador_terminado">Temps écoulé !</string>
     <string name="txt_titulo_contador_finalizado">Le minuteur est terminé</string>
     <string name="txt_name_canal">Minuteur VoxTask</string>
-    <string name="txt_descripcion">Affiche le compte à rebours</string>
+    <string name="txt_descripcion">Affiche le compte à rebours du minuteur</string>
     <string name="txt_title_reanudar">Reprendre</string>
     <string name="txt_title_pausar">Pause</string>
     <string name="txt_title_cancelar">Annuler</string>
+    <string name="txt_info_contador">Pour créer le minuteur, indique la durée souhaitée. Pour en créer un nouveau, annule le minuteur actuel et indique à nouveau la durée voulue</string>
 
     <!-- Correo Screen -->
-    <string name="txt_title_advertencia_ver_correos">Connectez votre compte Gmail pour voir vos e-mails</string>
+    <string name="txt_title_advertencia_ver_correos">Connecte ton compte Gmail pour voir tes e-mails</string>
     <string name="txt_btn_conectar_gmail">Connecter Gmail</string>
-    <string name="txt_title_no_correos">Vous n\'avez pas d\'e-mails</string>
+    <string name="txt_title_no_correos">Tu n\'as pas d\'e-mails</string>
     <string name="txt_btne_crear_correo">Créer un e-mail</string>
     <string name="error_sin_sesion">Aucune session active</string>
-    <string name="error_general">Une erreur est survenue. Réessayez.</string>
+    <string name="error_general">Une erreur est survenue. Veuillez réessayer</string>
     <string name="error_cargar_correos">Erreur lors du chargement des e-mails</string>
-    <string name="error_cuenta_google_incorrecta">Le compte Google ne correspond pas à celui de l\'application</string>
+    <string name="error_cuenta_google_incorrecta">Le compte Google ne correspond pas au compte de l\'application</string>
 
     <!-- Enviar Correo Screen -->
     <string name="txt_enviarcorreo_paso_uno">Étape %1$d sur 4</string>
-    <string name="txt_enviarcorreo_vincular_cuenta">Liaison du compte...</string>
-    <string name="txt_enviarcorreo_paso_destinatario_pregunta">À qui envoyez-vous l\'e-mail ?</string>
-    <string name="txt_enviarcorreo_paso_destinatario_description">Dites l\'adresse e-mail du destinataire</string>
+    <string name="txt_enviarcorreo_vincular_cuenta">Association du compte...</string>
+    <string name="txt_enviarcorreo_paso_destinatario_pregunta">À qui envoies-tu l\'e-mail ?</string>
+    <string name="txt_enviarcorreo_paso_destinatario_description">Dis l\'adresse e-mail du destinataire</string>
     <string name="txt_enviarcorreo_pregunta_asunto">Quel est l\'objet ?</string>
-    <string name="txt_enviarcorreo_descripcion_asunto">Dites l\'objet de l\'e-mail</string>
-    <string name="txt_enviarcorreo_pregunta_modo">Comment voulez-vous rédiger le message ?</string>
-    <string name="txt_enviarcorreo_descripcion_modo">Dites \"moi-même\" pour l\'écrire vous-même\nDites \"intelligence artificielle\" pour que l\'IA le crée</string>
-    <string name="txt_enviarcorreo_pregunta_mensaje_ia">De quoi traite l\'e-mail ?</string>
-    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Dictez le message</string>
-    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Dites le sujet ou l\'idée principale</string>
-    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Dites le contenu complet de l\'e-mail</string>
-    <string name="txt_enviarcorreo_titulo_confirmacion">Voulez-vous l\'envoyer ainsi ?</string>
-    <string name="txt_enviarcorreo_subtitulo_confirmacion">Vérifiez les données avant d\'envoyer</string>
-    <string name="txt_enviarcorreo_etiqueta_para">À</string>
+    <string name="txt_enviarcorreo_descripcion_asunto">Dis l\'objet de l\'e-mail</string>
+    <string name="txt_enviarcorreo_pregunta_modo">Comment souhaites-tu rédiger le message ?</string>
+    <string name="txt_enviarcorreo_descripcion_modo">Dis \"moi-même\" pour l\'écrire toi-même\nDis \"intelligence artificielle\" pour que l\'IA le crée</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_ia">Quel est le sujet de l\'e-mail ?</string>
+    <string name="txt_enviarcorreo_pregunta_mensaje_manual">Dicte le message</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_ia">Dis le thème ou l\'idée principale</string>
+    <string name="txt_enviarcorreo_descripcion_mensaje_manual">Dis le contenu complet de l\'e-mail</string>
+    <string name="txt_enviarcorreo_titulo_confirmacion">Souhaites-tu l\'envoyer ainsi ?</string>
+    <string name="txt_enviarcorreo_subtitulo_confirmacion">Vérifie les informations avant d\'envoyer</string>
+    <string name="txt_enviarcorreo_etiqueta_para">Pour</string>
     <string name="txt_enviarcorreo_etiqueta_asunto">Objet</string>
     <string name="txt_enviarcorreo_etiqueta_mensaje">Message</string>
     <string name="txt_enviarcorreo_etiqueta_modo">Mode</string>
-    <string name="txt_enviarcorreo_modo_ia">Généré par IA</string>
+    <string name="txt_enviarcorreo_modo_ia">Généré par l\'IA</string>
     <string name="txt_enviarcorreo_modo_manual">Manuel</string>
     <string name="txt_enviarcorreo_btn_enviar">Envoyer l\'e-mail</string>
     <string name="txt_enviarcorreo_estado_enviando">Envoi de l\'e-mail...</string>
-    <string name="txt_enviarcorreo_exito">✓ E-mail envoyé</string>
-    <string name="txt_enviarcorreo_btn_otro">En envoyer un autre</string>
+    <string name="txt_enviarcorreo_exito">E-mail envoyé</string>
+    <string name="txt_enviarcorreo_btn_otro">Envoyer un autre</string>
     <string name="txt_enviarcorreo_btn_reintentar">Réessayer</string>
-    <string name="txt_enviarcorreo_resumen_para">À : %1$s</string>
+    <string name="txt_enviarcorreo_resumen_para">Pour : %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Objet : %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Mode : %1$s</string>
     <string name="txt_enviarcorreo_google_requerido">Compte Google requis</string>
-    <string name="txt_enviarcorreo_google_descripcion">Pour envoyer des e-mails, vous devez lier votre compte Google avec l\'autorisation Gmail.</string>
-    <string name="txt_enviarcorreo_btn_vincular">Lier un compte Google</string>
+    <string name="txt_enviarcorreo_google_descripcion">Pour envoyer des e-mails, tu dois associer ton compte Google avec l\'autorisation Gmail.</string>
+    <string name="txt_enviarcorreo_btn_vincular">Associer un compte Google</string>
     <string name="txt_enviarcorreo_btn_guardar">Enregistrer</string>
     <string name="txt_enviarcorreo_btn_editar">Modifier</string>
-    <string name="txt_enviarcorreo_vincular_cuenta_exito">Compte lié correctement. À qui voulez-vous l\'envoyer ?</string>
+    <string name="txt_enviarcorreo_vincular_cuenta_exito">Compte associé avec succès. À qui souhaites-tu l\'envoyer ?</string>
     <string name="txt_enviarcorreo_error_token">Erreur lors de l\'obtention du jeton : %1$s</string>
     <string name="txt_enviarcorreo_error_auth">Erreur d\'authentification : %1$s</string>
     <string name="txt_enviarcorreo_error_generico">Une erreur est survenue lors de l\'envoi de l\'e-mail.</string>
@@ -187,53 +191,51 @@
     <string name="btn_iniciar_sesion">Se connecter</string>
     <string name="txt_o">ou</string>
     <string name="txt_iniciar_google">Continuer avec Google</string>
-    <string name="txt_pregunta">Vous n\'avez pas de compte ?</string>
-    <string name="txt_respuesta">Inscrivez-vous</string>
-    <string name="txt_pregunta_contrasenia">Mot de passe oublié ?</string>
+    <string name="txt_pregunta">Tu n\'as pas de compte ?</string>
+    <string name="txt_respuesta">Inscris-toi</string>
+    <string name="txt_pregunta_contrasenia">Tu as oublié ton mot de passe ?</string>
     <string name="txt_respuesta_contrasenia">Réinitialiser maintenant</string>
     <string name="err_campos_vacios">Veuillez remplir tous les champs</string>
     <string name="err_nombre_usuario_invalido">Le nom d\'utilisateur ne peut contenir que des lettres et des chiffres</string>
-    <string name="err_contrasenia_debil">Le mot de passe doit comporter au moins 9 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</string>
-    <string name="err_google_auth">Échec de la connexion avec Google. Réessayez.</string>
+    <string name="err_contrasenia_debil">Le mot de passe doit contenir au moins 9 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</string>
+    <string name="err_google_auth">La connexion avec Google a échoué. Veuillez réessayer.</string>
     <string name="err_credenciales_incorrectas">Nom d\'utilisateur ou mot de passe incorrect</string>
     <string name="err_firestore">Impossible d\'enregistrer les données sur le cloud.</string>
-    <string name="err_conexion">Erreur réseau. Vérifiez votre connexion internet.</string>
+    <string name="err_conexion">Erreur réseau. Vérifie ta connexion Internet.</string>
 
     <!-- Nueva Contraseña Screen -->
     <string name="txt_cargando_contrasena">Enregistrement du mot de passe...</string>
     <string name="txt_contrasena_cambiada">Mot de passe changé !</string>
-    <string name="txt_contrasena_cambiada_descripcion">Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.</string>
-    <string name="btn_ir_inicio_sesion">Aller à la connexion</string>
+    <string name="txt_contrasena_cambiada_descripcion">Tu peux maintenant te connecter avec ton nouveau mot de passe.</string>
+    <string name="btn_ir_inicio_sesion">Aller à la page de connexion</string>
     <string name="txt_titulo_nueva_contrasena">Nouveau mot de passe</string>
-    <string name="txt_descripcion_nueva_contrasena">Entrez votre nouveau mot de passe.</string>
+    <string name="txt_descripcion_nueva_contrasena">Saisis ton nouveau mot de passe.</string>
     <string name="hint_nueva_contrasena">Nouveau mot de passe</string>
     <string name="hint_confirmar_contrasena">Confirmer le mot de passe</string>
     <string name="btn_guardar_contrasena">Enregistrer le mot de passe</string>
-
 
     <!-- Perfil Screen -->
     <string name="content_desc_avatar">Avatar</string>
     <string name="hint_nombre_usuario">Nom d\'utilisateur</string>
     <string name="hint_nombre">Prénom</string>
-    <string name="hint_primer_apellido">Premier nom</string>
-    <string name="hint_segundo_apellido">Deuxième nom</string>
+    <string name="hint_primer_apellido">Premier nom de famille</string>
+    <string name="hint_segundo_apellido">Deuxième nom de famille</string>
     <string name="btn_guardar_cambios">Enregistrer les modifications</string>
     <string name="btn_editar_perfil">Modifier le profil</string>
     <string name="btn_cancelar">Annuler</string>
-    <string name="txt_titulo_selector_avatar">Choisissez votre avatar</string>
+    <string name="txt_titulo_selector_avatar">Choisis ton avatar</string>
     <string name="btn_cerrar_avatar">Fermer</string>
-    <string name="error_nombre_invalido">Le nom ne peut contenir que des lettres</string>
-    <string name="error_primer_apellido_invalido">Le premier nom ne peut contenir que des lettres</string>
-    <string name="error_segundo_apellido_invalido">Le deuxième nom ne peut contenir que des lettres</string>
+    <string name="error_nombre_invalido">Le prénom ne peut contenir que des lettres</string>
+    <string name="error_primer_apellido_invalido">Le premier nom de famille ne peut contenir que des lettres</string>
+    <string name="error_segundo_apellido_invalido">Le deuxième nom de famille ne peut contenir que des lettres</string>
     <string name="error_cargar_datos">Erreur lors du chargement des données</string>
     <string name="error_guardar_perfil">Erreur lors de l\'enregistrement du profil</string>
     <string name="error_actualizar_avatar">Erreur lors de la mise à jour de l\'avatar</string>
     <string name="msg_perfil_actualizado">Profil mis à jour avec succès</string>
     <string name="msg_avatar_actualizado">Avatar mis à jour</string>
 
-
     <!-- Verificacion Screen -->
-    <string name="txt_verificar_correo">Vérifiez votre e-mail</string>
+    <string name="txt_verificar_correo">Vérifie ton adresse e-mail</string>
     <string name="txt_codigo_enviado_a">Nous avons envoyé un code à :</string>
     <string name="txt_enviando_codigo">Envoi du code...</string>
     <string name="txt_codigo_expirado">Code expiré</string>
@@ -241,5 +243,5 @@
     <string name="btn_verificar_codigo">Vérifier le code</string>
     <string name="btn_reenviar_codigo">Renvoyer le code</string>
     <string name="error_enviar_codigo">Erreur lors de l\'envoi du code : %1$s</string>
-    <string name="error_codigo_incorrecto">Code incorrect, réessayez</string>
+    <string name="error_codigo_incorrecto">Code incorrect, veuillez réessayer</string>
 </resources>

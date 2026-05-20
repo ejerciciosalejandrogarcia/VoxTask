@@ -6,8 +6,6 @@ plugins {
     //plugins instaladas
     id("com.google.gms.google-services")
 
-//    id("com.android.application")
-//    id("com.google.gms.google-services")
 }
 
 android {
