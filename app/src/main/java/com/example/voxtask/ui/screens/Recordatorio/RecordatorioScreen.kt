@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Recordatorio
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -46,6 +47,7 @@ import com.example.voxtask.utils.PlantillaBaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalLocale
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Pantalla principal
@@ -63,25 +65,34 @@ fun RecordatorioScreen(
     val tamano = LocalTamanioPantalla.current
     val configuracion = LocalConfiguration.current
 
-    // ── Layout de dos columnas cuando hay suficiente ancho ────────────────────
-    // Se activa en: landscape de cualquier móvil, tablet (medio/expandido),
-    // y plegables desplegados.
     val esLayout2Columnas = when (tamano) {
-        TamanioPantalla.EXPANDIDO -> true                        // tableta siempre
-        TamanioPantalla.MEDIO     -> true                        // plegable abierto siempre
-        TamanioPantalla.COMPACTO  ->                             // móvil: solo landscape
+        TamanioPantalla.EXPANDIDO -> true
+        TamanioPantalla.MEDIO     -> true
+        TamanioPantalla.COMPACTO  ->
             configuracion.screenWidthDp > configuracion.screenHeightDp
     }
 
     val paddingContenido = dimensionResource(R.dimen.recordatorio_padding_contenido)
-
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
+    @Suppress("NonObservableStateRead")
+    val idiomaActual = TextoAVoz.localeActual.language
+
     LaunchedEffect(Unit) {
-        TextoAVoz.hablar(contexto, "Di 'crea evento para el día que quieras'")
-        viewModel.onHablar = { mensaje ->
+        val mensaje = when (idiomaActual) {
+            "en" -> "Say 'create event for the day you want'"
+            "fr" -> "Dites 'créer événement pour le jour que vous voulez'"
+            "de" -> "Sagen Sie 'Ereignis erstellen für den Tag, den Sie möchten'"
+            "it" -> "Di 'crea evento per il giorno che vuoi'"
+            "pt" -> "Diga 'criar evento para o dia que quiser'"
+            else -> "Di 'crea evento para el día que quieras'"
+        }
+        TextoAVoz.hablar(contexto, mensaje)
+
+        // ✅ Nombre del parámetro distinto ("texto") para evitar shadowing
+        viewModel.onHablar = { texto ->
             CoroutineScope(Dispatchers.Main).launch {
-                TextoAVoz.hablar(contexto, mensaje)
+                TextoAVoz.hablar(contexto, texto)
             }
         }
     }
@@ -105,14 +116,10 @@ fun RecordatorioScreen(
             }
 
             if (esLayout2Columnas) {
-                // ── Layout horizontal: calendario | eventos ───────────────────
-                // Scroll independiente en cada columna: el calendario es
-                // desplazable sin afectar al panel de eventos y viceversa.
                 Row(
                     modifier = modificadorContenido,
                     horizontalArrangement = Arrangement.spacedBy(espaciado.l)
                 ) {
-                    // Columna izquierda: calendario con scroll propio
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -121,8 +128,6 @@ fun RecordatorioScreen(
                     ) {
                         CalendarioGrid(viewModel = viewModel)
                     }
-
-                    // Columna derecha: eventos con scroll propio
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -133,7 +138,6 @@ fun RecordatorioScreen(
                     }
                 }
             } else {
-                // ── Layout vertical: todo en columna con scroll (portrait móvil) ──
                 Column(
                     modifier = modificadorContenido
                         .verticalScroll(rememberScrollState())
@@ -147,7 +151,7 @@ fun RecordatorioScreen(
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Grid del calendario (cabecera de mes + días de semana + celdas)
+// Grid del calendario
 // ──────────────────────────────────────────────────────────────────────────────
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -157,13 +161,12 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
     val tamano = LocalTamanioPantalla.current
 
     val tamanoTituloMes = tamano.textoTitulo
-    val tamanoTextoDia = tamano.textoBody
+    val tamanoTextoDia  = tamano.textoBody
 
     var mesActual by remember { mutableStateOf(YearMonth.now()) }
     val hoy = LocalDate.now()
 
     Column {
-        // ── Cabecera del mes ──────────────────────────────────────────────────
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -174,7 +177,7 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
             }
             Text(
                 text = mesActual.month
-                    .getDisplayName(TextStyle.FULL, Locale("es"))
+                    .getDisplayName(TextStyle.FULL, LocalLocale.current.platformLocale)
                     .replaceFirstChar { it.uppercase() } + " ${mesActual.year}",
                 fontSize = tamanoTituloMes,
                 fontWeight = FontWeight.Bold
@@ -186,7 +189,6 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
 
         Spacer(modifier = Modifier.height(espaciado.s))
 
-        // ── Nombres de días ───────────────────────────────────────────────────
         val diasSemana = stringArrayResource(R.array.dias_semana)
         Row(modifier = Modifier.fillMaxWidth()) {
             diasSemana.forEach { dia ->
@@ -203,11 +205,10 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
 
         Spacer(modifier = Modifier.height(espaciado.xs))
 
-        // ── Celdas del mes ────────────────────────────────────────────────────
         val primerDia = mesActual.atDay(1).dayOfWeek.value
         val totalDias = mesActual.lengthOfMonth()
-        val celdas = primerDia - 1 + totalDias
-        val filas = (celdas / 7) + if (celdas % 7 != 0) 1 else 0
+        val celdas    = primerDia - 1 + totalDias
+        val filas     = (celdas / 7) + if (celdas % 7 != 0) 1 else 0
 
         for (fila in 0 until filas) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -218,8 +219,8 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
                     if (dia < 1 || dia > totalDias) {
                         Box(modifier = Modifier.weight(1f).aspectRatio(1f))
                     } else {
-                        val fecha = mesActual.atDay(dia)
-                        val esHoy = fecha == hoy
+                        val fecha        = mesActual.atDay(dia)
+                        val esHoy        = fecha == hoy
                         val seleccionado = viewModel.diaSeleccionado == fecha
                         val tieneEventos = viewModel.eventos.any {
                             it.dia == dia &&
@@ -238,7 +239,7 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
                                 .clip(CircleShape)
                                 .background(
                                     when {
-                                        esHoy       -> MaterialTheme.colorScheme.primary
+                                        esHoy        -> MaterialTheme.colorScheme.primary
                                         seleccionado -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                         tieneEventos -> MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
                                         else         -> Color.Transparent
@@ -257,7 +258,7 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
                                 fontSize = tamanoTextoDia,
                                 fontWeight = if (esHoy || tieneEventos) FontWeight.Bold else FontWeight.Normal,
                                 color = when {
-                                    esHoy       -> MaterialTheme.colorScheme.onPrimary
+                                    esHoy        -> MaterialTheme.colorScheme.onPrimary
                                     tieneEventos -> MaterialTheme.colorScheme.primary
                                     else         -> MaterialTheme.colorScheme.onSurface
                                 }
@@ -274,29 +275,24 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
 // Panel de eventos del día seleccionado
 // ──────────────────────────────────────────────────────────────────────────────
 
+@SuppressLint("NonObservableLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventosDia(viewModel: RecordatorioViewModel) {
-    val espaciado = LocalEspaciado.current
-    val tamano = LocalTamanioPantalla.current
+    val espaciado         = LocalEspaciado.current
+    val tamano            = LocalTamanioPantalla.current
 
-    val tamanoTituloMes  = tamano.textoTitulo
-    val tamanoTextoEvento = tamano.textoBody
+    val tamanoTituloMes       = tamano.textoTitulo
+    val tamanoTextoEvento     = tamano.textoBody
     val tamanoIndicadorEvento = dimensionResource(R.dimen.recordatorio_indicador_evento)
-    val tamanoIconoEliminar = dimensionResource(R.dimen.recordatorio_icono_eliminar)
-    val paddingFilaEvento = dimensionResource(R.dimen.recordatorio_padding_fila_evento)
+    val tamanoIconoEliminar   = dimensionResource(R.dimen.recordatorio_icono_eliminar)
+    val paddingFilaEvento     = dimensionResource(R.dimen.recordatorio_padding_fila_evento)
 
-    val eventosDia = viewModel.diaSeleccionado?.let { fecha ->
-        viewModel.eventos.filter {
-            it.dia == fecha.dayOfMonth &&
-                    it.mes == fecha.monthValue &&
-                    it.anio == fecha.year
-        }
-    } ?: emptyList()
+    // ✅ No mostrar nada mientras se está creando un evento por voz
+    if (viewModel.creandoEvento) return
 
-    // En layout de 2 columnas aparece siempre; en 1 columna, solo si hay día seleccionado
+    // ✅ No mostrar nada si no hay día seleccionado
     if (viewModel.diaSeleccionado == null) {
-        // Placeholder cuando no hay día seleccionado (útil en landscape)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -304,13 +300,19 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(R.string.txt_selecciona_dia),   // añade esta cadena a strings.xml
+                text = stringResource(R.string.txt_selecciona_dia),
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 fontSize = tamanoTextoEvento,
                 textAlign = TextAlign.Center
             )
         }
         return
+    }
+
+    val eventosDia = viewModel.eventos.filter {
+        it.dia == viewModel.diaSeleccionado!!.dayOfMonth &&
+                it.mes == viewModel.diaSeleccionado!!.monthValue &&
+                it.anio == viewModel.diaSeleccionado!!.year
     }
 
     Column {
@@ -321,7 +323,7 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
                 R.string.txt_eventos_dia_seleccionado,
                 viewModel.diaSeleccionado!!.dayOfMonth,
                 viewModel.diaSeleccionado!!.month
-                    .getDisplayName(TextStyle.FULL, Locale("es"))
+                    .getDisplayName(TextStyle.FULL, LocalLocale.current.platformLocale)
                     .replaceFirstChar { it.uppercase() }
             ),
             fontWeight = FontWeight.Bold,
@@ -336,8 +338,6 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
                 fontSize = tamanoTextoEvento
             )
         } else {
-            // Column normal en lugar de LazyColumn para evitar scroll anidado:
-            // el scroll ya lo gestiona el Column padre en RecordatorioScreen.
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(espaciado.xs)
@@ -379,13 +379,12 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// (Mantenido por compatibilidad — ya no lo usa RecordatorioScreen directamente)
+// (Mantenido por compatibilidad)
 // ──────────────────────────────────────────────────────────────────────────────
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Calendario(viewModel: RecordatorioViewModel) {
-    val espaciado = LocalEspaciado.current
     Column {
         CalendarioGrid(viewModel = viewModel)
         EventosDia(viewModel = viewModel)

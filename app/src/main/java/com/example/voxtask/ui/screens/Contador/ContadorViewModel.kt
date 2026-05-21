@@ -1,55 +1,66 @@
 package com.example.voxtask.ui.screens.Contador
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.services.ContadorService
 import com.example.voxtask.utils.TextoAVoz
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ContadorViewModel : ViewModel() {
+class ContadorViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _textoReconocido = MutableStateFlow("")
     val textoReconocido: StateFlow<String> = _textoReconocido
-    var tiempoFormato by mutableStateOf("00:00:00")
+
+    var tiempoFormato   by mutableStateOf("00:00:00")
     var mostrarContador by mutableStateOf(false)
-    private var countdownJob: Job? = null
-    var corriendo by mutableStateOf(false)
+    var corriendo       by mutableStateOf(false)
         private set
 
+    // true cuando el contador llegó a 0; se resetea solo cuando el usuario pulsa X
+    var terminado       by mutableStateOf(false)
+        private set
+
+    private var countdownJob: Job? = null
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Restaurar estado si el servicio estaba activo al volver a la pantalla
+    // ─────────────────────────────────────────────────────────────────────────
     fun restaurarSiServicioActivo() {
-
         if (ContadorService.segundosRestantes > 0) {
-
             mostrarContador = true
-
             if (ContadorService.estaActivo) {
-                if (!corriendo) {
-                    iniciarContador(ContadorService.segundosRestantes)
-                }
-
+                if (!corriendo) iniciarContador(ContadorService.segundosRestantes)
             } else if (ContadorService.estaPausado) {
                 corriendo = false
-
                 val h = ContadorService.segundosRestantes / 3600
                 val m = (ContadorService.segundosRestantes % 3600) / 60
                 val s = ContadorService.segundosRestantes % 60
-
                 tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
             }
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Entrada de voz
+    // ─────────────────────────────────────────────────────────────────────────
     @RequiresApi(Build.VERSION_CODES.O)
     fun onTextoRecibido(texto: String, contexto: Context) {
         _textoReconocido.value = texto
@@ -70,40 +81,21 @@ class ContadorViewModel : ViewModel() {
         partes.forEachIndexed { index, parte ->
             val numero = parte.toIntOrNull()
             if (numero != null) {
-                val sig1 = partes.getOrNull(index + 1)?.lowercase() ?: ""
-                val sig2 = partes.getOrNull(index + 2)?.lowercase() ?: ""
+                val sig1   = partes.getOrNull(index + 1)?.lowercase() ?: ""
+                val sig2   = partes.getOrNull(index + 2)?.lowercase() ?: ""
                 val unidad = if (sig1.toIntOrNull() != null) sig2 else sig1
 
                 when {
-                    // Horas
                     unidad.startsWith(when (TextoAVoz.localeActual.language) {
-                        "en" -> "hour"
-                        "fr" -> "heure"
-                        "de" -> "stunde"
-                        "it" -> "ora"
-                        "pt" -> "hora"
-                        else -> "hora" // español
+                        "en" -> "hour"; "fr" -> "heure"; "de" -> "stunde"
+                        "it" -> "ora";  "pt" -> "hora";  else -> "hora"
                     }) -> totalSegundos += numero * 3600
 
-                    // Minutos
-                    unidad.startsWith(when (TextoAVoz.localeActual.language) {
-                        "en" -> "min"
-                        "fr" -> "min"
-                        "de" -> "min"
-                        "it" -> "min"
-                        "pt" -> "min"
-                        else -> "min" // español
-                    }) -> totalSegundos += numero * 60
+                    unidad.startsWith("min") -> totalSegundos += numero * 60
 
-                    // Segundos
                     unidad.startsWith(when (TextoAVoz.localeActual.language) {
-                        "en" -> "sec"
-                        "fr" -> "sec"
-                        "de" -> "sek"
-                        "it" -> "sec"
-                        "pt" -> "seg"
-                        else -> "seg" // español
-                    }) -> totalSegundos += numero
+                        "de" -> "sek"; "pt" -> "seg"; else -> "seg"
+                    }) || unidad.startsWith("sec") -> totalSegundos += numero
                 }
                 android.util.Log.d("CONTADOR", "Número: $numero, Unidad: $unidad")
             }
@@ -125,12 +117,194 @@ class ContadorViewModel : ViewModel() {
         contexto.startForegroundService(intent)
     }
 
-    private fun normalizarNumeros(texto: String, idioma: String = TextoAVoz.localeActual.language): String {
+    // ─────────────────────────────────────────────────────────────────────────
+    // Sonido + vibración — ejecutados siempre en el hilo principal
+    // ─────────────────────────────────────────────────────────────────────────
+    private fun reproducirSonidoFin() {
+        // Se lanza en Main para que RingtoneManager y Vibrator funcionen
+        viewModelScope.launch(Dispatchers.Main) {
+            val contexto = getApplication<Application>()
+
+            // 1. Sonido con RingtoneManager (no necesita Looper manual)
+            try {
+                val uri      = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val ringtone = RingtoneManager.getRingtone(contexto, uri)
+                ringtone?.play()
+                android.util.Log.d("CONTADOR", "Sonido reproducido correctamente")
+            } catch (e: Exception) {
+                android.util.Log.e("CONTADOR", "Error al reproducir sonido: ${e.message}")
+            }
+
+            // 2. Vibración
+            try {
+                val patron = longArrayOf(0, 400, 200, 400)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val vm = contexto.getSystemService(VibratorManager::class.java)
+                    vm?.defaultVibrator?.vibrate(
+                        VibrationEffect.createWaveform(patron, -1)
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    val vibrator = contexto.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator?.vibrate(VibrationEffect.createWaveform(patron, -1))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vibrator?.vibrate(patron, -1)
+                    }
+                }
+                android.util.Log.d("CONTADOR", "Vibración ejecutada correctamente")
+            } catch (e: Exception) {
+                android.util.Log.e("CONTADOR", "Error al vibrar: ${e.message}")
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Cuenta atrás principal
+    // ─────────────────────────────────────────────────────────────────────────
+    fun iniciarContador(totalSegundos: Int) {
+        mostrarContador = true
+        corriendo       = true
+        terminado       = false
+        countdownJob?.cancel()
+        countdownJob = viewModelScope.launch {
+            var restantes = totalSegundos
+            while (restantes >= 0) {
+                // Actualizar UI en Main
+                withContext(Dispatchers.Main) {
+                    val h = restantes / 3600
+                    val m = (restantes % 3600) / 60
+                    val s = restantes % 60
+                    tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                }
+                if (restantes == 0) {
+                    // Marcar terminado y reproducir en Main antes de salir del loop
+                    withContext(Dispatchers.Main) {
+                        corriendo = false
+                        terminado = true
+                    }
+                    reproducirSonidoFin()
+                    break
+                }
+                delay(1000L)
+                restantes--
+            }
+            withContext(Dispatchers.Main) { corriendo = false }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Reanudar tras pausa
+    // ─────────────────────────────────────────────────────────────────────────
+    fun iniciar(contexto: Context) {
+        val partes    = tiempoFormato.split(":")
+        val restantes = partes[0].toInt() * 3600 + partes[1].toInt() * 60 + partes[2].toInt()
+        if (restantes <= 0) return
+
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_REANUDAR
+        }
+        contexto.startService(intent)
+
+        corriendo = true
+        terminado = false
+        countdownJob?.cancel()
+        countdownJob = viewModelScope.launch {
+            var r = restantes
+            while (r >= 0) {
+                withContext(Dispatchers.Main) {
+                    val h = r / 3600
+                    val m = (r % 3600) / 60
+                    val s = r % 60
+                    tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                }
+                if (r == 0) {
+                    withContext(Dispatchers.Main) {
+                        corriendo = false
+                        terminado = true
+                    }
+                    reproducirSonidoFin()
+                    break
+                }
+                delay(1000L)
+                r--
+            }
+            withContext(Dispatchers.Main) { corriendo = false }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Parar / Cancelar
+    // ─────────────────────────────────────────────────────────────────────────
+    fun parar(contexto: Context) {
+        corriendo = false
+        countdownJob?.cancel()
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_PARAR
+        }
+        contexto.startService(intent)
+    }
+
+    fun cancelar(contexto: Context) {
+        corriendo       = false
+        mostrarContador = false
+        terminado       = false
+        countdownJob?.cancel()
+        tiempoFormato   = "00:00:00"
+        val intent = Intent(contexto, ContadorService::class.java).apply {
+            action = ContadorService.ACCION_CANCELAR
+        }
+        contexto.startService(intent)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        countdownJob?.cancel()
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Sincronización con el servicio
+    // Si terminado == true ignoramos el estado del servicio para no ocultar
+    // el contador antes de que el usuario pulse X
+    // ─────────────────────────────────────────────────────────────────────────
+    fun comprobarEstadoService() {
+        viewModelScope.launch {
+            while (true) {
+                if (!terminado) {
+                    when {
+                        ContadorService.estaPausado && corriendo -> {
+                            withContext(Dispatchers.Main) {
+                                corriendo = false
+                                countdownJob?.cancel()
+                                val r = ContadorService.segundosRestantes
+                                val h = r / 3600
+                                val m = (r % 3600) / 60
+                                val s = r % 60
+                                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                            }
+                        }
+                        ContadorService.estaActivo && !corriendo && mostrarContador -> {
+                            iniciarContador(ContadorService.segundosRestantes)
+                        }
+                    }
+                }
+                delay(300)
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Normalización de números por idioma
+    // ─────────────────────────────────────────────────────────────────────────
+    private fun normalizarNumeros(
+        texto: String,
+        idioma: String = TextoAVoz.localeActual.language
+    ): String {
         val reemplazos = linkedMapOf<String, String>()
 
         when (idioma) {
             "en" -> reemplazos.putAll(linkedMapOf(
-                // Compuestos primero
                 "fifty one" to "51", "fifty two" to "52", "fifty three" to "53",
                 "fifty four" to "54", "fifty five" to "55", "fifty six" to "56",
                 "fifty seven" to "57", "fifty eight" to "58", "fifty nine" to "59",
@@ -143,7 +317,6 @@ class ContadorViewModel : ViewModel() {
                 "twenty one" to "21", "twenty two" to "22", "twenty three" to "23",
                 "twenty four" to "24", "twenty five" to "25", "twenty six" to "26",
                 "twenty seven" to "27", "twenty eight" to "28", "twenty nine" to "29",
-                // Simples
                 "sixty" to "60", "fifty" to "50", "forty" to "40", "thirty" to "30",
                 "twenty" to "20", "nineteen" to "19", "eighteen" to "18",
                 "seventeen" to "17", "sixteen" to "16", "fifteen" to "15",
@@ -152,7 +325,6 @@ class ContadorViewModel : ViewModel() {
                 "seven" to "7", "six" to "6", "five" to "5", "four" to "4",
                 "three" to "3", "two" to "2", "one" to "1", "zero" to "0"
             ))
-
             "fr" -> reemplazos.putAll(linkedMapOf(
                 "cinquante et un" to "51", "cinquante deux" to "52", "cinquante trois" to "53",
                 "cinquante quatre" to "54", "cinquante cinq" to "55", "cinquante six" to "56",
@@ -174,7 +346,6 @@ class ContadorViewModel : ViewModel() {
                 "huit" to "8", "sept" to "7", "six" to "6", "cinq" to "5",
                 "quatre" to "4", "trois" to "3", "deux" to "2", "un" to "1", "zéro" to "0"
             ))
-
             "de" -> reemplazos.putAll(linkedMapOf(
                 "einundfünfzig" to "51", "zweiundfünfzig" to "52", "dreiundfünfzig" to "53",
                 "vierundfünfzig" to "54", "fünfundfünfzig" to "55", "sechsundfünfzig" to "56",
@@ -195,7 +366,6 @@ class ContadorViewModel : ViewModel() {
                 "acht" to "8", "sieben" to "7", "sechs" to "6", "fünf" to "5",
                 "vier" to "4", "drei" to "3", "zwei" to "2", "eins" to "1", "null" to "0"
             ))
-
             "it" -> reemplazos.putAll(linkedMapOf(
                 "cinquantuno" to "51", "cinquantadue" to "52", "cinquantatré" to "53",
                 "cinquantaquattro" to "54", "cinquantacinque" to "55", "cinquantasei" to "56",
@@ -217,7 +387,6 @@ class ContadorViewModel : ViewModel() {
                 "cinque" to "5", "quattro" to "4", "tre" to "3", "due" to "2",
                 "uno" to "1", "zero" to "0"
             ))
-
             "pt" -> reemplazos.putAll(linkedMapOf(
                 "cinquenta e um" to "51", "cinquenta e dois" to "52", "cinquenta e três" to "53",
                 "cinquenta e quatro" to "54", "cinquenta e cinco" to "55", "cinquenta e seis" to "56",
@@ -239,9 +408,7 @@ class ContadorViewModel : ViewModel() {
                 "cinco" to "5", "quatro" to "4", "três" to "3", "dois" to "2",
                 "um" to "1", "zero" to "0"
             ))
-
-            else -> reemplazos.putAll(linkedMapOf( // Español por defecto
-                // Compuestos primero (más largos antes que los simples)
+            else -> reemplazos.putAll(linkedMapOf(
                 "cincuenta y uno" to "51", "cincuenta y dos" to "52", "cincuenta y tres" to "53",
                 "cincuenta y cuatro" to "54", "cincuenta y cinco" to "55", "cincuenta y seis" to "56",
                 "cincuenta y siete" to "57", "cincuenta y ocho" to "58", "cincuenta y nueve" to "59",
@@ -255,7 +422,6 @@ class ContadorViewModel : ViewModel() {
                 "veintitrés" to "23", "veintitres" to "23", "veinticuatro" to "24",
                 "veinticinco" to "25", "veintiseis" to "26", "veintisiete" to "27",
                 "veintiocho" to "28", "veintinueve" to "29",
-                // Simples
                 "sesenta" to "60", "cincuenta" to "50", "cuarenta" to "40",
                 "treinta" to "30", "veinte" to "20", "diecinueve" to "19", "dieciocho" to "18",
                 "diecisiete" to "17", "dieciséis" to "16", "dieciseis" to "16",
@@ -271,102 +437,5 @@ class ContadorViewModel : ViewModel() {
             resultado = resultado.replace(palabra, numero, ignoreCase = true)
         }
         return resultado
-    }
-
-    fun iniciarContador(totalSegundos: Int) {
-        mostrarContador = true
-        corriendo = true
-        countdownJob?.cancel()
-        countdownJob = viewModelScope.launch {
-            var restantes = totalSegundos
-            while (restantes >= 0) {
-                val h = restantes / 3600
-                val m = (restantes % 3600) / 60
-                val s = restantes % 60
-                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
-                if (restantes == 0) break
-                delay(1000L)
-                restantes--
-            }
-            corriendo = false
-        }
-    }
-
-    fun iniciar(contexto: Context) {
-        val partes = tiempoFormato.split(":")
-        val restantes = partes[0].toInt() * 3600 + partes[1].toInt() * 60 + partes[2].toInt()
-        if (restantes <= 0) return
-
-        val intent = Intent(contexto, ContadorService::class.java).apply {
-            action = ContadorService.ACCION_REANUDAR
-        }
-        contexto.startService(intent)
-
-        corriendo = true
-        countdownJob?.cancel()
-        countdownJob = viewModelScope.launch {
-            var r = restantes
-            while (r >= 0) {
-                val h = r / 3600
-                val m = (r % 3600) / 60
-                val s = r % 60
-                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
-                if (r == 0) break
-                delay(1000L)
-                r--
-            }
-            corriendo = false
-        }
-    }
-    fun parar(contexto: Context) {
-        corriendo = false
-        countdownJob?.cancel()
-        val intent = Intent(contexto, ContadorService::class.java).apply {
-            action = ContadorService.ACCION_PARAR
-        }
-        contexto.startService(intent)
-    }
-
-    fun cancelar(contexto: Context) {
-        corriendo = false
-        mostrarContador = false
-        countdownJob?.cancel()
-        tiempoFormato = "00:00:00"
-        val intent = Intent(contexto, ContadorService::class.java).apply {
-            action = ContadorService.ACCION_CANCELAR
-        }
-        contexto.startService(intent)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        countdownJob?.cancel()
-    }
-    fun comprobarEstadoService() {
-        viewModelScope.launch {
-            while (true) {
-                when {
-                    !ContadorService.estaActivo && !ContadorService.estaPausado && mostrarContador -> {
-                        mostrarContador = false
-                        corriendo = false
-                        tiempoFormato = "00:00:00"
-                        countdownJob?.cancel()
-                    }
-                    ContadorService.estaPausado && corriendo -> {
-                        corriendo = false
-                        countdownJob?.cancel()
-                        val r = ContadorService.segundosRestantes
-                        val h = r / 3600
-                        val m = (r % 3600) / 60
-                        val s = r % 60
-                        tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
-                    }
-                    ContadorService.estaActivo && !corriendo && mostrarContador -> {
-                        iniciarContador(ContadorService.segundosRestantes)
-                    }
-                }
-                delay(300)
-            }
-        }
     }
 }

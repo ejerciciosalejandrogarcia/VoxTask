@@ -49,30 +49,22 @@ class UsuarioRepository : UsuarioDao {
         contrasena: String
     ): Result<Usuario> {
         return try {
-
             val query = coleccion
                 .whereEqualTo("nombre_usuario", nombreUsuario)
                 .get()
                 .await()
-
             val documento = query.documents.firstOrNull()
                 ?: return Result.failure(Exception("Usuario no encontrado"))
-
             val usuario = documento.toObject(Usuario::class.java)
                 ?: return Result.failure(Exception("Error al obtener usuario"))
-
             val email = usuario.correo_electronico
-
             val authResult = auth
                 .signInWithEmailAndPassword(email, contrasena)
                 .await()
-
             if (authResult.user == null) {
                 return Result.failure(Exception("Error en autenticación"))
             }
-
             Result.success(usuario)
-
         } catch (e: Exception) {
             Result.failure(e)
         }

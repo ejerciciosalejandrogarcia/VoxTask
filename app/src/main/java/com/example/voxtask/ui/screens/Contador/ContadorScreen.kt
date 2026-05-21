@@ -45,7 +45,6 @@ import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.ui.theme.VerdePrimario
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.LocalTamanioPantalla
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
@@ -62,24 +61,21 @@ fun ContadorScreen(
     viewModel: ContadorViewModel,
     navController: NavController
 ) {
-    val contexto = LocalContext.current
-    val espaciado = LocalEspaciado.current
-    val tamano = LocalTamanioPantalla.current
+    val contexto      = LocalContext.current
+    val espaciado     = LocalEspaciado.current
+    val tamano        = LocalTamanioPantalla.current
     val configuracion = LocalConfiguration.current
-    val usuario = FirebaseAuth.getInstance().currentUser
-    val uid = usuario?.uid
+    val usuario       = FirebaseAuth.getInstance().currentUser
+    val uid           = usuario?.uid
 
-    // ── Detectar landscape ────────────────────────────────────────────────────
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
-    // ── Tamaños adaptativos ───────────────────────────────────────────────────
-    // En landscape reducimos el círculo para que quepa sin scroll cuando es posible
     val tamanoCirculo = if (esLandscape) {
         dimensionResource(R.dimen.contador_circulo_landscape)
     } else {
         dimensionResource(R.dimen.contador_circulo)
     }
-    val tamanoBoton = dimensionResource(R.dimen.contador_boton)
+    val tamanoBoton      = dimensionResource(R.dimen.contador_boton)
     val tamanoIconoBoton = dimensionResource(R.dimen.contador_icono_boton)
 
     val anchoMaximoContenido = tamano.anchoMaximoContenido
@@ -98,7 +94,16 @@ fun ContadorScreen(
 
     LaunchedEffect(viewModel.mostrarContador) {
         if (viewModel.mostrarContador) {
-            TextoAVoz.hablar(contexto, "Creando e iniciando contador.")
+            val idioma  = TextoAVoz.localeActual.language
+            val mensaje = when (idioma) {
+                "en" -> "Creating and starting timer."
+                "fr" -> "Création et démarrage du compteur."
+                "de" -> "Timer wird erstellt und gestartet."
+                "it" -> "Creazione e avvio del contatore."
+                "pt" -> "Criando e iniciando o contador."
+                else -> "Creando e iniciando contador."
+            }
+            TextoAVoz.hablar(contexto, mensaje)
         }
     }
 
@@ -119,32 +124,40 @@ fun ContadorScreen(
             } else {
                 "Usuario"
             }
-            TextoAVoz.hablar(contexto, "¿Okey $nombre cuanto tiempo quieres poner al contador?.")
+            val idioma  = TextoAVoz.localeActual.language
+            val mensaje = when (idioma) {
+                "en" -> "Okay $nombre, how much time do you want to set on the timer?"
+                "fr" -> "D'accord $nombre, combien de temps voulez-vous mettre sur le compteur?"
+                "de" -> "Okay $nombre, wie viel Zeit möchten Sie für den Timer einstellen?"
+                "it" -> "Okay $nombre, quanto tempo vuoi impostare sul timer?"
+                "pt" -> "Ok $nombre, quanto tempo você quer colocar no contador?"
+                else -> "¿Okey $nombre cuanto tiempo quieres poner al contador?"
+            }
+            TextoAVoz.hablar(contexto, mensaje)
         }
     }
 
     PlantillaBase(
-        viewModel = viewModelPlantilla,
-        navController = navController,
-        textoInformacion = stringResource(R.string.txt_info_contador),
+        viewModel         = viewModelPlantilla,
+        navController     = navController,
+        textoInformacion  = stringResource(R.string.txt_info_contador),
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto, contexto) }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
+            modifier         = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentAlignment = Alignment.Center          // centrado vertical real
+            contentAlignment = Alignment.Center
         ) {
             AnimatedVisibility(visible = viewModel.mostrarContador) {
 
-                val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
-                    Modifier.widthIn(max = anchoMaximoContenido)
-                } else {
-                    Modifier
-                }
+                val modificadorContenido =
+                    if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
+                        Modifier.widthIn(max = anchoMaximoContenido)
+                    } else {
+                        Modifier
+                    }
 
-                // ── Column con scroll: si el contenido no cabe (landscape en
-                //    móvil pequeño) el usuario puede deslizar hacia abajo ──────
                 Column(
                     modifier = modificadorContenido
                         .verticalScroll(rememberScrollState())
@@ -152,40 +165,50 @@ fun ContadorScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+
+                    // ── Círculo con el tiempo ─────────────────────────────────
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier
+                        modifier         = Modifier
                             .size(tamanoCirculo)
                             .clip(CircleShape)
                             .background(VerdePrimario.copy(alpha = 0.1f))
                             .border(3.dp, VerdePrimario, CircleShape)
                     ) {
                         Text(
-                            text = viewModel.tiempoFormato,
-                            style = MaterialTheme.typography.displayMedium,
+                            text       = viewModel.tiempoFormato,
+                            style      = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Bold,
-                            color = VerdePrimario
+                            color      = VerdePrimario
                         )
                     }
 
                     Spacer(modifier = Modifier.height(espaciado.xl))
 
+                    // ── Botones ───────────────────────────────────────────────
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(espaciado.l),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment     = Alignment.CenterVertically
                     ) {
+
+                        // ── Botón Play / Pause
+                        // Deshabilitado cuando el contador ha terminado (terminado == true)
                         IconButton(
-                            onClick = {
+                            onClick  = {
                                 if (viewModel.corriendo) {
                                     viewModel.parar(contexto)
                                 } else {
                                     viewModel.iniciar(contexto)
                                 }
                             },
+                            enabled  = !viewModel.terminado,
                             modifier = Modifier
                                 .size(tamanoBoton)
                                 .clip(CircleShape)
-                                .background(VerdePrimario)
+                                .background(
+                                    // Gris cuando está deshabilitado, verde en caso contrario
+                                    if (!viewModel.terminado) VerdePrimario else Color.Gray
+                                )
                         ) {
                             Icon(
                                 imageVector = if (viewModel.corriendo)
@@ -196,23 +219,25 @@ fun ContadorScreen(
                                     stringResource(R.string.btn_parar)
                                 else
                                     stringResource(R.string.btn_iniciar),
-                                tint = Color.White,
+                                tint     = Color.White,
                                 modifier = Modifier.size(tamanoIconoBoton)
                             )
                         }
 
+                        // ── Botón Cancelar (X)
+                        // Siempre activo: al pulsarlo se oculta el contador y para el sonido
                         IconButton(
-                            onClick = { viewModel.cancelar(contexto) },
+                            onClick  = { viewModel.cancelar(contexto) },
                             modifier = Modifier
                                 .size(tamanoBoton)
                                 .clip(CircleShape)
                                 .background(Color.Red)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Close,
+                                imageVector        = Icons.Default.Close,
                                 contentDescription = stringResource(R.string.btn_cancelar),
-                                tint = Color.White,
-                                modifier = Modifier.size(tamanoIconoBoton)
+                                tint               = Color.White,
+                                modifier           = Modifier.size(tamanoIconoBoton)
                             )
                         }
                     }

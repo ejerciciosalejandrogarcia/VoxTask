@@ -38,7 +38,7 @@ class InicioViewModel : ViewModel() {
         val textoLower = texto.lowercase()
         val idioma = TextoAVoz.localeActual.language
 
-        val comandoContador    = when (idioma) { "en" -> "counter"; "fr" -> "compteur"; "de" -> "zähler"; "it" -> "contatore"; "pt" -> "contador"; else -> "contador" }
+        val comandoContador    = when (idioma) { "en" -> "timer"; "fr" -> "compteur"; "de" -> "zähler"; "it" -> "contatore"; "pt" -> "contador"; else -> "contador" }
         val comandoCorreo      = when (idioma) { "en" -> "email";   "fr" -> "courriel"; "de" -> "mail";   "it" -> "posta";     "pt" -> "correio";  else -> "correo" }
         val comandoRecordatorio = when (idioma) { "en" -> "reminder"; "fr" -> "rappel"; "de" -> "erinnerung"; "it" -> "promemoria"; "pt" -> "lembrete"; else -> "recordatorio" }
         val comandoLista       = when (idioma) { "en" -> "list";    "fr" -> "liste";    "de" -> "liste";  "it" -> "lista";     "pt" -> "lista";    else -> "lista" }

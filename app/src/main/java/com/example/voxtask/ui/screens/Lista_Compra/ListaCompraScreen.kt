@@ -72,9 +72,17 @@ fun ListaCompraScreen(
     }
 
     LaunchedEffect(Unit) {
-        TextoAVoz.hablar(contexto, "Lista de compra. Di un producto para agregarlo, o di elimina y el producto para borrarlo.")
+        val idioma = TextoAVoz.localeActual.language
+        val mensaje = when (idioma) {
+            "en" -> "Shopping list. Say a product to add it, or say delete and the product to remove it."
+            "fr" -> "Liste de courses. Dites un produit pour l'ajouter, ou dites supprimer et le produit pour le supprimer."
+            "de" -> "Einkaufsliste. Sagen Sie ein Produkt, um es hinzuzufügen, oder sagen Sie löschen und das Produkt, um es zu entfernen."
+            "it" -> "Lista della spesa. Di un prodotto per aggiungerlo, o di elimina e il prodotto per rimuoverlo."
+            "pt" -> "Lista de compras. Diga um produto para adicioná-lo, ou diga eliminar e o produto para removê-lo."
+            else -> "Lista de compra. Di un producto para agregarlo, o di elimina y el producto para borrarlo."
+        }
+        TextoAVoz.hablar(contexto, mensaje)
     }
-
     PlantillaBase(
         viewModel = viewModelPlantilla,
         textoInformacion = stringResource(R.string.txt_info_lista_compra),
