@@ -23,7 +23,7 @@ data class NuevaContraseniaUiState(
     val confirmarContrasena: String = "",
     val cargando: Boolean = false,
     val cambioExitoso: Boolean = false,
-    val mensajeError: Int = 0
+    val mensajeError: Int? = null  // ← cambia a nullable
 )
 
 class CambiarContraseniaViewModel : ViewModel() {
@@ -125,6 +125,6 @@ class CambiarContraseniaViewModel : ViewModel() {
     }
 
     fun limpiarErrorNueva() {
-        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = 0)
+        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = null) // ← null en vez de 0
     }
 }
