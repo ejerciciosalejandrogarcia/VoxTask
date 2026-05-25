@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -177,6 +178,11 @@ fun InicioScreen(
                             icono = Icons.Default.Add,
                             titulo = stringResource(R.string.txt_contador),
                             subtexto = stringResource(R.string.txt_inicio_sub_contador)
+                        )
+                        TarjetaMenu(
+                            icono = Icons.Default.Cloud,
+                            titulo = stringResource(R.string.menu_clima_titulo),
+                            subtexto = stringResource(R.string.menu_clima_subtexto)
                         )
                         Spacer(modifier = Modifier.height(espaciado.xl))        // antes: 32.dp
                     }

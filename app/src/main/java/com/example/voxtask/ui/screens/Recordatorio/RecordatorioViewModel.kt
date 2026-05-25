@@ -8,563 +8,719 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.voxtask.databases.model.Evento
-import com.example.voxtask.databases.repository.EventoRepository
-import com.example.voxtask.utils.TextoAVoz
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Modelo de datos
+// ──────────────────────────────────────────────────────────────────────────────
+
+data class Evento(
+    val dia: Int,
+    val mes: Int,
+    val anio: Int,
+    val asunto: String
+)
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ViewModel
+// ──────────────────────────────────────────────────────────────────────────────
+
+@RequiresApi(Build.VERSION_CODES.O)
 class RecordatorioViewModel : ViewModel() {
 
-    // ─── Variables ───────────────────────────────────────────────────────────
-    private val repository = EventoRepository()
-    private val usuarioId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-
-    var diaSeleccionado by mutableStateOf<LocalDate?>(null)
-        private set
-
-    // Estado que indica si estamos en medio de la creación de un evento por voz
-    // La UI lo usa para ocultar el panel de eventos mientras se crea
-    var creandoEvento by mutableStateOf(false)
-        private set
+    // ── Estado observable ─────────────────────────────────────────────────────
 
     val eventos = mutableStateListOf<Evento>()
-    private var esperandoAsunto = false
+
+    var diaSeleccionado: LocalDate? by mutableStateOf(null)
+        private set
+
+    /** True mientras el flujo de creación de evento por voz está activo */
+    var creandoEvento: Boolean by mutableStateOf(false)
+        private set
+
+    /** Callback para hablar (se inyecta desde la Screen) */
     var onHablar: ((String) -> Unit)? = null
 
-    init {
-        cargarEventos()
+    // ── Estado interno del flujo de voz ───────────────────────────────────────
+
+    private enum class FlujoVoz {
+        NINGUNO,
+        // Flujo CREAR - pasos
+        CREAR_ESPERANDO_DIA,
+        CREAR_ESPERANDO_MES,
+        CREAR_ESPERANDO_ANIO,
+        CREAR_ESPERANDO_ASUNTO,
+        // Flujo ELIMINAR
+        ELIMINAR_ESPERANDO_DIA,
+        ELIMINAR_ESPERANDO_MES,
+        ELIMINAR_ESPERANDO_ANIO
     }
 
-    // ─── Carga de eventos ────────────────────────────────────────────────────
-    private fun cargarEventos() {
-        viewModelScope.launch {
-            val listaEventos = repository.obtenerTodos(usuarioId)
-            eventos.clear()
-            eventos.addAll(listaEventos)
-        }
-    }
+    private var flujoActual = FlujoVoz.NINGUNO
 
-    // ─── Selección de día en el calendario ──────────────────────────────────
+    /** Partes de fecha que vamos acumulando paso a paso */
+    private var diaPendiente: Int? = null
+    private var mesPendiente: Int? = null
+    private var anioPendiente: Int? = null
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // API pública
+    // ──────────────────────────────────────────────────────────────────────────
+
     fun seleccionarDia(fecha: LocalDate) {
-        // Solo permite seleccionar día manualmente si no estamos creando un evento
-        if (!creandoEvento) {
-            diaSeleccionado = fecha
-        }
+        diaSeleccionado = fecha
     }
 
-    // ─── Entrada de texto por voz ────────────────────────────────────────────
-    @RequiresApi(Build.VERSION_CODES.O)
+    fun eliminarEvento(evento: Evento) {
+        eventos.remove(evento)
+    }
+
+    /** Punto de entrada para todo texto reconocido por voz */
     fun onTextoRecibido(texto: String) {
-        val textoLimpio = texto.lowercase().trim()
+        Log.d("VoxTask", "onTextoRecibido → texto='$texto' | flujo=$flujoActual")
+        val textoNorm = texto.trim().lowercase()
 
-        Log.d("Recordatorio", "Texto recibido: $textoLimpio")
-        Log.d("Recordatorio", "esperandoAsunto: $esperandoAsunto")
-        Log.d("Recordatorio", "diaSeleccionado: $diaSeleccionado")
-
-        if (esperandoAsunto) {
-            guardarEvento(textoLimpio)
+        // Cancelación global en cualquier momento
+        if (esCancelacion(textoNorm) && flujoActual != FlujoVoz.NINGUNO) {
+            resetFlujo()
+            hablar(mensajeCancelado())
             return
         }
 
-        procesarComando(textoLimpio)
+        when (flujoActual) {
+            FlujoVoz.NINGUNO                  -> procesarComandoInicial(textoNorm)
+            FlujoVoz.CREAR_ESPERANDO_DIA      -> procesarDia(textoNorm, esCrear = true)
+            FlujoVoz.CREAR_ESPERANDO_MES      -> procesarMes(textoNorm, esCrear = true)
+            FlujoVoz.CREAR_ESPERANDO_ANIO     -> procesarAnio(textoNorm, esCrear = true)
+            FlujoVoz.CREAR_ESPERANDO_ASUNTO   -> procesarAsunto(textoNorm)
+            FlujoVoz.ELIMINAR_ESPERANDO_DIA   -> procesarDia(textoNorm, esCrear = false)
+            FlujoVoz.ELIMINAR_ESPERANDO_MES   -> procesarMes(textoNorm, esCrear = false)
+            FlujoVoz.ELIMINAR_ESPERANDO_ANIO  -> procesarAnio(textoNorm, esCrear = false)
+        }
     }
 
-    // ─── Procesamiento de comandos ───────────────────────────────────────────
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun procesarComando(texto: String) {
-        val idioma = TextoAVoz.localeActual.language
+    // ──────────────────────────────────────────────────────────────────────────
+    // Procesamiento del comando inicial
+    // ──────────────────────────────────────────────────────────────────────────
 
-        val comandosCrear = comandosCrearPorIdioma(idioma)
-        val prefijosEliminar = prefijosEliminarPorIdioma(idioma)
+    private fun procesarComandoInicial(texto: String) {
+        Log.d("VoxTask", "procesarComandoInicial → texto='$texto'")
+        Log.d("VoxTask", "  esCrear=${esComandoCrear(texto)} | esEliminar=${esComandoEliminar(texto)}")
 
         when {
-            comandosCrear.any { texto.contains(it) } -> {
-                val fecha = extraerFecha(texto)
-                if (fecha != null) {
-                    diaSeleccionado = fecha
-                    esperandoAsunto = true
-                    creandoEvento = true           // ← oculta panel en la UI
-                    onHablar?.invoke(mensajePedirAsunto(idioma))
-                } else {
-                    onHablar?.invoke(mensajeFechaNoReconocida(idioma))
-                }
-            }
-
-            prefijosEliminar.any { texto.startsWith(it) } -> {
-                val prefijoUsado = prefijosEliminar.first { texto.startsWith(it) }
-                val asunto = texto.removePrefix(prefijoUsado).trim()
-                // Busca el evento ignorando mayúsculas/minúsculas y espacios extra
-                val evento = eventos.find { it.asunto.trim().equals(asunto, ignoreCase = true) }
-                if (evento != null) {
-                    eliminarEvento(evento)
-                } else {
-                    onHablar?.invoke("${mensajeNoEncontrado(idioma)} $asunto")
-                }
-            }
+            esComandoCrear(texto)    -> iniciarCreacion()
+            esComandoEliminar(texto) -> iniciarEliminacion()
         }
     }
 
-    // ─── Guardar evento ──────────────────────────────────────────────────────
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun guardarEvento(asunto: String) {
-        val dia = diaSeleccionado ?: run {
-            // Seguridad: si por alguna razón diaSeleccionado es null, reseteamos
-            esperandoAsunto = false
-            creandoEvento = false
+    private fun iniciarCreacion() {
+        creandoEvento = true
+        flujoActual = FlujoVoz.CREAR_ESPERANDO_DIA
+        hablar(mensajePreguntaDia())
+    }
+
+    private fun iniciarEliminacion() {
+        flujoActual = FlujoVoz.ELIMINAR_ESPERANDO_DIA
+        hablar(mensajePreguntaDia())
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Pasos del flujo guiado
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /** Paso 1: esperar el número de día */
+    private fun procesarDia(texto: String, esCrear: Boolean) {
+        val dia = extraerNumero(texto)
+        Log.d("VoxTask", "procesarDia → texto='$texto' | extraído=$dia")
+
+        if (dia == null || dia < 1 || dia > 31) {
+            hablar(mensajeNoEntendiDia())
             return
         }
-        val idioma = TextoAVoz.localeActual.language
+        diaPendiente = dia
+        flujoActual = if (esCrear) FlujoVoz.CREAR_ESPERANDO_MES else FlujoVoz.ELIMINAR_ESPERANDO_MES
+        hablar(mensajePreguntaMes())
+    }
 
-        val evento = Evento(
-            asunto = asunto,
-            dia = dia.dayOfMonth,
-            mes = dia.monthValue,
-            anio = dia.year
-        )
+    /** Paso 2: esperar el nombre o número del mes */
+    private fun procesarMes(texto: String, esCrear: Boolean) {
+        // Intentar por nombre primero, luego por número
+        val mes = nombreMesANumero(texto) ?: extraerNumero(texto)
+        if (mes == null || mes < 1 || mes > 12) {
+            hablar(mensajeNoEntendiMes())
+            return
+        }
+        mesPendiente = mes
+        flujoActual = if (esCrear) FlujoVoz.CREAR_ESPERANDO_ANIO else FlujoVoz.ELIMINAR_ESPERANDO_ANIO
+        hablar(mensajePreguntaAnio())
+    }
 
-        viewModelScope.launch {
-            try {
-                repository.agregar(usuarioId, evento)
-                eventos.add(evento)
-                onHablar?.invoke(mensajeEventoGuardado(idioma, asunto, dia))
-            } catch (e: Exception) {
-                Log.e("Recordatorio", "Error guardando evento", e)
-                onHablar?.invoke(mensajeErrorGuardar(idioma))
-            } finally {
-                // Siempre reseteamos el estado al terminar, con éxito o error
-                esperandoAsunto = false
-                creandoEvento = false
-                diaSeleccionado = null
-            }
+    /** Paso 3: esperar si es este año u otro */
+    private fun procesarAnio(texto: String, esCrear: Boolean) {
+        val anioActual = LocalDate.now().year
+        val anio: Int? = when {
+            // "este año", "this year", "cette année", "dieses jahr", "quest'anno", "este ano"
+            esEsteAnio(texto) -> anioActual
+            // Número explícito de 4 dígitos
+            else -> extraerAnio(texto)
+        }
+
+        if (anio == null) {
+            hablar(mensajeNoEntendiAnio())
+            return
+        }
+
+        anioPendiente = anio
+
+        // Validar que la fecha sea coherente
+        val fecha = runCatching {
+            LocalDate.of(anio, mesPendiente!!, diaPendiente!!)
+        }.getOrNull()
+
+        if (fecha == null) {
+            hablar(mensajeFechaInvalida())
+            resetFlujo()
+            return
+        }
+
+        seleccionarDia(fecha)
+
+        if (esCrear) {
+            flujoActual = FlujoVoz.CREAR_ESPERANDO_ASUNTO
+            hablar(mensajePreguntaAsunto(fecha))
+        } else {
+            // Flujo eliminar: buscar y borrar
+            procesarEliminacionConFecha(fecha)
         }
     }
 
-    // ─── Eliminar evento ─────────────────────────────────────────────────────
-    fun eliminarEvento(evento: Evento) {
-        val idioma = TextoAVoz.localeActual.language
-        viewModelScope.launch {
-            try {
-                repository.eliminar(usuarioId, evento.id)
-                eventos.remove(evento)
-                onHablar?.invoke(mensajeEventoEliminado(idioma, evento.asunto))
-            } catch (e: Exception) {
-                Log.e("Recordatorio", "Error eliminando evento", e)
-                onHablar?.invoke(mensajeErrorEliminar(idioma))
-            }
+    /** Paso 4 (solo crear): recibir el asunto */
+    private fun procesarAsunto(asunto: String) {
+        if (asunto.isBlank()) {
+            hablar(mensajeNoEntendiAsunto())
+            return
+        }
+
+        val dia  = diaPendiente  ?: run { resetFlujo(); return }
+        val mes  = mesPendiente  ?: run { resetFlujo(); return }
+        val anio = anioPendiente ?: run { resetFlujo(); return }
+
+        // ── Comprobar si ya existe un evento con el mismo asunto ese día ────────
+        val asuntoNorm = asunto.trim().lowercase()
+        val duplicado = eventos.any {
+            it.dia == dia &&
+                    it.mes == mes &&
+                    it.anio == anio &&
+                    it.asunto.trim().lowercase() == asuntoNorm
+        }
+
+        if (duplicado) {
+            // No reseteamos el flujo: el usuario puede decir otro asunto
+            hablar(mensajeAsuntoDuplicado(asunto))
+            return
+        }
+
+        val evento = Evento(dia = dia, mes = mes, anio = anio, asunto = asunto)
+        eventos.add(evento)
+        resetFlujo()
+        hablar(mensajeEventoCreado(evento))
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Flujo ELIMINAR con fecha ya construida
+    // ──────────────────────────────────────────────────────────────────────────
+
+    private fun procesarEliminacionConFecha(fecha: LocalDate) {
+        val eventosDia = eventos.filter {
+            it.dia == fecha.dayOfMonth &&
+                    it.mes == fecha.monthValue &&
+                    it.anio == fecha.year
+        }
+
+        resetFlujo()
+
+        if (eventosDia.isEmpty()) {
+            hablar(mensajeSinEventos(fecha))
+            return
+        }
+
+        if (eventosDia.size == 1) {
+            eventos.remove(eventosDia.first())
+            hablar(mensajeEventoEliminado(eventosDia.first()))
+            return
+        }
+
+        // Varios eventos: eliminar todos e informar
+        eventosDia.forEach { eventos.remove(it) }
+        hablar(mensajeTodosEliminados(fecha, eventosDia.size))
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Detección de intención
+    // ──────────────────────────────────────────────────────────────────────────
+
+    private fun esComandoCrear(texto: String): Boolean {
+        val palabras = listOf(
+            "añade evento", "añadir evento", "crea evento", "crear evento",
+            "nuevo evento", "agregar evento", "agrega evento",
+            "add event", "create event", "new event",
+            "ajouter événement", "créer événement", "nouvel événement",
+            "ajouter evenement", "creer evenement",
+            "ereignis erstellen", "ereignis hinzufügen", "neues ereignis",
+            "event erstellen", "event hinzufügen",
+            "aggiungi evento", "nuovo evento",
+            "adicionar evento", "criar evento", "novo evento"
+        )
+        return palabras.any { texto.contains(it) }
+    }
+
+    private fun esComandoEliminar(texto: String): Boolean {
+        val palabras = listOf(
+            "elimina evento", "eliminar evento", "borra evento", "borrar evento",
+            "quita evento", "quitar evento",
+            "delete event", "remove event", "cancel event",
+            "supprimer événement", "effacer événement", "supprimer evenement",
+            "ereignis löschen", "ereignis entfernen", "event löschen",
+            "rimuovi evento", "cancella evento",
+            "remover evento", "apagar evento"
+        )
+        return palabras.any { texto.contains(it) }
+    }
+
+    private fun esCancelacion(texto: String): Boolean {
+        val palabras = listOf(
+            "cancelar", "cancel", "annuler", "abbrechen", "annulla", "cancelar", "parar", "stop"
+        )
+        return palabras.any { texto.contains(it) }
+    }
+
+    private fun esEsteAnio(texto: String): Boolean {
+        val palabras = listOf(
+            // ES
+            "este año", "este ano",
+            // EN
+            "this year", "current year",
+            // FR
+            "cette année", "cette annee",
+            // DE
+            "dieses jahr",
+            // IT
+            "quest'anno", "questo anno",
+            // PT
+            "este ano"
+        )
+        return palabras.any { texto.contains(it) }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Extracción de valores numéricos
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /** Extrae el primer número entero encontrado en el texto */
+    /** Extrae un año de 4 dígitos (entre 2000 y 2100) */
+    private fun extraerAnio(texto: String): Int? {
+        return Regex("""\b(20\d{2}|21\d{2})\b""").find(texto)?.value?.toIntOrNull()
+    }
+
+    /** Mapeo de nombres de mes en 6 idiomas → número de mes */
+    private fun nombreMesANumero(texto: String): Int? {
+        // Normalizar acentos para comparación
+        val n = texto.lowercase()
+            .replace("á", "a").replace("é", "e")
+            .replace("í", "i").replace("ó", "o")
+            .replace("ú", "u").replace("ü", "u")
+            .replace("è", "e").replace("ê", "e")
+            .replace("â", "a").replace("ô", "o")
+            .replace("î", "i")
+
+        // Mapa completo: todas las palabras clave de mes en 6 idiomas
+        val mapaAbrevMes = mapOf(
+            // Enero / January / Janvier / Januar / Gennaio / Janeiro
+            "enero" to 1, "ene" to 1,
+            "january" to 1, "jan" to 1,
+            "janvier" to 1,
+            "januar" to 1,
+            "gennaio" to 1, "gen" to 1,
+            "janeiro" to 1,
+            // Febrero / February / Février / Februar / Febbraio / Fevereiro
+            "febrero" to 2, "feb" to 2,
+            "february" to 2,
+            "fevrier" to 2, "fev" to 2,
+            "februar" to 2,
+            "febbraio" to 2,
+            "fevereiro" to 2,
+            // Marzo / March / Mars / März / Marzo / Março
+            "marzo" to 3, "mar" to 3,
+            "march" to 3,
+            "mars" to 3,
+            "marz" to 3,
+            "marco" to 3,
+            // Abril / April / Avril / April / Aprile / Abril
+            "abril" to 4, "abr" to 4,
+            "april" to 4, "apr" to 4,
+            "avril" to 4,
+            "aprile" to 4,
+            // Mayo / May / Mai / Mai / Maggio / Maio
+            "mayo" to 5,
+            "may" to 5,
+            "mai" to 5,
+            "maggio" to 5, "mag" to 5,
+            "maio" to 5,
+            // Junio / June / Juin / Juni / Giugno / Junho
+            "junio" to 6, "jun" to 6,
+            "june" to 6,
+            "juin" to 6,
+            "juni" to 6,
+            "giugno" to 6, "giu" to 6,
+            "junho" to 6,
+            // Julio / July / Juillet / Juli / Luglio / Julho
+            "julio" to 7, "jul" to 7,
+            "july" to 7,
+            "juillet" to 7,
+            "juli" to 7,
+            "luglio" to 7, "lug" to 7,
+            "julho" to 7,
+            // Agosto / August / Août / August / Agosto / Agosto
+            "agosto" to 8, "ago" to 8,
+            "august" to 8, "aug" to 8,
+            "aout" to 8,
+            // Septiembre / September / Septembre / September / Settembre / Setembro
+            "septiembre" to 9, "sep" to 9, "sept" to 9,
+            "september" to 9,
+            "septembre" to 9,
+            "settembre" to 9, "set" to 9,
+            "setembro" to 9,
+            // Octubre / October / Octobre / Oktober / Ottobre / Outubro
+            "octubre" to 10, "oct" to 10,
+            "october" to 10,
+            "octobre" to 10,
+            "oktober" to 10, "okt" to 10,
+            "ottobre" to 10, "ott" to 10,
+            "outubro" to 10,
+            // Noviembre / November / Novembre / November / Novembre / Novembro
+            "noviembre" to 11, "nov" to 11,
+            "november" to 11,
+            "novembre" to 11,
+            "novembro" to 11,
+            // Diciembre / December / Décembre / Dezember / Dicembre / Dezembro
+            "diciembre" to 12, "dic" to 12,
+            "december" to 12, "dec" to 12,
+            "decembre" to 12,
+            "dezember" to 12, "dez" to 12,
+            "dicembre" to 12,
+            "dezembro" to 12
+        )
+
+        // Buscar coincidencia exacta de palabra completa en el texto normalizado
+        val palabras = n.split(Regex("""\s+"""))
+        for (palabra in palabras) {
+            mapaAbrevMes[palabra]?.let { return it }
+        }
+        // También buscar si el texto completo normalizado contiene el nombre
+        for ((nombre, numero) in mapaAbrevMes) {
+            if (n.contains(nombre)) return numero
+        }
+        return null
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Mensajes TTS multiidioma
+    // ──────────────────────────────────────────────────────────────────────────
+
+    private fun idioma(): String = try {
+        com.example.voxtask.utils.TextoAVoz.localeActual.language
+    } catch (e: Exception) { "es" }
+
+    private fun mensajePreguntaDia(): String = when (idioma()) {
+        "en" -> "What day? Say a number."
+        "fr" -> "Quel jour ? Dites un numéro."
+        "de" -> "Welcher Tag? Sagen Sie eine Zahl."
+        "it" -> "Che giorno? Dì un numero."
+        "pt" -> "Que dia? Diga um número."
+        else -> "¿Qué día? Di un número."
+    }
+
+    private fun mensajePreguntaMes(): String = when (idioma()) {
+        "en" -> "What month?"
+        "fr" -> "Quel mois ?"
+        "de" -> "Welcher Monat?"
+        "it" -> "Che mese?"
+        "pt" -> "Que mês?"
+        else -> "¿Qué mes?"
+    }
+
+    private fun mensajePreguntaAnio(): String = when (idioma()) {
+        "en" -> "This year, or which year?"
+        "fr" -> "Cette année, ou quelle année ?"
+        "de" -> "Dieses Jahr oder welches Jahr?"
+        "it" -> "Quest'anno o quale anno?"
+        "pt" -> "Este ano ou qual ano?"
+        else -> "¿Este año o qué año?"
+    }
+
+    private fun mensajePreguntaAsunto(fecha: LocalDate): String {
+        val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
+        return when (idioma()) {
+            "en" -> "Date: $d/$m/$a. What subject do you want to add?"
+            "fr" -> "Date : $d/$m/$a. Quel sujet voulez-vous ajouter ?"
+            "de" -> "Datum: $d.$m.$a. Welchen Betreff möchten Sie hinzufügen?"
+            "it" -> "Data: $d/$m/$a. Che oggetto vuoi aggiungere?"
+            "pt" -> "Data: $d/$m/$a. Qual assunto deseja adicionar?"
+            else -> "Fecha: $d/$m/$a. ¿Qué asunto quieres ponerle?"
         }
     }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // EXTRACCIÓN DE FECHA
-    // ═════════════════════════════════════════════════════════════════════════
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun extraerFecha(texto: String): LocalDate? {
-        val idioma = TextoAVoz.localeActual.language
-        val meses = mesesPorIdioma(idioma)
-
-        // Primero intentamos tokens compuestos con guion para inglés
-        // antes de hacer split por espacios (ej: "twenty-third")
-        val textoNormalizado = if (idioma == "en") {
-            normalizarCompuestosEN(texto)
-        } else texto
-
-        val partes = textoNormalizado.split(" ")
-
-        var dia: Int? = null
-        var mes: Int? = null
-        var anio: Int? = null
-
-        partes.forEach { parte ->
-            val numero = parte.toIntOrNull()
-
-            // Año (4 dígitos entre 2024 y 2099)
-            if (numero != null && numero in 2024..2099) {
-                anio = numero
-                return@forEach
-            }
-
-            // Día como número directo
-            if (numero != null && numero in 1..31 && dia == null) {
-                dia = numero
-                return@forEach
-            }
-
-            // Día como palabra
-            val numPalabra = palabraADia(parte, idioma)
-            if (numPalabra != null && dia == null) {
-                dia = numPalabra
-                return@forEach
-            }
-
-            // Mes por nombre
-            meses[parte]?.let { if (mes == null) mes = it }
-        }
-
-        // Año en palabras (inglés: "two thousand twenty-seven")
-        if (anio == null && idioma == "en") {
-            anio = extraerAnioPalabrasEN(texto)
-        }
-
-        Log.d("Recordatorio", "extraerFecha → dia=$dia mes=$mes anio=$anio")
-
-        return if (dia != null && mes != null) {
-            try {
-                LocalDate.of(anio ?: LocalDate.now().year, mes!!, dia!!)
-            } catch (e: Exception) {
-                Log.e("Recordatorio", "Fecha inválida: dia=$dia mes=$mes", e)
-                null
-            }
-        } else null
-    }
-
-    /**
-     * Reemplaza ordinales compuestos con espacio por versiones con guion
-     * para que el split posterior los trate como un único token.
-     * Ej: "twenty third" → "twenty-third"
-     */
-    private fun normalizarCompuestosEN(texto: String): String {
-        val unidades = listOf(
-            "first", "second", "third", "fourth", "fifth", "sixth", "seventh",
-            "eighth", "ninth", "tenth", "eleventh", "twelfth", "thirteenth",
-            "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth",
-            "nineteenth"
-        )
-        var resultado = texto
-        for (u in unidades) {
-            resultado = resultado.replace("twenty $u", "twenty-$u")
-            resultado = resultado.replace("thirty $u", "thirty-$u")
-        }
-        return resultado
-    }
-
-    private fun extraerAnioPalabrasEN(texto: String): Int? {
-        val miles = mapOf("two thousand" to 2000, "three thousand" to 3000)
-        val decenas = mapOf(
-            "twenty" to 20, "thirty" to 30, "forty" to 40,
-            "fifty" to 50, "sixty" to 60, "seventy" to 70,
-            "eighty" to 80, "ninety" to 90
-        )
-        val unidades = mapOf(
-            "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
-            "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
-            "fifteen" to 15, "sixteen" to 16, "seventeen" to 17,
-            "eighteen" to 18, "nineteen" to 19
-        )
-
-        var base: Int? = null
-        for ((k, v) in miles) {
-            if (texto.contains(k)) { base = v; break }
-        }
-        base ?: return null
-
-        val idxThousand = texto.indexOf("thousand")
-        var resto = 0
-        for ((k, v) in decenas) {
-            val idx = texto.indexOf(k)
-            if (idx != -1 && idx > idxThousand) { resto += v; break }
-        }
-        for ((k, v) in unidades) {
-            val idx = texto.indexOf(k)
-            if (idx != -1 && idx > idxThousand) { resto += v; break }
-        }
-
-        return base + resto
-    }
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // MAPAS DE IDIOMA
-    // ═════════════════════════════════════════════════════════════════════════
-
-    private fun mesesPorIdioma(idioma: String): Map<String, Int> = when (idioma) {
-        "en" -> mapOf(
-            "january" to 1, "february" to 2, "march" to 3, "april" to 4,
-            "may" to 5, "june" to 6, "july" to 7, "august" to 8,
-            "september" to 9, "october" to 10, "november" to 11, "december" to 12
-        )
-        "fr" -> mapOf(
-            "janvier" to 1, "février" to 2, "mars" to 3, "avril" to 4,
-            "mai" to 5, "juin" to 6, "juillet" to 7, "août" to 8,
-            "septembre" to 9, "octobre" to 10, "novembre" to 11, "décembre" to 12
-        )
-        "de" -> mapOf(
-            "januar" to 1, "februar" to 2, "märz" to 3, "april" to 4,
-            "mai" to 5, "juni" to 6, "juli" to 7, "august" to 8,
-            "september" to 9, "oktober" to 10, "november" to 11, "dezember" to 12
-        )
-        "it" -> mapOf(
-            "gennaio" to 1, "febbraio" to 2, "marzo" to 3, "aprile" to 4,
-            "maggio" to 5, "giugno" to 6, "luglio" to 7, "agosto" to 8,
-            "settembre" to 9, "ottobre" to 10, "novembre" to 11, "dicembre" to 12
-        )
-        "pt" -> mapOf(
-            "janeiro" to 1, "fevereiro" to 2, "março" to 3, "abril" to 4,
-            "maio" to 5, "junho" to 6, "julho" to 7, "agosto" to 8,
-            "setembro" to 9, "outubro" to 10, "novembro" to 11, "dezembro" to 12
-        )
-        else -> mapOf(
-            "enero" to 1, "febrero" to 2, "marzo" to 3, "abril" to 4,
-            "mayo" to 5, "junio" to 6, "julio" to 7, "agosto" to 8,
-            "septiembre" to 9, "octubre" to 10, "noviembre" to 11, "diciembre" to 12
-        )
-    }
-
-    private fun palabraADia(palabra: String, idioma: String): Int? {
-        val enOrdinal = mapOf(
-            "first" to 1, "second" to 2, "third" to 3, "fourth" to 4,
-            "fifth" to 5, "sixth" to 6, "seventh" to 7, "eighth" to 8,
-            "ninth" to 9, "tenth" to 10, "eleventh" to 11, "twelfth" to 12,
-            "thirteenth" to 13, "fourteenth" to 14, "fifteenth" to 15,
-            "sixteenth" to 16, "seventeenth" to 17, "eighteenth" to 18,
-            "nineteenth" to 19, "twentieth" to 20,
-            "twenty-first" to 21, "twenty-second" to 22, "twenty-third" to 23,
-            "twenty-fourth" to 24, "twenty-fifth" to 25, "twenty-sixth" to 26,
-            "twenty-seventh" to 27, "twenty-eighth" to 28, "twenty-ninth" to 29,
-            "thirtieth" to 30, "thirty-first" to 31
-        )
-        val enCardinal = mapOf(
-            "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
-            "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
-            "fifteen" to 15, "sixteen" to 16, "seventeen" to 17, "eighteen" to 18,
-            "nineteen" to 19, "twenty" to 20, "thirty" to 30
-        )
-        val esOrdinal = mapOf(
-            "primero" to 1, "segundo" to 2, "tercero" to 3, "cuarto" to 4,
-            "quinto" to 5, "sexto" to 6, "séptimo" to 7, "octavo" to 8,
-            "noveno" to 9, "décimo" to 10, "undécimo" to 11, "duodécimo" to 12,
-            "decimotercero" to 13, "decimocuarto" to 14, "decimoquinto" to 15,
-            "decimosexto" to 16, "decimoséptimo" to 17, "decimoctavo" to 18,
-            "decimonoveno" to 19, "vigésimo" to 20, "veintiuno" to 21,
-            "veintidós" to 22, "veintitrés" to 23, "veinticuatro" to 24,
-            "veinticinco" to 25, "veintiséis" to 26, "veintisiete" to 27,
-            "veintiocho" to 28, "veintinueve" to 29, "treinta" to 30
-        )
-        val esCardinal = mapOf(
-            "uno" to 1, "dos" to 2, "tres" to 3, "cuatro" to 4, "cinco" to 5,
-            "seis" to 6, "siete" to 7, "ocho" to 8, "nueve" to 9, "diez" to 10,
-            "once" to 11, "doce" to 12, "trece" to 13, "catorce" to 14,
-            "quince" to 15, "dieciséis" to 16, "diecisiete" to 17,
-            "dieciocho" to 18, "diecinueve" to 19, "veinte" to 20
-        )
-        val frOrdinal = mapOf(
-            "premier" to 1, "première" to 1, "deuxième" to 2, "troisième" to 3,
-            "quatrième" to 4, "cinquième" to 5, "sixième" to 6, "septième" to 7,
-            "huitième" to 8, "neuvième" to 9, "dixième" to 10, "onzième" to 11,
-            "douzième" to 12, "treizième" to 13, "quatorzième" to 14,
-            "quinzième" to 15, "seizième" to 16, "dix-septième" to 17,
-            "dix-huitième" to 18, "dix-neuvième" to 19, "vingtième" to 20,
-            "vingt-et-unième" to 21, "vingt-deuxième" to 22, "vingt-troisième" to 23,
-            "vingt-quatrième" to 24, "vingt-cinquième" to 25, "vingt-sixième" to 26,
-            "vingt-septième" to 27, "vingt-huitième" to 28, "vingt-neuvième" to 29,
-            "trentième" to 30, "trente-et-unième" to 31
-        )
-        val frCardinal = mapOf(
-            "un" to 1, "deux" to 2, "trois" to 3, "quatre" to 4, "cinq" to 5,
-            "six" to 6, "sept" to 7, "huit" to 8, "neuf" to 9, "dix" to 10,
-            "onze" to 11, "douze" to 12, "treize" to 13, "quatorze" to 14,
-            "quinze" to 15, "seize" to 16, "dix-sept" to 17, "dix-huit" to 18,
-            "dix-neuf" to 19, "vingt" to 20, "vingt-et-un" to 21,
-            "vingt-deux" to 22, "vingt-trois" to 23, "vingt-quatre" to 24,
-            "vingt-cinq" to 25, "vingt-six" to 26, "vingt-sept" to 27,
-            "vingt-huit" to 28, "vingt-neuf" to 29, "trente" to 30, "trente-et-un" to 31
-        )
-        val deOrdinal = mapOf(
-            "erste" to 1, "zweite" to 2, "dritte" to 3, "vierte" to 4,
-            "fünfte" to 5, "sechste" to 6, "siebte" to 7, "achte" to 8,
-            "neunte" to 9, "zehnte" to 10, "elfte" to 11, "zwölfte" to 12,
-            "dreizehnte" to 13, "vierzehnte" to 14, "fünfzehnte" to 15,
-            "sechzehnte" to 16, "siebzehnte" to 17, "achtzehnte" to 18,
-            "neunzehnte" to 19, "zwanzigste" to 20, "einundzwanzigste" to 21,
-            "zweiundzwanzigste" to 22, "dreiundzwanzigste" to 23,
-            "vierundzwanzigste" to 24, "fünfundzwanzigste" to 25,
-            "sechsundzwanzigste" to 26, "siebenundzwanzigste" to 27,
-            "achtundzwanzigste" to 28, "neunundzwanzigste" to 29,
-            "dreißigste" to 30, "einunddreißigste" to 31
-        )
-        val deCardinal = mapOf(
-            "eins" to 1, "zwei" to 2, "drei" to 3, "vier" to 4, "fünf" to 5,
-            "sechs" to 6, "sieben" to 7, "acht" to 8, "neun" to 9, "zehn" to 10,
-            "elf" to 11, "zwölf" to 12, "dreizehn" to 13, "vierzehn" to 14,
-            "fünfzehn" to 15, "sechzehn" to 16, "siebzehn" to 17, "achtzehn" to 18,
-            "neunzehn" to 19, "zwanzig" to 20, "einundzwanzig" to 21,
-            "zweiundzwanzig" to 22, "dreiundzwanzig" to 23, "vierundzwanzig" to 24,
-            "fünfundzwanzig" to 25, "sechsundzwanzig" to 26,
-            "siebenundzwanzig" to 27, "achtundzwanzig" to 28,
-            "neunundzwanzig" to 29, "dreißig" to 30, "einunddreißig" to 31
-        )
-        val itOrdinal = mapOf(
-            "primo" to 1, "secondo" to 2, "terzo" to 3, "quarto" to 4,
-            "quinto" to 5, "sesto" to 6, "settimo" to 7, "ottavo" to 8,
-            "nono" to 9, "decimo" to 10, "undicesimo" to 11, "dodicesimo" to 12,
-            "tredicesimo" to 13, "quattordicesimo" to 14, "quindicesimo" to 15,
-            "sedicesimo" to 16, "diciassettesimo" to 17, "diciottesimo" to 18,
-            "diciannovesimo" to 19, "ventesimo" to 20, "ventunesimo" to 21,
-            "ventiduesimo" to 22, "ventitreesimo" to 23, "ventiquattresimo" to 24,
-            "venticinquesimo" to 25, "ventiseiesimo" to 26, "ventisettesimo" to 27,
-            "ventottesimo" to 28, "ventinovesimo" to 29, "trentesimo" to 30,
-            "trentunesimo" to 31
-        )
-        val itCardinal = mapOf(
-            "uno" to 1, "due" to 2, "tre" to 3, "quattro" to 4, "cinque" to 5,
-            "sei" to 6, "sette" to 7, "otto" to 8, "nove" to 9, "dieci" to 10,
-            "undici" to 11, "dodici" to 12, "tredici" to 13, "quattordici" to 14,
-            "quindici" to 15, "sedici" to 16, "diciassette" to 17, "diciotto" to 18,
-            "diciannove" to 19, "venti" to 20, "ventuno" to 21, "ventidue" to 22,
-            "ventitre" to 23, "ventiquattro" to 24, "venticinque" to 25,
-            "ventisei" to 26, "ventisette" to 27, "ventotto" to 28,
-            "ventinove" to 29, "trenta" to 30, "trentuno" to 31
-        )
-        val ptOrdinal = mapOf(
-            "primeiro" to 1, "segundo" to 2, "terceiro" to 3, "quarto" to 4,
-            "quinto" to 5, "sexto" to 6, "sétimo" to 7, "oitavo" to 8,
-            "nono" to 9, "décimo" to 10, "vigésimo" to 20,
-            "vigésimo primeiro" to 21, "vigésimo segundo" to 22,
-            "vigésimo terceiro" to 23, "vigésimo quarto" to 24,
-            "vigésimo quinto" to 25, "vigésimo sexto" to 26,
-            "vigésimo sétimo" to 27, "vigésimo oitavo" to 28,
-            "vigésimo nono" to 29, "trigésimo" to 30, "trigésimo primeiro" to 31
-        )
-        val ptCardinal = mapOf(
-            "um" to 1, "dois" to 2, "três" to 3, "quatro" to 4, "cinco" to 5,
-            "seis" to 6, "sete" to 7, "oito" to 8, "nove" to 9, "dez" to 10,
-            "onze" to 11, "doze" to 12, "treze" to 13, "catorze" to 14,
-            "quinze" to 15, "dezesseis" to 16, "dezessete" to 17,
-            "dezoito" to 18, "dezenove" to 19, "vinte" to 20,
-            "trinta" to 30
-        )
-
-        return when (idioma) {
-            "en" -> enOrdinal[palabra] ?: enCardinal[palabra]
-            "es" -> esOrdinal[palabra] ?: esCardinal[palabra]
-            "fr" -> frOrdinal[palabra] ?: frCardinal[palabra]
-            "de" -> deOrdinal[palabra] ?: deCardinal[palabra]
-            "it" -> itOrdinal[palabra] ?: itCardinal[palabra]
-            "pt" -> ptOrdinal[palabra] ?: ptCardinal[palabra]
-            else -> null
+    private fun mensajeEventoCreado(evento: Evento): String {
+        val d = evento.dia; val m = evento.mes; val a = evento.anio
+        return when (idioma()) {
+            "en" -> "Event '${evento.asunto}' created for $d/$m/$a."
+            "fr" -> "Événement '${evento.asunto}' créé pour le $d/$m/$a."
+            "de" -> "Ereignis '${evento.asunto}' für den $d.$m.$a erstellt."
+            "it" -> "Evento '${evento.asunto}' creato per il $d/$m/$a."
+            "pt" -> "Evento '${evento.asunto}' criado para $d/$m/$a."
+            else -> "Evento '${evento.asunto}' creado para el $d/$m/$a."
         }
     }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // COMANDOS POR IDIOMA
-    // ═════════════════════════════════════════════════════════════════════════
-
-    private fun comandosCrearPorIdioma(idioma: String) = when (idioma) {
-        "en" -> listOf("create event", "add event", "new event", "schedule event")
-        "fr" -> listOf("créer événement", "ajouter événement", "nouvel événement", "planifier événement")
-        "de" -> listOf("ereignis erstellen", "ereignis hinzufügen", "neues ereignis", "termin erstellen")
-        "it" -> listOf("crea evento", "aggiungi evento", "nuovo evento", "pianifica evento")
-        "pt" -> listOf("criar evento", "adicionar evento", "novo evento", "agendar evento")
-        else -> listOf("crea evento", "añade evento", "crear evento", "nuevo evento", "agregar evento")
+    private fun mensajeEventoEliminado(evento: Evento): String {
+        val d = evento.dia; val m = evento.mes; val a = evento.anio
+        return when (idioma()) {
+            "en" -> "Event '${evento.asunto}' on $d/$m/$a deleted."
+            "fr" -> "Événement '${evento.asunto}' du $d/$m/$a supprimé."
+            "de" -> "Ereignis '${evento.asunto}' vom $d.$m.$a gelöscht."
+            "it" -> "Evento '${evento.asunto}' del $d/$m/$a eliminato."
+            "pt" -> "Evento '${evento.asunto}' de $d/$m/$a removido."
+            else -> "Evento '${evento.asunto}' del $d/$m/$a eliminado."
+        }
     }
 
-    private fun prefijosEliminarPorIdioma(idioma: String) = when (idioma) {
-        "en" -> listOf("delete", "remove", "erase", "cancel")
-        "fr" -> listOf("supprime", "enlève", "efface", "annule")
-        "de" -> listOf("lösche", "entferne", "streiche", "absage")
-        "it" -> listOf("elimina", "rimuovi", "cancella", "annulla")
-        "pt" -> listOf("elimina", "remove", "apaga", "cancela")
-        else -> listOf("elimina", "quita", "borra", "cancela")
+    private fun mensajeTodosEliminados(fecha: LocalDate, cantidad: Int): String {
+        val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
+        return when (idioma()) {
+            "en" -> "$cantidad events on $d/$m/$a have been deleted."
+            "fr" -> "$cantidad événements du $d/$m/$a ont été supprimés."
+            "de" -> "$cantidad Ereignisse vom $d.$m.$a wurden gelöscht."
+            "it" -> "$cantidad eventi del $d/$m/$a sono stati eliminati."
+            "pt" -> "$cantidad eventos de $d/$m/$a foram removidos."
+            else -> "Se han eliminado $cantidad eventos del $d/$m/$a."
+        }
     }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // MENSAJES TTS POR IDIOMA
-    // ═════════════════════════════════════════════════════════════════════════
-
-    private fun mensajePedirAsunto(idioma: String) = when (idioma) {
-        "en" -> "What do you want to add as the subject?"
-        "fr" -> "Que voulez-vous ajouter comme sujet?"
-        "de" -> "Was möchten Sie als Betreff hinzufügen?"
-        "it" -> "Cosa vuoi aggiungere come oggetto?"
-        "pt" -> "O que você quer adicionar como assunto?"
-        else -> "¿Qué quieres añadir como asunto?"
+    private fun mensajeSinEventos(fecha: LocalDate): String {
+        val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
+        return when (idioma()) {
+            "en" -> "No events found for $d/$m/$a."
+            "fr" -> "Aucun événement trouvé pour le $d/$m/$a."
+            "de" -> "Keine Ereignisse für den $d.$m.$a gefunden."
+            "it" -> "Nessun evento trovato per il $d/$m/$a."
+            "pt" -> "Nenhum evento encontrado para $d/$m/$a."
+            else -> "No se encontraron eventos para el $d/$m/$a."
+        }
     }
 
-    private fun mensajeFechaNoReconocida(idioma: String) = when (idioma) {
-        "en" -> "I couldn't recognize the date. Please say the day and month clearly."
-        "fr" -> "Je n'ai pas reconnu la date. Veuillez dire le jour et le mois clairement."
-        "de" -> "Ich konnte das Datum nicht erkennen. Bitte sagen Sie Tag und Monat deutlich."
-        "it" -> "Non ho riconosciuto la data. Per favore dì il giorno e il mese chiaramente."
-        "pt" -> "Não reconheci a data. Por favor diga o dia e o mês claramente."
-        else -> "No reconocí la fecha. Por favor di el día y el mes claramente."
+    private fun mensajeNoEntendiDia(): String = when (idioma()) {
+        "en" -> "I didn't understand the day. Please say a number between 1 and 31."
+        "fr" -> "Je n'ai pas compris le jour. Dites un numéro entre 1 et 31."
+        "de" -> "Ich habe den Tag nicht verstanden. Bitte sagen Sie eine Zahl zwischen 1 und 31."
+        "it" -> "Non ho capito il giorno. Di' un numero tra 1 e 31."
+        "pt" -> "Não entendi o dia. Diga um número entre 1 e 31."
+        else -> "No entendí el día. Di un número entre 1 y 31."
     }
 
-    private fun mensajeNoEncontrado(idioma: String) = when (idioma) {
-        "en" -> "I couldn't find any event called"
-        "fr" -> "Je n'ai trouvé aucun événement appelé"
-        "de" -> "Ich konnte kein Ereignis namens finden"
-        "it" -> "Non ho trovato nessun evento chiamato"
-        "pt" -> "Não encontrei nenhum evento chamado"
-        else -> "No encontré ningún evento llamado"
+    /** Extrae el primer número entero encontrado en el texto.
+     *  Acepta tanto cifras ("8") como palabras numéricas en 6 idiomas
+     *  ("eight", "huit", "acht", "otto", "oito", "ocho"). */
+    private fun extraerNumero(texto: String): Int? {
+        // ── 1. Normalizar acentos ──────────────────────────────────────────────
+        val norm = texto.lowercase()
+            .replace("á","a").replace("é","e").replace("í","i")
+            .replace("ó","o").replace("ú","u").replace("ü","u")
+            .replace("è","e").replace("ê","e").replace("â","a")
+            .replace("ô","o").replace("î","i").replace("ñ","n")
+
+        // ── 2. Mapa de palabras → número (ES / EN / FR / DE / IT / PT) ─────────
+        val palabrasNumericas = mapOf(
+            // 0
+            "cero" to 0, "zero" to 0, "zéro" to 0, "null" to 0,
+            // 1
+            "uno" to 1, "un" to 1, "uma" to 1, "one" to 1,
+            "un" to 1, "une" to 1, "ein" to 1, "eins" to 1,
+            "uno" to 1, "um" to 1,
+            // 2
+            "dos" to 2, "two" to 2, "deux" to 2, "zwei" to 2,
+            "due" to 2, "dois" to 2,
+            // 3
+            "tres" to 3, "three" to 3, "trois" to 3, "drei" to 3,
+            "tre" to 3,
+            // 4
+            "cuatro" to 4, "four" to 4, "quatre" to 4, "vier" to 4,
+            "quattro" to 4, "quatro" to 4,
+            // 5
+            "cinco" to 5, "five" to 5, "cinq" to 5, "funf" to 5,
+            "cinque" to 5,
+            // 6
+            "seis" to 6, "six" to 6, "sechs" to 6, "sei" to 6,
+            // 7
+            "siete" to 7, "seven" to 7, "sept" to 7, "sieben" to 7,
+            "sette" to 7, "sete" to 7,
+            // 8
+            "ocho" to 8, "eight" to 8, "huit" to 8, "acht" to 8,
+            "otto" to 8, "oito" to 8,
+            // 9
+            "nueve" to 9, "nine" to 9, "neuf" to 9, "neun" to 9,
+            "nove" to 9,
+            // 10
+            "diez" to 10, "ten" to 10, "dix" to 10, "zehn" to 10,
+            "dieci" to 10, "dez" to 10,
+            // 11
+            "once" to 11, "eleven" to 11, "onze" to 11, "elf" to 11,
+            "undici" to 11, "onze" to 11,
+            // 12
+            "doce" to 12, "twelve" to 12, "douze" to 12, "zwolf" to 12,
+            "dodici" to 12, "doze" to 12,
+            // 13
+            "trece" to 13, "thirteen" to 13, "treize" to 13,
+            "dreizehn" to 13, "tredici" to 13, "treze" to 13,
+            // 14
+            "catorce" to 14, "fourteen" to 14, "quatorze" to 14,
+            "vierzehn" to 14, "quattordici" to 14, "quatorze" to 14,
+            // 15
+            "quince" to 15, "fifteen" to 15, "quinze" to 15,
+            "funfzehn" to 15, "quindici" to 15,
+            // 16
+            "dieciseis" to 16, "sixteen" to 16, "seize" to 16,
+            "sechzehn" to 16, "sedici" to 16, "dezasseis" to 16,
+            // 17
+            "diecisiete" to 17, "seventeen" to 17, "dix-sept" to 17,
+            "siebzehn" to 17, "diciassette" to 17, "dezassete" to 17,
+            // 18
+            "dieciocho" to 18, "eighteen" to 18, "dix-huit" to 18,
+            "achtzehn" to 18, "diciotto" to 18, "dezoito" to 18,
+            // 19
+            "diecinueve" to 19, "nineteen" to 19, "dix-neuf" to 19,
+            "neunzehn" to 19, "diciannove" to 19, "dezanove" to 19,
+            // 20
+            "veinte" to 20, "twenty" to 20, "vingt" to 20,
+            "zwanzig" to 20, "venti" to 20, "vinte" to 20,
+            // 21-31 (días de calendario más usados por voz)
+            "veintiuno" to 21, "twenty one" to 21, "twenty-one" to 21,
+            "vingt et un" to 21, "einundzwanzig" to 21,
+            "ventuno" to 21, "vinte e um" to 21,
+            "veintidos" to 22, "twenty two" to 22, "twenty-two" to 22,
+            "vingt-deux" to 22, "zweiundzwanzig" to 22,
+            "ventidue" to 22, "vinte e dois" to 22,
+            "veintitres" to 23, "twenty three" to 23, "twenty-three" to 23,
+            "vingt-trois" to 23, "dreiundzwanzig" to 23,
+            "ventitré" to 23, "vinte e tres" to 23,
+            "veinticuatro" to 24, "twenty four" to 24, "twenty-four" to 24,
+            "vingt-quatre" to 24, "vierundzwanzig" to 24,
+            "ventiquattro" to 24, "vinte e quatro" to 24,
+            "veinticinco" to 25, "twenty five" to 25, "twenty-five" to 25,
+            "vingt-cinq" to 25, "funfundzwanzig" to 25,
+            "venticinque" to 25, "vinte e cinco" to 25,
+            "veintiseis" to 26, "twenty six" to 26, "twenty-six" to 26,
+            "vingt-six" to 26, "sechsundzwanzig" to 26,
+            "ventisei" to 26, "vinte e seis" to 26,
+            "veintisiete" to 27, "twenty seven" to 27, "twenty-seven" to 27,
+            "vingt-sept" to 27, "siebenundzwanzig" to 27,
+            "ventisette" to 27, "vinte e sete" to 27,
+            "veintiocho" to 28, "twenty eight" to 28, "twenty-eight" to 28,
+            "vingt-huit" to 28, "achtundzwanzig" to 28,
+            "ventotto" to 28, "vinte e oito" to 28,
+            "veintinueve" to 29, "twenty nine" to 29, "twenty-nine" to 29,
+            "vingt-neuf" to 29, "neunundzwanzig" to 29,
+            "ventinove" to 29, "vinte e nove" to 29,
+            "treinta" to 30, "thirty" to 30, "trente" to 30,
+            "dreißig" to 30, "dreizig" to 30, "trenta" to 30, "trinta" to 30,
+            "treinta y uno" to 31, "thirty one" to 31, "thirty-one" to 31,
+            "trente et un" to 31, "einunddreißig" to 31,
+            "trentuno" to 31, "trinta e um" to 31
+        )
+
+        // ── 3. Buscar frases compuestas primero (más específicas) ───────────────
+        //       Ordenar por longitud descendente para que "twenty-one" gane a "one"
+        val candidatoFrase = palabrasNumericas.entries
+            .sortedByDescending { it.key.length }
+            .firstOrNull { norm.contains(it.key) }
+        if (candidatoFrase != null) return candidatoFrase.value
+
+        // ── 4. Buscar palabra suelta con límites de palabra ─────────────────────
+        val palabras = norm.split(Regex("""\s+"""))
+        for (p in palabras) {
+            palabrasNumericas[p]?.let { return it }
+        }
+
+        // ── 5. Fallback: primer dígito en el texto original ─────────────────────
+        return Regex("""\d+""").find(texto)?.value?.toIntOrNull()
+    }
+    private fun mensajeNoEntendiMes(): String = when (idioma()) {
+        "en" -> "I didn't understand the month. Please say the month name or a number."
+        "fr" -> "Je n'ai pas compris le mois. Dites le nom du mois ou un numéro."
+        "de" -> "Ich habe den Monat nicht verstanden. Bitte sagen Sie den Monatsnamen oder eine Zahl."
+        "it" -> "Non ho capito il mese. Di' il nome del mese o un numero."
+        "pt" -> "Não entendi o mês. Diga o nome do mês ou um número."
+        else -> "No entendí el mes. Di el nombre del mes o un número."
     }
 
-    private fun mensajeErrorGuardar(idioma: String) = when (idioma) {
-        "en" -> "There was an error saving the event. Please try again."
-        "fr" -> "Une erreur s'est produite lors de l'enregistrement. Veuillez réessayer."
-        "de" -> "Beim Speichern ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-        "it" -> "Si è verificato un errore durante il salvataggio. Riprova."
-        "pt" -> "Ocorreu um erro ao salvar o evento. Por favor tente novamente."
-        else -> "Hubo un error al guardar el evento. Por favor inténtalo de nuevo."
+    private fun mensajeNoEntendiAnio(): String = when (idioma()) {
+        "en" -> "I didn't understand the year. Say 'this year' or a four-digit year like 2026."
+        "fr" -> "Je n'ai pas compris l'année. Dites 'cette année' ou une année comme 2026."
+        "de" -> "Ich habe das Jahr nicht verstanden. Sagen Sie 'dieses Jahr' oder z.B. 2026."
+        "it" -> "Non ho capito l'anno. Di' 'quest'anno' o un anno come 2026."
+        "pt" -> "Não entendi o ano. Diga 'este ano' ou um ano como 2026."
+        else -> "No entendí el año. Di 'este año' o un año como 2026."
     }
 
-    private fun mensajeErrorEliminar(idioma: String) = when (idioma) {
-        "en" -> "There was an error deleting the event. Please try again."
-        "fr" -> "Une erreur s'est produite lors de la suppression. Veuillez réessayer."
-        "de" -> "Beim Löschen ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-        "it" -> "Si è verificato un errore durante l'eliminazione. Riprova."
-        "pt" -> "Ocorreu um erro ao eliminar o evento. Por favor tente novamente."
-        else -> "Hubo un error al eliminar el evento. Por favor inténtalo de nuevo."
+    private fun mensajeNoEntendiAsunto(): String = when (idioma()) {
+        "en" -> "I didn't catch the subject. Please say it again."
+        "fr" -> "Je n'ai pas saisi le sujet. Veuillez répéter."
+        "de" -> "Ich habe den Betreff nicht verstanden. Bitte wiederholen."
+        "it" -> "Non ho capito l'oggetto. Ripeti per favore."
+        "pt" -> "Não entendi o assunto. Por favor repita."
+        else -> "No entendí el asunto. Por favor repite."
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun mensajeEventoGuardado(idioma: String, asunto: String, dia: LocalDate) = when (idioma) {
-        "en" -> "Event $asunto saved for ${dia.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${dia.dayOfMonth}"
-        "fr" -> "Événement $asunto enregistré pour le ${dia.dayOfMonth} ${nombreMesFr(dia.monthValue)}"
-        "de" -> "Ereignis $asunto gespeichert für den ${dia.dayOfMonth}. ${nombreMesDe(dia.monthValue)}"
-        "it" -> "Evento $asunto salvato per il ${dia.dayOfMonth} ${nombreMesIt(dia.monthValue)}"
-        "pt" -> "Evento $asunto salvo para ${dia.dayOfMonth} de ${nombreMesPt(dia.monthValue)}"
-        else -> "Evento $asunto guardado para el ${dia.dayOfMonth} de ${nombreMesEs(dia.monthValue)}"
+    private fun mensajeFechaInvalida(): String = when (idioma()) {
+        "en" -> "That date is not valid. Please try again."
+        "fr" -> "Cette date n'est pas valide. Veuillez réessayer."
+        "de" -> "Dieses Datum ist ungültig. Bitte versuchen Sie es erneut."
+        "it" -> "Quella data non è valida. Riprova per favore."
+        "pt" -> "Essa data não é válida. Por favor tente novamente."
+        else -> "Esa fecha no es válida. Por favor inténtalo de nuevo."
     }
 
-    private fun mensajeEventoEliminado(idioma: String, asunto: String) = when (idioma) {
-        "en" -> "Event $asunto deleted"
-        "fr" -> "Événement $asunto supprimé"
-        "de" -> "Ereignis $asunto gelöscht"
-        "it" -> "Evento $asunto eliminato"
-        "pt" -> "Evento $asunto eliminado"
-        else -> "Evento $asunto eliminado"
+    private fun mensajeCancelado(): String = when (idioma()) {
+        "en" -> "Cancelled."
+        "fr" -> "Annulé."
+        "de" -> "Abgebrochen."
+        "it" -> "Annullato."
+        "pt" -> "Cancelado."
+        else -> "Cancelado."
     }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // NOMBRES DE MESES PARA TTS
-    // ═════════════════════════════════════════════════════════════════════════
+    private fun mensajeAsuntoDuplicado(asunto: String): String = when (idioma()) {
+        "en" -> "The event '$asunto' already exists on that date. Please say a different subject."
+        "fr" -> "L'événement '$asunto' existe déjà à cette date. Veuillez dire un autre sujet."
+        "de" -> "Das Ereignis '$asunto' existiert bereits an diesem Datum. Bitte sagen Sie einen anderen Betreff."
+        "it" -> "L'evento '$asunto' esiste già in quella data. Per favore di' un oggetto diverso."
+        "pt" -> "O evento '$asunto' já existe nessa data. Por favor diga um assunto diferente."
+        else -> "Ya existe un evento '$asunto' en esa fecha. Di otro asunto para el evento."
+    }
 
-    private fun nombreMesEs(mes: Int) = listOf(
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-    )[mes - 1]
+    // ──────────────────────────────────────────────────────────────────────────
+    // Utilidades internas
+    // ──────────────────────────────────────────────────────────────────────────
 
-    private fun nombreMesFr(mes: Int) = listOf(
-        "janvier", "février", "mars", "avril", "mai", "juin",
-        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
-    )[mes - 1]
+    private fun hablar(mensaje: String) {
+        onHablar?.invoke(mensaje)
+    }
 
-    private fun nombreMesDe(mes: Int) = listOf(
-        "Januar", "Februar", "März", "April", "Mai", "Juni",
-        "Juli", "August", "September", "Oktober", "November", "Dezember"
-    )[mes - 1]
-
-    private fun nombreMesIt(mes: Int) = listOf(
-        "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
-        "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"
-    )[mes - 1]
-
-    private fun nombreMesPt(mes: Int) = listOf(
-        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-    )[mes - 1]
+    private fun resetFlujo() {
+        flujoActual    = FlujoVoz.NINGUNO
+        diaPendiente   = null
+        mesPendiente   = null
+        anioPendiente  = null
+        creandoEvento  = false
+    }
 }

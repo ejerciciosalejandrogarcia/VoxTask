@@ -23,7 +23,6 @@ class ContadorService : Service() {
         const val CHANNEL_ID              = "contador_channel"
         const val CHANNEL_ID_FINALIZADO   = "contador_channel_finalizado"
         const val NOTIF_ID                = 1
-        const val NOTIF_ID_FINALIZADO     = 2   // ID distinto para forzar sonido + vibración
 
         const val EXTRA_SEGUNDOS  = "segundos"
 
@@ -88,9 +87,7 @@ class ContadorService : Service() {
                 estaActivo        = false
                 estaPausado       = false
                 segundosRestantes = 0
-                // Cancelar ambas notificaciones
                 getSystemService(NotificationManager::class.java).cancel(NOTIF_ID)
-                getSystemService(NotificationManager::class.java).cancel(NOTIF_ID_FINALIZADO)
                 stopSelf()
             }
         }
@@ -110,29 +107,23 @@ class ContadorService : Service() {
 
             while (restantes >= 0) {
                 segundosRestantes = restantes
-                val finalizado    = restantes == 0
+                val finalizado = restantes == 0
 
                 if (finalizado) {
-                    // Cancela la notificación del contador en curso
-                    getSystemService(NotificationManager::class.java).cancel(NOTIF_ID)
-                    // Publica una notificación NUEVA con ID distinto → Android dispara sonido + vibración
-                    getSystemService(NotificationManager::class.java)
-                        .notify(
-                            NOTIF_ID_FINALIZADO,
-                            crearNotificacion(
-                                titulo     = getString(R.string.txt_titulo_contador_terminado),
-                                contenido  = getString(R.string.txt_titulo_contador_finalizado),
-                                pausado    = false,
-                                finalizado = true
-                            ).build()
-                        )
+                    // ── Actualizamos la MISMA notificación en lugar de crear una nueva
+                    actualizarNotificacion(
+                        titulo     = getString(R.string.txt_titulo_contador_terminado),
+                        contenido  = getString(R.string.txt_titulo_contador_finalizado),
+                        pausado    = false,
+                        finalizado = true
+                    )
                     break
                 }
 
                 actualizarNotificacion(
-                    titulo    = getString(R.string.txt_titulo_contador_iniciado),
-                    contenido = formatearTiempo(restantes),
-                    pausado   = false,
+                    titulo     = getString(R.string.txt_titulo_contador_iniciado),
+                    contenido  = formatearTiempo(restantes),
+                    pausado    = false,
                     finalizado = false
                 )
 
@@ -142,11 +133,8 @@ class ContadorService : Service() {
 
             estaActivo        = false
             segundosRestantes = 0
-            // No llamamos stopSelf() aquí: dejamos que el usuario pulse X
-            // para que la notificación de "terminado" siga visible
         }
     }
-
     // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
@@ -235,10 +223,11 @@ class ContadorService : Service() {
             .setContentTitle(titulo)
             .setContentText(contenido)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setOngoing(!finalizado)   // al terminar el usuario puede descartarla
-            .setSilent(!finalizado)    // el canal ya gestiona el sonido al finalizar
+            .setOngoing(!finalizado)
+            .setSilent(!finalizado)
             .setContentIntent(crearPendingIntent())
 
+        // Sin botones cuando ha terminado
         if (!finalizado) {
             if (pausado) {
                 builder.addAction(
@@ -262,7 +251,6 @@ class ContadorService : Service() {
 
         return builder
     }
-
     private fun actualizarNotificacion(
         titulo: String,
         contenido: String,

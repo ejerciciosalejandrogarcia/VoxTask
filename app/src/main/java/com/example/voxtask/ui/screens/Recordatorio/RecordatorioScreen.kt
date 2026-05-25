@@ -79,27 +79,28 @@ fun RecordatorioScreen(
     val idiomaActual = TextoAVoz.localeActual.language
 
     LaunchedEffect(Unit) {
-        val mensaje = when (idiomaActual) {
-            "en" -> "Say 'create event for the day you want'"
-            "fr" -> "Dites 'créer événement pour le jour que vous voulez'"
-            "de" -> "Sagen Sie 'Ereignis erstellen für den Tag, den Sie möchten'"
-            "it" -> "Di 'crea evento per il giorno che vuoi'"
-            "pt" -> "Diga 'criar evento para o dia que quiser'"
-            else -> "Di 'crea evento para el día que quieras'"
-        }
-        TextoAVoz.hablar(contexto, mensaje)
-
-        // ✅ Nombre del parámetro distinto ("texto") para evitar shadowing
+        // 1. Conectar PRIMERO el callback
         viewModel.onHablar = { texto ->
             CoroutineScope(Dispatchers.Main).launch {
                 TextoAVoz.hablar(contexto, texto)
             }
         }
-    }
 
+        // 2. Mensaje de bienvenida DESPUÉS
+        val mensaje = when (idiomaActual) {
+            "en" -> "Say 'create event' or 'delete event'"
+            "fr" -> "Dites 'créer événement' ou 'supprimer événement'"
+            "de" -> "Sagen Sie 'Event erstellen' oder 'Event löschen'"
+            "it" -> "Di 'crea evento' o 'elimina evento'"
+            "pt" -> "Diga 'criar evento' ou 'remover evento'"
+            else -> "Di 'crea evento' o 'eliminar evento'"
+        }
+        TextoAVoz.hablar(contexto, mensaje)
+    }
     PlantillaBase(
         viewModel = viewModelPlantilla,
         navController = navController,
+        textoInformacion = stringResource(R.string.instrucciones_evento),
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
     ) { paddingValues ->
         Box(

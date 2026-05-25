@@ -32,6 +32,8 @@
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hello, how are you %1$s? What would you like me to do for you?</string>
+    <string name="menu_clima_titulo">Weather</string>
+    <string name="menu_clima_subtexto">View the weather</string>
     <string name="txt_inicio_instrucciones">Choose one of the following options and, when you are ready, press and hold the speak button</string>
     <string name="txt_inicio_sub_correo">View my email</string>
     <string name="txt_inicio_sub_recordatorios_ver">View my reminders</string>
@@ -59,6 +61,7 @@
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Previous month</string>
+    <string name="instrucciones_evento">To create an event say \'create event\', to delete an event say \'delete event\'</string>
     <string name="icono_mes_siguiente">Next month</string>
     <string-array name="dias_semana">
         <item>Mon</item>
@@ -244,4 +247,22 @@
     <string name="btn_reenviar_codigo">Resend code</string>
     <string name="error_enviar_codigo">Error sending code: %1$s</string>
     <string name="error_codigo_incorrecto">Incorrect code, please try again</string>
+
+
+    <string name="clima_info_plantilla">Shows the weather of your current location</string>
+    <string name="clima_sin_ubicacion">Enable location to view the weather</string>
+    <string name="clima_btn_permitir">Allow location</string>
+    <string name="clima_cargando">Fetching weather…</string>
+    <string name="clima_error">Error: %1$s</string>
+    <string name="clima_btn_reintentar">Could not get the weather. Please try again.</string>
+    <string name="clima_etiqueta_sensacion">Feels like</string>
+    <string name="clima_etiqueta_viento">Wind</string>
+    <string name="clima_etiqueta_humedad">Humidity</string>
+    <string name="desc_clima_sin_ubicacion">Location disabled icon</string>
+    <string name="desc_clima_error">Warning icon for connection error</string>
+    <string name="desc_clima_icono_principal">Current weather condition icon</string>
+    <string name="desc_clima_marcador_posicion">Current location icon</string>
+    <string name="desc_clima_icono_sensacion">Thermal sensation icon</string>
+    <string name="desc_clima_icono_viento">Wind speed icon</string>
+    <string name="desc_clima_icono_humedad">Humidity percentage icon</string>
 </resources>

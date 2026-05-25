@@ -34,11 +34,11 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
     var corriendo       by mutableStateOf(false)
         private set
 
-    // true cuando el contador llegó a 0; se resetea solo cuando el usuario pulsa X
     var terminado       by mutableStateOf(false)
         private set
 
     private var countdownJob: Job? = null
+    private var mediaPlayer: android.media.MediaPlayer? = null
 
     // ─────────────────────────────────────────────────────────────────────────
     // Restaurar estado si el servicio estaba activo al volver a la pantalla
@@ -118,18 +118,30 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Sonido + vibración — ejecutados siempre en el hilo principal
+    // Sonido + vibración
     // ─────────────────────────────────────────────────────────────────────────
     private fun reproducirSonidoFin() {
-        // Se lanza en Main para que RingtoneManager y Vibrator funcionen
         viewModelScope.launch(Dispatchers.Main) {
             val contexto = getApplication<Application>()
 
-            // 1. Sonido con RingtoneManager (no necesita Looper manual)
+            // 1. Sonido con MediaPlayer
             try {
-                val uri      = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val ringtone = RingtoneManager.getRingtone(contexto, uri)
-                ringtone?.play()
+                val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val mp = android.media.MediaPlayer().apply {
+                    setAudioAttributes(
+                        android.media.AudioAttributes.Builder()
+                            .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                    )
+                    setDataSource(contexto, uri)
+                    isLooping = false
+                    prepare()
+                }
+                mp.setOnCompletionListener { it.release(); mediaPlayer = null }
+                mp.start()
+                mediaPlayer = mp
                 android.util.Log.d("CONTADOR", "Sonido reproducido correctamente")
             } catch (e: Exception) {
                 android.util.Log.e("CONTADOR", "Error al reproducir sonido: ${e.message}")
@@ -171,7 +183,6 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         countdownJob = viewModelScope.launch {
             var restantes = totalSegundos
             while (restantes >= 0) {
-                // Actualizar UI en Main
                 withContext(Dispatchers.Main) {
                     val h = restantes / 3600
                     val m = (restantes % 3600) / 60
@@ -179,7 +190,6 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
                     tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
                 }
                 if (restantes == 0) {
-                    // Marcar terminado y reproducir en Main antes de salir del loop
                     withContext(Dispatchers.Main) {
                         corriendo = false
                         terminado = true
@@ -252,6 +262,12 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         terminado       = false
         countdownJob?.cancel()
         tiempoFormato   = "00:00:00"
+
+        // Parar sonido inmediatamente
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
+
         val intent = Intent(contexto, ContadorService::class.java).apply {
             action = ContadorService.ACCION_CANCELAR
         }
@@ -261,12 +277,12 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
     override fun onCleared() {
         super.onCleared()
         countdownJob?.cancel()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Sincronización con el servicio
-    // Si terminado == true ignoramos el estado del servicio para no ocultar
-    // el contador antes de que el usuario pulse X
     // ─────────────────────────────────────────────────────────────────────────
     fun comprobarEstadoService() {
         viewModelScope.launch {

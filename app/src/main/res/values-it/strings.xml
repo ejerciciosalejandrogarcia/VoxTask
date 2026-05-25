@@ -32,6 +32,8 @@
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Ciao %1$s, come stai? Cosa posso fare per te?</string>
+    <string name="menu_clima_titulo">Meteo</string>
+    <string name="menu_clima_subtexto">Visualizza il meteo</string>
     <string name="txt_inicio_instrucciones">Scegli una delle seguenti opzioni e, quando sei pronto, tieni premuto il pulsante per parlare</string>
     <string name="txt_inicio_sub_correo">Vedi le mie email</string>
     <string name="txt_inicio_sub_recordatorios_ver">Vedi i miei promemoria</string>
@@ -59,6 +61,7 @@
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mese precedente</string>
+    <string name="instrucciones_evento">Per creare un evento di\' \'crea evento\', per eliminare un evento di\' \'elimina evento\'</string>
     <string name="icono_mes_siguiente">Mese successivo</string>
     <string-array name="dias_semana">
         <item>Lun</item>
@@ -244,4 +247,24 @@
     <string name="btn_reenviar_codigo">Invia di nuovo il codice</string>
     <string name="error_enviar_codigo">Errore durante l\'invio del codice: %1$s</string>
     <string name="error_codigo_incorrecto">Codice errato, riprova</string>
+
+
+
+
+    <string name="clima_info_plantilla">Mostra il meteo della tua posizione attuale</string>
+    <string name="clima_sin_ubicacion">Attiva la posizione para vedere il meteo</string>
+    <string name="clima_btn_permitir">Consenti posizione</string>
+    <string name="clima_cargando">Recupero meteo…</string>
+    <string name="clima_error">Errore: %1$s</string>
+    <string name="clima_btn_reintentar">Impossibile ottenere il meteo. Riprova di nuovo.</string>
+    <string name="clima_etiqueta_sensacion">Percepita</string>
+    <string name="clima_etiqueta_viento">Vento</string>
+    <string name="clima_etiqueta_humedad">Umidità</string>
+    <string name="desc_clima_sin_ubicacion">Icona posizione disattivata</string>
+    <string name="desc_clima_error">Icona di avviso per errore di connessione</string>
+    <string name="desc_clima_icono_principal">Icona delle condizioni meteo attuali</string>
+    <string name="desc_clima_marcador_posicion">Icona della posizione attuale</string>
+    <string name="desc_clima_icono_sensacion">Icona della temperatura percepita</string>
+    <string name="desc_clima_icono_viento">Icona della velocità del vento</string>
+    <string name="desc_clima_icono_humedad">Icona della percentuale di umidità</string>
 </resources>

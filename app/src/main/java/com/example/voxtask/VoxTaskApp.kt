@@ -23,6 +23,8 @@ import com.example.voxtask.ui.screens.Ajustes.AjustesScreen
 import com.example.voxtask.ui.screens.Ajustes.AjustesViewModel
 import com.example.voxtask.ui.screens.Cambiar_contrasenia.CambiarContrasenaScreen
 import com.example.voxtask.ui.screens.Cambiar_contrasenia.CambiarContraseniaViewModel
+import com.example.voxtask.ui.screens.Clima.ClimaScreen
+import com.example.voxtask.ui.screens.Clima.ClimaViewModel
 import com.example.voxtask.ui.screens.Contador.ContadorScreen
 import com.example.voxtask.ui.screens.VerCorreo.VerCorreoScreen
 import com.example.voxtask.ui.screens.Contador.ContadorViewModel
@@ -65,7 +67,8 @@ enum class VoxTaskScreen {
     VerCorreo,
     CambiarContrasenia,
     Verificacion,
-    RegistrarNuevaContrasenia
+    RegistrarNuevaContrasenia,
+    Clima
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -174,6 +177,11 @@ fun VoxTaskApp(
                         popUpTo(VoxTaskScreen.Inicio.name)
                     }
                 }
+                viewModelInicio.abrirClima = {
+                    navController.navigate(VoxTaskScreen.Clima.name) {
+                        popUpTo(VoxTaskScreen.Inicio.name)
+                    }
+                }
                 InicioScreen(
                     viewModel = viewModelInicio,
                     navController = navController,
@@ -275,6 +283,16 @@ fun VoxTaskApp(
                 val oobCode = backStackEntry.arguments?.getString("oobCode") ?: ""
                 val viewModel: CambiarContraseniaViewModel = viewModel()
                 NuevaContraseniaScreen(navController, viewModel, oobCode)
+            }
+
+
+            composable(VoxTaskScreen.Clima.name) {
+                val viewModelClima: ClimaViewModel = viewModel()
+                ClimaScreen(
+                    viewModelPlantilla = plantillaBaseViewModel,
+                    viewModel = viewModelClima,
+                    navController = navController
+                )
             }
         }
     }

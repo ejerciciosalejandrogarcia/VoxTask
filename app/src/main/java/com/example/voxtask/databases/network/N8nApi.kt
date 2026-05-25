@@ -17,7 +17,29 @@ data class EnviarCorreoRequest(
     val para: String,
     val asunto: String,
     val mensaje: String,
-    val modo: String
+    val modo: String,
+    val idioma: String
+)
+
+
+data class ClimaResponse(
+    val temperatura: Double,
+    val viento: Double,
+    val humedad: Int,
+    val codigo: Int,
+    val unidad_temp: String,
+    val unidad_viento: String,
+
+    val sensacion_termica: Double,
+    val indice_uv: Double,
+    val visibilidad_km: Double,
+    val direccion_viento: String,
+    val presion_mb: Double,
+    val es_de_dia: Boolean,
+    val precipitacion_mm: Double,
+    val texto_clima: String,
+    val municipio: String,
+    val region: String,
 )
 
 data class VerificacionRequest(
@@ -47,6 +69,12 @@ interface N8nApiService {
     suspend fun enviarCorreo(
         @Body body: EnviarCorreoRequest
     ): retrofit2.Response<Unit>
+
+    @GET("webhook/obtener-clima")
+    suspend fun obtenerClima(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double
+    ): ClimaResponse
 
 
     @GET("webhook/d0521b1f-a7b6-4bf0-9292-940850a29e93/correo-detalle/correo/{id}")

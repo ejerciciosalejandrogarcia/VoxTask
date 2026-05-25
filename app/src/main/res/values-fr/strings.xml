@@ -32,6 +32,8 @@
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Bonjour, comment vas-tu %1$s ? Que puis-je faire pour toi ?</string>
+    <string name="menu_clima_titulo">Météo</string>
+    <string name="menu_clima_subtexto">Visualiser la météo</string>
     <string name="txt_inicio_instrucciones">Choisis l\'une des options suivantes et, quand tu es prêt, maintiens le bouton de parole enfoncé</string>
     <string name="txt_inicio_sub_correo">Voir mes e-mails</string>
     <string name="txt_inicio_sub_recordatorios_ver">Voir mes rappels</string>
@@ -59,6 +61,7 @@
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mois précédent</string>
+    <string name="instrucciones_evento">Pour créer un événement, dites \'créer un événement\', pour supprimer un événement, dites \'supprimer un événement\'</string>
     <string name="icono_mes_siguiente">Mois suivant</string>
     <string-array name="dias_semana">
         <item>Lun</item>
@@ -244,4 +247,24 @@
     <string name="btn_reenviar_codigo">Renvoyer le code</string>
     <string name="error_enviar_codigo">Erreur lors de l\'envoi du code : %1$s</string>
     <string name="error_codigo_incorrecto">Code incorrect, veuillez réessayer</string>
+
+
+
+
+    <string name="clima_info_plantilla">Affiche la météo de votre emplacement actuel</string>
+    <string name="clima_sin_ubicacion">Activez la localisation pour voir la météo</string>
+    <string name="clima_btn_permitir">Autoriser la localisation</string>
+    <string name="clima_cargando">Obtention de la météo…</string>
+    <string name="clima_error">Erreur: %1$s</string>
+    <string name="clima_btn_reintentar">Impossible d\'obtenir météo. Veuillez réessayer.</string>
+    <string name="clima_etiqueta_sensacion">Ressentiez</string>
+    <string name="clima_etiqueta_viento">Vent</string>
+    <string name="clima_etiqueta_humedad">Humidité</string>
+    <string name="desc_clima_sin_ubicacion">Icône de localisation désactivée</string>
+    <string name="desc_clima_error">Icône d\'avertissement pour erreur de connexion</string>
+    <string name="desc_clima_icono_principal">Icône de la condition météo actuelle</string>
+    <string name="desc_clima_marcador_posicion">Icône de l\'emplacement actuel</string>
+    <string name="desc_clima_icono_sensacion">Icône de sensation thermique</string>
+    <string name="desc_clima_icono_viento">Icône de la vitesse du vent</string>
+    <string name="desc_clima_icono_humedad">Icône du pourcentage d\'humidité</string>
 </resources>

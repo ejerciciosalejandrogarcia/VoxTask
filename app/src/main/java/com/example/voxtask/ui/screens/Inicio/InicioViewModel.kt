@@ -25,6 +25,7 @@ class InicioViewModel : ViewModel() {
     var abrirListaCompra: () -> Unit = {}
     var abrirRecordatorio: () -> Unit = {}
     var abrirCorreo: () -> Unit = {}
+    var abrirClima: () -> Unit = {}
 
 
     //Funcion que recibe el texto transformado por voz y lo convierte a minusculas y elimina espacios
@@ -42,12 +43,21 @@ class InicioViewModel : ViewModel() {
         val comandoCorreo      = when (idioma) { "en" -> "email";   "fr" -> "courriel"; "de" -> "mail";   "it" -> "posta";     "pt" -> "correio";  else -> "correo" }
         val comandoRecordatorio = when (idioma) { "en" -> "reminder"; "fr" -> "rappel"; "de" -> "erinnerung"; "it" -> "promemoria"; "pt" -> "lembrete"; else -> "recordatorio" }
         val comandoLista       = when (idioma) { "en" -> "list";    "fr" -> "liste";    "de" -> "liste";  "it" -> "lista";     "pt" -> "lista";    else -> "lista" }
-
+        val comandoClima = when (idioma) {
+            "en" -> "weather"
+            "fr" -> "météo"
+            "de" -> "wetter"
+            "it" -> "meteo"
+            "pt" -> "clima"
+            else -> "clima"
+        }
         when {
             textoLower.contains(comandoContador)     -> abrirContador()
             textoLower.contains(comandoCorreo)       -> abrirCorreo()
             textoLower.contains(comandoRecordatorio) -> abrirRecordatorio()
             textoLower.contains(comandoLista)        -> abrirListaCompra()
+            textoLower.contains(comandoClima)        -> abrirClima()
+
         }
     }
 

@@ -32,6 +32,8 @@
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hallo, wie geht es dir, %1$s? Was kann ich für dich tun?</string>
+    <string name="menu_clima_titulo">Wetter</string>
+    <string name="menu_clima_subtexto">Wetter anzeigen</string>
     <string name="txt_inicio_instrucciones">Wähle eine der folgenden Optionen und halte die Sprachtaste gedrückt, wenn du bereit bist</string>
     <string name="txt_inicio_sub_correo">Meine E-Mails anzeigen</string>
     <string name="txt_inicio_sub_recordatorios_ver">Meine Erinnerungen anzeigen</string>
@@ -59,6 +61,7 @@
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Vorheriger Monat</string>
+    <string name="instrucciones_evento">Um ein Ereignis zu erstellen, sagen Sie \'Ereignis erstellen\', um ein Ereignis zu löschen, sagen Sie \'Ereignis löschen\'</string>
     <string name="icono_mes_siguiente">Nächster Monat</string>
     <string-array name="dias_semana">
         <item>Mo</item>
@@ -244,4 +247,22 @@
     <string name="btn_reenviar_codigo">Code erneut senden</string>
     <string name="error_enviar_codigo">Fehler beim Senden des Codes: %1$s</string>
     <string name="error_codigo_incorrecto">Falscher Code, bitte versuche es erneut</string>
+
+
+    <string name="clima_info_plantilla">Zeigt das Wetter Ihres aktuellen Standorts an</string>
+    <string name="clima_sin_ubicacion">Aktivieren Sie den Standort, um das Wetter zu sehen</string>
+    <string name="clima_btn_permitir">Standort zulassen</string>
+    <string name="clima_cargando">Wetterdaten werden geladen…</string>
+    <string name="clima_error">Fehler: %1$s</string>
+    <string name="clima_btn_reintentar">Das Wetter konnte nicht geladen werden. Bitte versuchen Sie es erneut.</string>
+    <string name="clima_etiqueta_sensacion">Gefühlt</string>
+    <string name="clima_etiqueta_viento">Wind</string>
+    <string name="clima_etiqueta_humedad">Feuchtigkeit</string>
+    <string name="desc_clima_sin_ubicacion">Symbol für deaktivierten Standort</string>
+    <string name="desc_clima_error">Warnsymbol für Verbindungsfehler</string>
+    <string name="desc_clima_icono_principal">Symbol für die aktuelle Wetterlage</string>
+    <string name="desc_clima_marcador_posicion">Symbol für den aktuellen Standort</string>
+    <string name="desc_clima_icono_sensacion">Symbol für gefühlte Temperatur</string>
+    <string name="desc_clima_icono_viento">Symbol für Windgeschwindigkeit</string>
+    <string name="desc_clima_icono_humedad">Symbol für Luftfeuchtigkeit</string>
 </resources>

@@ -32,6 +32,8 @@
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Olá, como estás %1$s? O que gostarias que fizesse por ti?</string>
+    <string name="menu_clima_titulo">Clima</string>
+    <string name="menu_clima_subtexto">Visualizar o clima</string>
     <string name="txt_inicio_instrucciones">Escolhe uma das seguintes opções e, quando estiveres pronto, mantém premido o botão de falar</string>
     <string name="txt_inicio_sub_correo">Ver o meu e-mail</string>
     <string name="txt_inicio_sub_recordatorios_ver">Ver os meus lembretes</string>
@@ -59,6 +61,7 @@
 
     <!-- Recordatorio Screen -->
     <string name="icono_mes_anterior">Mês anterior</string>
+    <string name="instrucciones_evento">Para criar um evento diga \'criar evento\', para excluir um evento diga \'excluir evento\'</string>
     <string name="icono_mes_siguiente">Mês seguinte</string>
     <string-array name="dias_semana">
         <item>Seg</item>
@@ -244,4 +247,22 @@
     <string name="btn_reenviar_codigo">Reenviar código</string>
     <string name="error_enviar_codigo">Erro ao enviar o código: %1$s</string>
     <string name="error_codigo_incorrecto">Código incorreto, tente novamente</string>
+
+
+    <string name="clima_info_plantilla">Mostra o clima da sua localização atual</string>
+    <string name="clima_sin_ubicacion">Ative a localização para ver o clima</string>
+    <string name="clima_btn_permitir">Permitir localização</string>
+    <string name="clima_cargando">Obtendo clima…</string>
+    <string name="clima_error">Erro: %1$s</string>
+    <string name="clima_btn_reintentar">Não foi possível obter o clima. Por favor, tente novamente.</string>
+    <string name="clima_etiqueta_sensacion">Sensação</string>
+    <string name="clima_etiqueta_viento">Vento</string>
+    <string name="clima_etiqueta_humedad">Umidade</string>
+    <string name="desc_clima_sin_ubicacion">Ícone de localização desativada</string>
+    <string name="desc_clima_error">Ícone de aviso por erro de conexão</string>
+    <string name="desc_clima_icono_principal">Ícone da condição meteorológica atual</string>
+    <string name="desc_clima_marcador_posicion">Ícone de localização atual</string>
+    <string name="desc_clima_icono_sensacion">Ícone de sensação térmica</string>
+    <string name="desc_clima_icono_viento">Ícone de velocidade do vento</string>
+    <string name="desc_clima_icono_humedad">Ícone de porcentagem de umidade</string>
 </resources>

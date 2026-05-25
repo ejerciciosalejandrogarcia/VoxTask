@@ -193,12 +193,16 @@ class EnviarCorreoViewModel : ViewModel() {
             try {
                 android.util.Log.d("TOKEN_ENVIO", "Token a enviar: ${accessToken.take(30)}")
                 android.util.Log.d("TOKEN_ENVIO", "Para: $destinatario")
+                val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+                val idiomaActual = prefs.getString("idioma", "es") ?: "es"
+
                 val request = EnviarCorreoRequest(
                     token = accessToken,
                     para = destinatario,
                     asunto = asunto,
                     mensaje = mensaje,
-                    modo = modo
+                    modo = modo,
+                    idioma = idiomaActual
                 )
                 val response = N8nClient.api.enviarCorreo(request)
                 if (response.isSuccessful) {
