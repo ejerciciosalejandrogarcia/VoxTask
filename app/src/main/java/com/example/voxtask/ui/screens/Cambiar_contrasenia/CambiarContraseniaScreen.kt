@@ -57,9 +57,11 @@ fun CambiarContrasenaScreen(
     val tamanoCirculoGrande = dimensionResource(R.dimen.cambiar_contrasena_circulo_grande)
     val tamanoCirculoMediano = dimensionResource(R.dimen.cambiar_contrasena_circulo_mediano)
     val tamanoCirculoPequeno = dimensionResource(R.dimen.cambiar_contrasena_circulo_pequeno)
-
-    // Nuevo: ancho máximo de la card para tabletas y plegables
     val anchoMaximoCard = tamano.anchoMaximoContenido
+
+    // Detectar orientación
+    val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
+    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
     LaunchedEffect(estadoUi.mensajeError) {
         if (estadoUi.mensajeError != 0) {
@@ -89,45 +91,57 @@ fun CambiarContrasenaScreen(
                 .zIndex(10f)
         )
 
-        // Círculo grande superior izquierda
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoGrande)
-                .offset(x = (-80).dp, y = (-60).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
+        if (esLandscape) {
+            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 80.dp, y = 60.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        } else {
+            // ── Portrait: círculos originales ─────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoMediano)
+                    .offset(x = 270.dp, y = 40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(2.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = 160.dp, y = 620.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoPequeno)
+                    .offset(x = (-40).dp, y = 700.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(1.dp)
+            )
+        }
 
-        // Círculo mediano superior derecha
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoMediano)
-                .offset(x = 270.dp, y = 40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(2.dp)
-        )
-
-        // Círculo grande inferior derecha
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoGrande)
-                .offset(x = 160.dp, y = 620.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-
-        // Círculo pequeño inferior izquierda
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoPequeno)
-                .offset(x = (-40).dp, y = 700.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(1.dp)
-        )
-
-        // Nuevo: scroll para teclado abierto y pantallas pequeñas
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +150,6 @@ fun CambiarContrasenaScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
             val modificadorCard = if (anchoMaximoCard != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier
                     .widthIn(max = anchoMaximoCard)

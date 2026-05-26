@@ -2,8 +2,10 @@ package com.example.voxtask.ui.screens.Verificacion
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -118,10 +120,13 @@ fun VerificacionScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = paddingHorizontal),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Spacer(modifier = Modifier.height(espaciado.xl))
+
             // Limita el ancho en tabletas y plegables
             val modificadorCard = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier.widthIn(max = anchoMaximo).fillMaxWidth()
@@ -302,6 +307,8 @@ fun VerificacionScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(espaciado.xl))
         }
     }
 }

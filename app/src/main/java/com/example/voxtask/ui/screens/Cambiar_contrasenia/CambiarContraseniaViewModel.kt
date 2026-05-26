@@ -23,7 +23,7 @@ data class NuevaContraseniaUiState(
     val confirmarContrasena: String = "",
     val cargando: Boolean = false,
     val cambioExitoso: Boolean = false,
-    val mensajeError: Int? = null  // ← cambia a nullable
+    val mensajeError: Int? = null
 )
 
 class CambiarContraseniaViewModel : ViewModel() {
@@ -41,11 +41,11 @@ class CambiarContraseniaViewModel : ViewModel() {
     }
 
     fun alCambiarNuevaContrasena(valor: String) {
-        _estadoNueva.value = _estadoNueva.value.copy(nuevaContrasena = valor, mensajeError = 0)
+        _estadoNueva.value = _estadoNueva.value.copy(nuevaContrasena = valor, mensajeError = null)
     }
 
     fun alCambiarConfirmarContrasena(valor: String) {
-        _estadoNueva.value = _estadoNueva.value.copy(confirmarContrasena = valor, mensajeError = 0)
+        _estadoNueva.value = _estadoNueva.value.copy(confirmarContrasena = valor, mensajeError = null)
     }
 
     fun enviarCorreoRecuperacion() {
@@ -101,7 +101,7 @@ class CambiarContraseniaViewModel : ViewModel() {
             }
             else -> {
                 viewModelScope.launch {
-                    _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = 0)
+                    _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = null)
                     try {
                         auth.confirmPasswordReset(oobCode, nueva).await()
                         _estadoNueva.value = _estadoNueva.value.copy(cargando = false, cambioExitoso = true)
@@ -125,6 +125,6 @@ class CambiarContraseniaViewModel : ViewModel() {
     }
 
     fun limpiarErrorNueva() {
-        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = null) // ← null en vez de 0
+        _estadoNueva.value = _estadoNueva.value.copy(mensajeError = null)
     }
 }

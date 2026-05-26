@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -69,8 +70,11 @@ fun NuevaContraseniaScreen(
     val tamanoCirculoGrande = dimensionResource(R.dimen.nueva_contrasenia_circulo_grande)
     val tamanoCirculoMediano = dimensionResource(R.dimen.nueva_contrasenia_circulo_mediano)
     val tamanoCirculoPequeno = dimensionResource(R.dimen.nueva_contrasenia_circulo_pequeno)
-    // Nuevo: ancho máximo de la card para tabletas y plegables
     val anchoMaximoCard = tamano.anchoMaximoContenido
+
+    // Detectar orientación
+    val configuracion = LocalConfiguration.current
+    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
     LaunchedEffect(estadoNueva.mensajeError) {
         estadoNueva.mensajeError?.let { resId ->
@@ -91,57 +95,71 @@ fun NuevaContraseniaScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = espaciado.xl)           // antes: 50.dp
+                .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
 
-        // Círculo grande superior izquierda
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoGrande)
-                .offset(x = (-80).dp, y = (-60).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-        // Círculo mediano superior derecha
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoMediano)
-                .offset(x = 270.dp, y = 40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(2.dp)
-        )
-        // Círculo grande inferior derecha
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoGrande)
-                .offset(x = 160.dp, y = 620.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-        // Círculo pequeño inferior izquierda
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoPequeno)
-                .offset(x = (-40).dp, y = 700.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(1.dp)
-        )
+        if (esLandscape) {
+            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 80.dp, y = 60.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        } else {
+            // ── Portrait: círculos originales ─────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoMediano)
+                    .offset(x = 270.dp, y = 40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(2.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = 160.dp, y = 620.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoPequeno)
+                    .offset(x = (-40).dp, y = 700.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(1.dp)
+            )
+        }
 
-        // Nuevo: scroll para teclado abierto y pantallas pequeñas
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = paddingHorizontalCard),  // antes: 36.dp fijo
+                .padding(horizontal = paddingHorizontalCard),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.height(espaciado.xl))
 
-            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
             val modificadorCard = if (anchoMaximoCard != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier.widthIn(max = anchoMaximoCard).fillMaxWidth()
             } else {
@@ -157,7 +175,7 @@ fun NuevaContraseniaScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = paddingVerticalCard, vertical = paddingVerticalCard), // antes: 28.dp, 36.dp
+                        .padding(horizontal = paddingVerticalCard, vertical = paddingVerticalCard),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     when {
@@ -168,11 +186,11 @@ fun NuevaContraseniaScreen(
                                 modifier = Modifier.size(56.dp),
                                 strokeWidth = 3.dp
                             )
-                            Spacer(modifier = Modifier.height(espaciado.l))    // antes: 16.dp
+                            Spacer(modifier = Modifier.height(espaciado.l))
                             Text(
                                 stringResource(R.string.txt_cargando_contrasena),
                                 color = Color.Gray,
-                                fontSize = tamano.textoBody                    // antes: 14.sp fijo
+                                fontSize = tamano.textoBody
                             )
                         }
 
@@ -184,7 +202,7 @@ fun NuevaContraseniaScreen(
                             AnimatedVisibility(visible = visible, enter = scaleIn() + fadeIn()) {
                                 Box(
                                     modifier = Modifier
-                                        .size(tamanoIconoExito)                // antes: 80.dp fijo
+                                        .size(tamanoIconoExito)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.colorScheme.primary),
                                     contentAlignment = Alignment.Center
@@ -193,25 +211,25 @@ fun NuevaContraseniaScreen(
                                         Icons.Default.Check,
                                         contentDescription = null,
                                         tint = Color.White,
-                                        modifier = Modifier.size(tamanoCheckExito) // antes: 48.dp fijo
+                                        modifier = Modifier.size(tamanoCheckExito)
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 20.dp
+                            Spacer(modifier = Modifier.height(espaciado.xl))
                             Text(
                                 stringResource(R.string.txt_contrasena_cambiada),
-                                fontSize = tamano.textoTitulo,                 // antes: 22.sp fijo
+                                fontSize = tamano.textoTitulo,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
+                            Spacer(modifier = Modifier.height(espaciado.s))
                             Text(
                                 stringResource(R.string.txt_contrasena_cambiada_descripcion),
-                                fontSize = tamano.textoBody,                   // antes: 13.sp fijo
+                                fontSize = tamano.textoBody,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
+                            Spacer(modifier = Modifier.height(espaciado.xl))
                             Button(
                                 onClick = {
                                     navController.navigate(VoxTaskScreen.Inicio_sesion.name) {
@@ -220,13 +238,13 @@ fun NuevaContraseniaScreen(
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(alturaBoton),                      // antes: 54.dp fijo
+                                    .height(alturaBoton),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
                                 Text(
                                     stringResource(R.string.btn_ir_inicio_sesion),
-                                    fontSize = tamano.textoBody,               // antes: 15.sp fijo
+                                    fontSize = tamano.textoBody,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
@@ -237,19 +255,19 @@ fun NuevaContraseniaScreen(
                         else -> {
                             Text(
                                 stringResource(R.string.txt_titulo_nueva_contrasena),
-                                fontSize = tamano.textoTitulo,                 // antes: 26.sp fijo
+                                fontSize = tamano.textoTitulo,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
+                            Spacer(modifier = Modifier.height(espaciado.s))
                             Text(
                                 stringResource(R.string.txt_descripcion_nueva_contrasena),
-                                fontSize = tamano.textoBody,                   // antes: 13.sp fijo
+                                fontSize = tamano.textoBody,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
+                            Spacer(modifier = Modifier.height(espaciado.xl))
 
                             OutlinedTextField(
                                 value = estado.nuevaContrasena,
@@ -278,7 +296,7 @@ fun NuevaContraseniaScreen(
                                     cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
-                            Spacer(modifier = Modifier.height(espaciado.m))    // antes: 14.dp
+                            Spacer(modifier = Modifier.height(espaciado.m))
                             OutlinedTextField(
                                 value = estado.confirmarContrasena,
                                 onValueChange = { viewModel.alCambiarConfirmarContrasena(it) },
@@ -306,19 +324,19 @@ fun NuevaContraseniaScreen(
                                     cursorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
-                            Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
+                            Spacer(modifier = Modifier.height(espaciado.xl))
                             Button(
                                 onClick = { viewModel.guardarNuevaContrasena(oobCode) },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(alturaBoton),                      // antes: 54.dp fijo
+                                    .height(alturaBoton),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                 enabled = !estado.cargando
                             ) {
                                 Text(
                                     stringResource(R.string.btn_guardar_contrasena),
-                                    fontSize = tamano.textoBody,               // antes: 15.sp fijo
+                                    fontSize = tamano.textoBody,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )

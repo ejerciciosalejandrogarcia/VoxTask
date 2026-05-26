@@ -55,6 +55,10 @@ fun InicioSesionScreen(
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
+    val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
+
+    // Detectar orientación
+    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
     // Valores adaptativos
     val paddingHorizontalCard = dimensionResource(R.dimen.inicio_sesion_padding_card_horizontal)
@@ -64,7 +68,6 @@ fun InicioSesionScreen(
     val tamanoCirculoGrande = dimensionResource(R.dimen.inicio_sesion_circulo_grande)
     val tamanoCirculoMediano = dimensionResource(R.dimen.inicio_sesion_circulo_mediano)
     val tamanoCirculoPequeno = dimensionResource(R.dimen.inicio_sesion_circulo_pequeno)
-    // Nuevo: ancho máximo de la card para tabletas y plegables
     val anchoMaximoCard = tamano.anchoMaximoContenido
 
     LaunchedEffect(estadoUi.inicioSesionExitoso) {
@@ -83,60 +86,72 @@ fun InicioSesionScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = espaciado.xl)           // antes: 50.dp
+                .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
 
-        // Círculo grande superior izquierda
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoGrande)
-                .offset(x = (-80).dp, y = (-60).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
+        if (esLandscape) {
+            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 80.dp, y = 60.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        } else {
+            // ── Portrait: círculos originales ─────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoMediano)
+                    .offset(x = 270.dp, y = 40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(2.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = 160.dp, y = 620.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoPequeno)
+                    .offset(x = (-40).dp, y = 700.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(1.dp)
+            )
+        }
 
-        // Círculo mediano superior derecha
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoMediano)
-                .offset(x = 270.dp, y = 40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(2.dp)
-        )
-
-        // Círculo grande inferior derecha
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoGrande)
-                .offset(x = 160.dp, y = 620.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-
-        // Círculo pequeño inferior izquierda
-        Box(
-            modifier = Modifier
-                .size(tamanoCirculoPequeno)
-                .offset(x = (-40).dp, y = 700.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(1.dp)
-        )
-
-        // Nuevo: scroll para teclado abierto y pantallas pequeñas
+        // ── Contenido ─────────────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = paddingHorizontalCard),  // antes: 36.dp fijo
+                .padding(horizontal = paddingHorizontalCard),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.height(espaciado.xl))
 
-            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
             val modificadorCard = if (anchoMaximoCard != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier.widthIn(max = anchoMaximoCard).fillMaxWidth()
             } else {
@@ -152,23 +167,21 @@ fun InicioSesionScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = paddingHorizontalCard, vertical = paddingVerticalCard), // antes: 28.dp, 36.dp
+                        .padding(horizontal = paddingHorizontalCard, vertical = paddingVerticalCard),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
+                    Spacer(modifier = Modifier.height(espaciado.s))
 
-                    // Título
                     Text(
                         text = stringResource(R.string.app_name),
-                        fontSize = tamano.textoTitulo,                 // antes: 34.sp fijo
+                        fontSize = tamano.textoTitulo,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary,
                         letterSpacing = (-0.5).sp
                     )
 
-                    Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 26.dp
+                    Spacer(modifier = Modifier.height(espaciado.xl))
 
-                    // Campo nombre de usuario
                     OutlinedTextField(
                         value = estadoUi.nombreUsuario,
                         onValueChange = { viewModel.alCambiarNombreUsuario(it) },
@@ -198,9 +211,8 @@ fun InicioSesionScreen(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(espaciado.m))    // antes: 14.dp
+                    Spacer(modifier = Modifier.height(espaciado.m))
 
-                    // Campo contraseña
                     OutlinedTextField(
                         value = estadoUi.contrasena,
                         onValueChange = { viewModel.alCambiarContrasena(it) },
@@ -229,7 +241,6 @@ fun InicioSesionScreen(
                         )
                     )
 
-                    // Mensaje de error
                     LaunchedEffect(estadoUi.mensajeError) {
                         estadoUi.mensajeError?.let { resId ->
                             snackbarHostState.showSnackbar(
@@ -240,14 +251,13 @@ fun InicioSesionScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(espaciado.xl))   // antes: 28.dp
+                    Spacer(modifier = Modifier.height(espaciado.xl))
 
-                    // Botón iniciar sesión
                     Button(
                         onClick = { viewModel.iniciarSesion() },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(alturaBotonPrincipal),             // antes: 54.dp fijo
+                            .height(alturaBotonPrincipal),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
@@ -256,16 +266,15 @@ fun InicioSesionScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.btn_iniciar_sesion),
-                            fontSize = tamano.textoBody,               // antes: 16.sp fijo
+                            fontSize = tamano.textoBody,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             letterSpacing = 0.5.sp
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(espaciado.l))    // antes: 16.dp
+                    Spacer(modifier = Modifier.height(espaciado.l))
 
-                    // Divisor
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
@@ -279,14 +288,13 @@ fun InicioSesionScreen(
                         HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
                     }
 
-                    Spacer(modifier = Modifier.height(espaciado.l))    // antes: 16.dp
+                    Spacer(modifier = Modifier.height(espaciado.l))
 
-                    // Botón iniciar sesión con Google
                     OutlinedButton(
                         onClick = alPulsarGoogle,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(alturaBotonGoogle),                // antes: 40.dp fijo
+                            .height(alturaBotonGoogle),
                         shape = MaterialTheme.shapes.extraLarge,
                         border = BorderStroke(1.dp, Color(0xFF747775)),
                         colors = ButtonDefaults.outlinedButtonColors(
@@ -305,34 +313,32 @@ fun InicioSesionScreen(
                                 contentDescription = "Logo de Google",
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(espaciado.s))  // antes: 8.dp
+                            Spacer(modifier = Modifier.width(espaciado.s))
                             Text(
                                 text = stringResource(R.string.txt_iniciar_google),
-                                fontSize = tamano.textoBody,            // antes: 14.sp fijo
+                                fontSize = tamano.textoBody,
                                 fontWeight = FontWeight.Medium,
                                 letterSpacing = 0.sp
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(espaciado.l))    // antes: 16.dp
+                    Spacer(modifier = Modifier.height(espaciado.l))
 
-                    // Botón redirigir a registro
                     TextButton(onClick = { alNavegarARegistro(VoxTaskScreen.Registro_Usuario.name) }) {
                         Text(
                             text = stringResource(R.string.txt_pregunta),
                             color = TextoGris,
-                            fontSize = tamano.textoBody                // antes: 13.sp fijo
+                            fontSize = tamano.textoBody
                         )
                         Text(
                             text = " " + stringResource(R.string.txt_respuesta),
                             color = MaterialTheme.colorScheme.primary,
-                            fontSize = tamano.textoBody,               // antes: 13.sp fijo
+                            fontSize = tamano.textoBody,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    // Botón redirigir a cambiar contraseña
                     TextButton(
                         onClick = { alNavegarARegistro(VoxTaskScreen.CambiarContrasenia.name) },
                         modifier = Modifier.fillMaxWidth()
@@ -341,13 +347,13 @@ fun InicioSesionScreen(
                             Text(
                                 text = stringResource(R.string.txt_pregunta_contrasenia),
                                 color = TextoGris,
-                                fontSize = tamano.textoBody            // antes: 13.sp fijo
+                                fontSize = tamano.textoBody
                             )
-                            Spacer(modifier = Modifier.height(espaciado.xs)) // antes: 4.dp
+                            Spacer(modifier = Modifier.height(espaciado.xs))
                             Text(
                                 text = stringResource(R.string.txt_respuesta_contrasenia),
                                 color = MaterialTheme.colorScheme.primary,
-                                fontSize = tamano.textoBody,           // antes: 13.sp fijo
+                                fontSize = tamano.textoBody,
                                 fontWeight = FontWeight.Bold
                             )
                         }

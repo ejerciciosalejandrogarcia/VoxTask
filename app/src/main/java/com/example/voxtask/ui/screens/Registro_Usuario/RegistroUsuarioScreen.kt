@@ -72,6 +72,10 @@ fun RegistroUsuarioScreen(
     val espaciadoCampos      = dimensionResource(R.dimen.registro_espaciado_campos)
     val anchoMaximo          = tamano.anchoMaximoContenido
 
+    // Detectar orientación
+    val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
+    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
+
     val selectorFecha = remember {
         DatePickerDialog(
             contexto,
@@ -107,43 +111,56 @@ fun RegistroUsuarioScreen(
                 .zIndex(10f)
         )
 
-        // Círculo grande superior izquierda
-        Box(
-            modifier = Modifier
-                .size(circuloGrande)
-                .offset(x = (-80).dp, y = (-60).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-
-        // Círculo mediano superior derecha
-        Box(
-            modifier = Modifier
-                .size(circuloMediano)
-                .offset(x = 270.dp, y = 40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(2.dp)
-        )
-
-        // Círculo grande inferior derecha
-        Box(
-            modifier = Modifier
-                .size(circuloInferior)
-                .offset(x = 160.dp, y = 620.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-
-        // Círculo pequeño inferior izquierda
-        Box(
-            modifier = Modifier
-                .size(circuloPequeno)
-                .offset(x = (-40).dp, y = 700.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .blur(1.dp)
-        )
+        if (esLandscape) {
+            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
+            Box(
+                modifier = Modifier
+                    .size(circuloGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(circuloGrande)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 80.dp, y = 60.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        } else {
+            // ── Portrait: círculos originales ─────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(circuloGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(circuloMediano)
+                    .offset(x = 270.dp, y = 40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(2.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .size(circuloInferior)
+                    .offset(x = 160.dp, y = 620.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(circuloPequeno)
+                    .offset(x = (-40).dp, y = 700.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(1.dp)
+            )
+        }
 
         // Scroll para teclado abierto y pantallas pequeñas
         Column(
