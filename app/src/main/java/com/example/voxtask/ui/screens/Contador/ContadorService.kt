@@ -148,7 +148,9 @@ class ContadorService : Service() {
     private fun crearPendingIntent(): PendingIntent {
         val intent = Intent(this, MainActivity::class.java).apply {
             action = "ABRIR_CONTADOR"
-            flags  = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT  // ← añadir esto
         }
         return PendingIntent.getActivity(
             this, 0, intent,

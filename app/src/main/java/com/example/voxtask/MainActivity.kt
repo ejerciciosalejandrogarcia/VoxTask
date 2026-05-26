@@ -57,10 +57,13 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                     val windowSize = calculateWindowSizeClass(this)
                     VoxTaskApp(
-                        windowSize = windowSize.widthSizeClass,
+                        windowSize             = windowSize.widthSizeClass,
                         plantillaBaseViewModel = plantillaBaseViewModel,
-                        onNavControllerReady = { navController = it },
-                        deepLinkIntent = intent
+                        onNavControllerReady   = {
+                            navController = it
+                            manejarIntent(intent)
+                        },
+                        deepLinkIntent         = intent
                     )
                 }
             }
@@ -70,10 +73,17 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.action == "ABRIR_CONTADOR") {
-            navController?.navigate(VoxTaskScreen.Contador.name)
+        manejarIntent(intent)
+    }
+
+    private fun manejarIntent(intent: Intent?) {
+        if (intent?.action == "ABRIR_CONTADOR") {
+            navController?.navigate(VoxTaskScreen.Contador.name) {
+                launchSingleTop = true
+            }
+            return
         }
-        val data = intent.data
+        val data = intent?.data
         if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
             val oobCode = data.getQueryParameter("oobCode") ?: ""
             navController?.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")

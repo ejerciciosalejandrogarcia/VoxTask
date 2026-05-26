@@ -128,12 +128,16 @@ class AjustesViewModel : ViewModel() {
     fun compartirAplicacion(contexto: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Coge el APK de la propia app instalada
-                val apkOrigen = File(contexto.applicationInfo.sourceDir)
                 val apkCompartido = File(contexto.cacheDir, "VoxTask.apk")
+                val archivos = contexto.assets.list("")
+                Log.d("ASSETS", "Archivos disponibles: ${archivos?.joinToString()}")
 
-                // Copia el APK instalado al cache
-                apkOrigen.copyTo(apkCompartido, overwrite = true)
+                // Copia desde assets donde metes tu APK release firmado
+                contexto.assets.open("VoxTask.apk").use { input ->
+                    apkCompartido.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
                 apkCompartido.setReadable(true, false)
 
                 val uri = FileProvider.getUriForFile(
@@ -155,10 +159,10 @@ class AjustesViewModel : ViewModel() {
                         Intent.createChooser(intent, "Compartir VoxTask")
                     )
                 }
-
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(contexto, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(contexto, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG)
+                        .show()
                 }
             }
         }
