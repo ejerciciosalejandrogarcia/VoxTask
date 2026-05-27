@@ -248,6 +248,7 @@
     <string name="btn_reenviar_codigo">Reenviar código</string>
     <string name="error_enviar_codigo">Error al enviar el código: %1$s</string>
     <string name="error_codigo_incorrecto">Código incorrecto, inténtalo de nuevo</string>
+    <string name="txt_error_envio_codigo">Error al enviar el código. Intenta de nuevo.</string>
 
 
 

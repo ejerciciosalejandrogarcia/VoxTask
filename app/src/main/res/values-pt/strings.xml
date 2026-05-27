@@ -247,6 +247,7 @@
     <string name="btn_reenviar_codigo">Reenviar código</string>
     <string name="error_enviar_codigo">Erro ao enviar o código: %1$s</string>
     <string name="error_codigo_incorrecto">Código incorreto, tente novamente</string>
+    <string name="txt_error_envio_codigo">Erro ao enviar o código. Tente novamente.</string>
 
 
     <string name="clima_info_plantilla">Mostra o clima da sua localização atual</string>

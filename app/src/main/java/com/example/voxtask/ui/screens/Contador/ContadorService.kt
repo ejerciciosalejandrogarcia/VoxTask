@@ -212,15 +212,8 @@ class ContadorService : Service() {
     // ─────────────────────────────────────────────────────────────────────────
     // Notificaciones
     // ─────────────────────────────────────────────────────────────────────────
-    private fun crearNotificacion(
-        titulo: String,
-        contenido: String,
-        pausado: Boolean,
-        finalizado: Boolean = false
-    ): NotificationCompat.Builder {
-
+    private fun crearNotificacion(titulo: String,contenido: String,pausado: Boolean,finalizado: Boolean = false): NotificationCompat.Builder {
         val canalId = if (finalizado) CHANNEL_ID_FINALIZADO else CHANNEL_ID
-
         val builder = NotificationCompat.Builder(this, canalId)
             .setContentTitle(titulo)
             .setContentText(contenido)
@@ -228,8 +221,6 @@ class ContadorService : Service() {
             .setOngoing(!finalizado)
             .setSilent(!finalizado)
             .setContentIntent(crearPendingIntent())
-
-        // Sin botones cuando ha terminado
         if (!finalizado) {
             if (pausado) {
                 builder.addAction(
@@ -250,7 +241,6 @@ class ContadorService : Service() {
                 pendingIntentAccion(ACCION_CANCELAR)
             )
         }
-
         return builder
     }
     private fun actualizarNotificacion(

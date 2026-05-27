@@ -247,6 +247,7 @@
     <string name="btn_reenviar_codigo">Resend code</string>
     <string name="error_enviar_codigo">Error sending code: %1$s</string>
     <string name="error_codigo_incorrecto">Incorrect code, please try again</string>
+    <string name="txt_error_envio_codigo">Error sending code. Try again.</string>
 
 
     <string name="clima_info_plantilla">Shows the weather of your current location</string>

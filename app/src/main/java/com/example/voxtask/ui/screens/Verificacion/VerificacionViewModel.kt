@@ -18,7 +18,8 @@ data class VerificacionUiState(
     val cargando: Boolean = false,
     val mensajeError: Int? = null,
     val errorDinamico: String = "",
-    val verificado: Boolean = false
+    val verificado: Boolean = false,
+    val errorEnvio: Boolean = false
 )
 
 class VerificacionViewModel : ViewModel() {
@@ -41,7 +42,8 @@ class VerificacionViewModel : ViewModel() {
             mensajeError = null,
             errorDinamico = "",
             verificado = false,
-            codigoCorrecto = ""
+            codigoCorrecto = "",
+            errorEnvio = false
         )
 
         viewModelScope.launch {
@@ -52,13 +54,15 @@ class VerificacionViewModel : ViewModel() {
                 android.util.Log.d("Verificacion", "Código recibido: '${respuesta.codigo}'")
                 _estadoUi.value = _estadoUi.value.copy(
                     codigoCorrecto = respuesta.codigo,
-                    cargando = false
+                    cargando = false,
+                    errorEnvio = false
                 )
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(
                     errorDinamico = contexto?.getString(R.string.error_enviar_codigo, e.message ?: "")
                         ?: "Error al enviar el código: ${e.message}",
-                    cargando = false
+                    cargando = false,
+                    errorEnvio = true
                 )
             }
         }

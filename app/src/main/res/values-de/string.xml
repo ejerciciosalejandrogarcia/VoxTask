@@ -247,6 +247,7 @@
     <string name="btn_reenviar_codigo">Code erneut senden</string>
     <string name="error_enviar_codigo">Fehler beim Senden des Codes: %1$s</string>
     <string name="error_codigo_incorrecto">Falscher Code, bitte versuche es erneut</string>
+    <string name="txt_error_envio_codigo">Fehler beim Versenden des Codes. Bitte versuchen Sie es erneut.</string>
 
 
     <string name="clima_info_plantilla">Zeigt das Wetter Ihres aktuellen Standorts an</string>

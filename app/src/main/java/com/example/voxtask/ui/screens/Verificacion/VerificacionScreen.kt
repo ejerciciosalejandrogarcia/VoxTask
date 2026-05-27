@@ -1,8 +1,10 @@
 package com.example.voxtask.ui.screens.Verificacion
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -48,6 +52,10 @@ fun VerificacionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
+    val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
+
+    // Detectar orientación
+    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
     // Valores adaptativos desde dimens.xml
     val paddingHorizontal  = dimensionResource(R.dimen.verificacion_padding_horizontal)
@@ -56,6 +64,9 @@ fun VerificacionScreen(
     val alturaBoton        = dimensionResource(R.dimen.verificacion_altura_boton)
     val campoAncho         = dimensionResource(R.dimen.verificacion_campo_ancho)
     val campoAlto          = dimensionResource(R.dimen.verificacion_campo_alto)
+    val tamanoCirculoGrande = dimensionResource(R.dimen.inicio_sesion_circulo_grande)
+    val tamanoCirculoMediano = dimensionResource(R.dimen.inicio_sesion_circulo_mediano)
+    val tamanoCirculoPequeno = dimensionResource(R.dimen.inicio_sesion_circulo_pequeno)
     val anchoMaximo        = tamano.anchoMaximoContenido
 
     var segundosRestantes by remember { mutableStateOf(300) }
@@ -69,8 +80,14 @@ fun VerificacionScreen(
         }
     }
 
-    LaunchedEffect(expirado) {
-        if (!expirado) {
+    LaunchedEffect(estadoUi.errorEnvio) {
+        if (estadoUi.errorEnvio) {
+            expirado = true
+        }
+    }
+
+    LaunchedEffect(expirado && !estadoUi.errorEnvio) {
+        if (!expirado && !estadoUi.errorEnvio) {
             segundosRestantes = 300
             while (segundosRestantes > 0) {
                 delay(1000L)
@@ -108,7 +125,11 @@ fun VerificacionScreen(
     val focusRequesters = remember { List(5) { FocusRequester() } }
     LaunchedEffect(Unit) { focusRequesters[0].requestFocus() }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
@@ -116,6 +137,57 @@ fun VerificacionScreen(
                 .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
+
+        if (esLandscape) {
+            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 80.dp, y = 60.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        } else {
+            // ── Portrait: círculos originales ─────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = (-80).dp, y = (-60).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoMediano)
+                    .offset(x = 270.dp, y = 40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(2.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoGrande)
+                    .offset(x = 160.dp, y = 620.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Box(
+                modifier = Modifier
+                    .size(tamanoCirculoPequeno)
+                    .offset(x = (-40).dp, y = 700.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(1.dp)
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -191,7 +263,14 @@ fun VerificacionScreen(
                         Text(
                             text = stringResource(R.string.txt_enviando_codigo),
                             fontSize = tamano.textoBody,
-                            color = TextoGris
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else if (estadoUi.errorEnvio) {
+                        Text(
+                            text = stringResource(R.string.txt_error_envio_codigo),
+                            fontSize = tamano.textoBody,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFE53935)
                         )
                     } else {
                         Text(
@@ -241,7 +320,7 @@ fun VerificacionScreen(
                                         } else false
                                     },
                                 singleLine = true,
-                                enabled = !expirado && !estadoUi.cargando,
+                                enabled = !expirado && !estadoUi.cargando && !estadoUi.errorEnvio,
                                 textStyle = TextStyle(
                                     fontSize = tamano.textoBody,
                                     fontWeight = FontWeight.Bold,
@@ -259,7 +338,9 @@ fun VerificacionScreen(
                                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                                     focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surface
                                 )
                             )
                         }
@@ -269,7 +350,7 @@ fun VerificacionScreen(
 
                     Button(
                         onClick = { viewModel.verificarCodigo(codigoUnido) },
-                        enabled = codigoUnido.length == 5 && !expirado && !estadoUi.cargando,
+                        enabled = codigoUnido.length == 5 && !expirado && !estadoUi.cargando && !estadoUi.errorEnvio,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(alturaBoton),
@@ -289,11 +370,12 @@ fun VerificacionScreen(
                         )
                     }
 
-                    if (expirado) {
+                    if (expirado || estadoUi.errorEnvio) {
                         Spacer(modifier = Modifier.height(espaciado.m))
                         TextButton(onClick = {
                             codigo = List(5) { "" }
                             expirado = false
+                            segundosRestantes = 300
                             viewModel.enviarCodigo(contexto)
                             focusRequesters[0].requestFocus()
                         }) {
