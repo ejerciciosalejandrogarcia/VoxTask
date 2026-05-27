@@ -41,6 +41,7 @@ import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.textoTitulo
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.anchoMaximoContenido
+import androidx.compose.ui.graphics.compositeOver
 
 @SuppressLint("MissingPermission", "LocalContextGetResourceValueCall")
 @Composable
@@ -105,22 +106,46 @@ fun ClimaScreen(
     }
 
     // --- LÓGICA DE DEGRADADOS DINÁMICOS ---
-    val colorArribaPorDefecto = MaterialTheme.colorScheme.surface
-    val colorAbajoPorDefecto = MaterialTheme.colorScheme.surfaceVariant
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
 
     val (colorArriba, colorAbajo, iconoClima) = if (uiState.datos != null) {
         val datos = uiState.datos!!
         val c = datos.codigo
         when {
-            !datos.es_de_dia -> Triple(Color(0xFF0F172A), Color(0xFF1E293B), Icons.Default.NightsStay)
-            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(Color(0xFF475569), Color(0xFF64748B), Icons.Default.WaterDrop)
-            c == 1030 || c == 1135 || c == 1147 -> Triple(Color(0xFF64748B), Color(0xFF94A3B8), Icons.Default.BlurOn)
-            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(Color(0xFF1E3A8A), Color(0xFF3B82F6), Icons.Default.AcUnit)
-            datos.temperatura >= 30.0 -> Triple(Color(0xFFEA580C), Color(0xFFFBBF24), Icons.Default.WbSunny)
-            else -> Triple(Color(0xFF0284C7), Color(0xFF38BDF8), Icons.Default.CloudQueue)
+            !datos.es_de_dia -> Triple(
+                Color(0xFF0F172A).copy(alpha = 0.85f).compositeOver(primaryColor),
+                Color(0xFF1E293B).copy(alpha = 0.85f).compositeOver(primaryColor),
+                Icons.Default.NightsStay
+            )
+            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(
+                Color(0xFF475569).copy(alpha = 0.8f).compositeOver(primaryColor),
+                Color(0xFF64748B).copy(alpha = 0.8f).compositeOver(primaryColor),
+                Icons.Default.WaterDrop
+            )
+            c == 1030 || c == 1135 || c == 1147 -> Triple(
+                Color(0xFF64748B).copy(alpha = 0.75f).compositeOver(primaryColor),
+                Color(0xFF94A3B8).copy(alpha = 0.75f).compositeOver(primaryColor),
+                Icons.Default.BlurOn
+            )
+            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(
+                Color(0xFF1E3A8A).copy(alpha = 0.8f).compositeOver(primaryColor),
+                Color(0xFF3B82F6).copy(alpha = 0.8f).compositeOver(primaryColor),
+                Icons.Default.AcUnit
+            )
+            datos.temperatura >= 30.0 -> Triple(
+                Color(0xFFEA580C).copy(alpha = 0.85f).compositeOver(primaryColor),
+                Color(0xFFFBBF24).copy(alpha = 0.85f).compositeOver(primaryColor),
+                Icons.Default.WbSunny
+            )
+            else -> Triple(
+                primaryColor.copy(alpha = 0.85f).compositeOver(surfaceColor),
+                primaryColor.copy(alpha = 0.6f).compositeOver(surfaceColor),
+                Icons.Default.CloudQueue
+            )
         }
     } else {
-        Triple(colorArribaPorDefecto, colorAbajoPorDefecto, Icons.Default.Cloud)
+        Triple(surfaceColor, MaterialTheme.colorScheme.surfaceVariant, Icons.Default.Cloud)
     }
 
     val animadoArriba by animateColorAsState(targetValue = colorArriba, animationSpec = tween(1000), label = "animArriba")
@@ -168,12 +193,12 @@ fun ClimaScreen(
                         when {
                             uiState.estaCargando && uiState.datos == null -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CircularProgressIndicator(color = colorDeContenido)
+                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                     Spacer(Modifier.height(espaciado.m))
                                     Text(
                                         text = stringResource(R.string.clima_cargando),
                                         fontSize = tamano.textoBody,
-                                        color = colorDeContenido
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -226,15 +251,21 @@ fun ClimaScreen(
                             else -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Button(
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                                        shape = RoundedCornerShape(14.dp),
                                         onClick = {
                                             fusedClient.lastLocation.addOnSuccessListener { loc ->
                                                 loc?.let { viewModel.cargarClima(it.latitude, it.longitude) }
                                             }
-                                        }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
                                     ) {
-                                        Text(text = stringResource(R.string.clima_btn_reintentar), fontSize = tamano.textoBody)
+                                        Text(
+                                            text = stringResource(R.string.clima_btn_reintentar),
+                                            fontSize = tamano.textoBody
+                                        )
                                     }
                                 }
                             }

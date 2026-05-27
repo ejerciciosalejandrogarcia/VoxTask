@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.voxtask.R
 import com.example.voxtask.utils.LocalEspaciado
@@ -38,19 +39,12 @@ import com.google.android.gms.common.api.ApiException
 // Helpers de orientación y layout
 // ---------------------------------------------------------------------------
 
-/**
- * Devuelve true si el dispositivo está en orientación horizontal (landscape).
- * Se recalcula automáticamente al girar gracias a LocalConfiguration.
- */
 @Composable
 private fun esHorizontal(): Boolean {
     val config = LocalConfiguration.current
     return config.screenWidthDp > config.screenHeightDp
 }
 
-/**
- * Padding vertical reducido en landscape para aprovechar la altura limitada.
- */
 @Composable
 private fun paddingVerticalAdaptativo(horizontal: Boolean): Dp {
     return if (horizontal) {
@@ -71,17 +65,15 @@ fun EnviarCorreoScreen(
     viewModel: EnviarCorreoViewModel,
     navController: NavController
 ) {
-    val contexto      = LocalContext.current
-    val espaciado     = LocalEspaciado.current
-    val tamano        = LocalTamanioPantalla.current
-    val horizontal    = esHorizontal()
+    val contexto          = LocalContext.current
+    val espaciado         = LocalEspaciado.current
+    val tamano            = LocalTamanioPantalla.current
+    val horizontal        = esHorizontal()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Padding horizontal del contenido
     val paddingHorizontal = dimensionResource(R.dimen.enviar_correo_padding_horizontal)
-    val paddingVertical = paddingVerticalAdaptativo(horizontal)
-
-    // Ancho máximo: limita en tabletas y plegables
-    val anchoMax = tamano.anchoMaximoContenido
+    val paddingVertical   = paddingVerticalAdaptativo(horizontal)
+    val anchoMax          = tamano.anchoMaximoContenido
 
     val lanzadorGoogle = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -107,22 +99,39 @@ fun EnviarCorreoScreen(
         }
     }
 
+    // Escucha el canal de errores y muestra el Snackbar
+    LaunchedEffect(Unit) {
+        viewModel.errorFlow.collect { mensajeError ->
+            snackbarHostState.showSnackbar(
+                message  = mensajeError,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
     PlantillaBase(
-        viewModel = viewModelPlantilla,
+        viewModel     = viewModelPlantilla,
         navController = navController,
         onTextoReconocido = { texto -> viewModel.procesarVoz(texto, contexto) }
     ) { padding ->
 
-        // ── Contenedor externo con scroll siempre habilitado ──────────────────
-        // Esto permite deslizar en landscape y en pantallas pequeñas con
-        // teclado visible.
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = paddingHorizontal, vertical = paddingVertical)
         ) {
-            // Indicador de pasos (arriba, centrado)
+
+            // Snackbar anclado en TopCenter
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier  = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = espaciado.xl)
+                    .zIndex(10f)
+            )
+
+            // Indicador de pasos
             if (!viewModel.necesitaVincularGoogle &&
                 !viewModel.cargandoToken &&
                 viewModel.paso !in listOf(
@@ -133,16 +142,15 @@ fun EnviarCorreoScreen(
                 )
             ) {
                 Text(
-                    text = stringResource(R.string.txt_enviarcorreo_paso_uno, viewModel.paso.ordinal + 1),
+                    text     = stringResource(R.string.txt_enviarcorreo_paso_uno, viewModel.paso.ordinal + 1),
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = espaciado.s),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray
+                    style    = MaterialTheme.typography.labelMedium,
+                    color    = Color.Gray
                 )
             }
 
-            // ── Modificador central con ancho máximo ─────────────────────────
             val modContenido = if (anchoMax != Dp.Unspecified) {
                 Modifier
                     .widthIn(max = anchoMax)
@@ -152,20 +160,14 @@ fun EnviarCorreoScreen(
                 Modifier.fillMaxSize()
             }
 
-            // ── Columna con scroll vertical siempre activo ───────────────────
-            // En portrait apenas se nota; en landscape permite deslizar todo.
             Column(
-                modifier = modContenido
-                    .verticalScroll(rememberScrollState()),
+                modifier            = modContenido.verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Espacio superior mínimo para que el contenido no quede pegado
-                // al indicador de pasos en portrait.
                 Spacer(modifier = Modifier.height(if (horizontal) espaciado.s else espaciado.xl))
 
                 when {
-                    // ── Cargando token ───────────────────────────────────────
                     viewModel.cargandoToken -> {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(espaciado.l))
@@ -175,7 +177,6 @@ fun EnviarCorreoScreen(
                         )
                     }
 
-                    // ── Vincular Google ──────────────────────────────────────
                     viewModel.necesitaVincularGoogle -> {
                         VincularGoogleUI(
                             horizontal = horizontal,
@@ -189,7 +190,6 @@ fun EnviarCorreoScreen(
                         )
                     }
 
-                    // ── Pasos del flujo ──────────────────────────────────────
                     else -> {
                         when (viewModel.paso) {
                             PasoEnvio.DESTINATARIO -> PasoUI(
@@ -241,10 +241,10 @@ fun EnviarCorreoScreen(
                             }
                             PasoEnvio.ENVIADO -> {
                                 Text(
-                                    text      = stringResource(R.string.txt_enviarcorreo_exito),
-                                    style     = MaterialTheme.typography.headlineSmall,
+                                    text       = stringResource(R.string.txt_enviarcorreo_exito),
+                                    style      = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color     = MaterialTheme.colorScheme.primary
+                                    color      = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.height(espaciado.xl))
                                 Spacer(modifier = Modifier.height(espaciado.xl))
@@ -256,25 +256,20 @@ fun EnviarCorreoScreen(
                                 }
                             }
                             PasoEnvio.ERROR -> {
-                                Text(
-                                    text      = viewModel.errorMensaje,
-                                    color     = MaterialTheme.colorScheme.error,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(espaciado.xl))
                                 Button(
-                                    onClick  = { viewModel.reiniciar(contexto) },
-                                    modifier = Modifier.fillMaxWidth()
+                                    onClick  = { viewModel.enviarCorreo(contexto) },
+                                    modifier = Modifier.wrapContentWidth()
                                 ) {
-                                    Text(stringResource(R.string.txt_enviarcorreo_btn_reintentar), color = Color.White)
+                                    Text(
+                                        stringResource(R.string.txt_enviarcorreo_btn_reintentar),
+                                        color = Color.White
+                                    )
                                 }
                             }
                         }
                     }
                 }
 
-                // Espacio inferior para que el último elemento no quede pegado
-                // al borde en landscape con barra de navegación.
                 Spacer(modifier = Modifier.height(espaciado.l))
             }
         }
@@ -282,7 +277,7 @@ fun EnviarCorreoScreen(
 }
 
 // ---------------------------------------------------------------------------
-// VincularGoogleUI — adaptado a orientación
+// VincularGoogleUI
 // ---------------------------------------------------------------------------
 
 @Composable
@@ -299,16 +294,12 @@ fun VincularGoogleUI(
         dimensionResource(R.dimen.enviar_correo_padding_vincular)
     }
 
-    // En landscape usa layout de dos columnas (texto | botón)
     if (horizontal && tamano == TamanioPantalla.COMPACTO) {
         Row(
-            modifier            = Modifier
-                .fillMaxWidth()
-                .padding(paddingVincular),
+            modifier              = Modifier.fillMaxWidth().padding(paddingVincular),
             horizontalArrangement = Arrangement.spacedBy(espaciado.l),
-            verticalAlignment   = Alignment.CenterVertically
+            verticalAlignment     = Alignment.CenterVertically
         ) {
-            // Columna de texto
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     stringResource(R.string.txt_enviarcorreo_google_requerido),
@@ -323,11 +314,7 @@ fun VincularGoogleUI(
                     fontSize  = tamano.textoBody
                 )
             }
-            // Botón lateral
-            Button(
-                onClick  = onVincular,
-                modifier = Modifier.widthIn(min = 140.dp)
-            ) {
+            Button(onClick = onVincular, modifier = Modifier.widthIn(min = 140.dp)) {
                 Text(stringResource(R.string.txt_enviarcorreo_btn_vincular), color = Color.White)
             }
         }
@@ -358,7 +345,7 @@ fun VincularGoogleUI(
 }
 
 // ---------------------------------------------------------------------------
-// ConfirmacionUI — adaptado a orientación y tamaño
+// ConfirmacionUI
 // ---------------------------------------------------------------------------
 
 @Composable
@@ -379,7 +366,6 @@ fun ConfirmacionUI(
     var asuntoEdit       by remember { mutableStateOf(asunto) }
     var mensajeEdit      by remember { mutableStateOf(mensaje) }
 
-    // En landscape + compacto: Card + Botón en Row para aprovechar el ancho
     val usarLayoutHorizontal = horizontal && tamano == TamanioPantalla.COMPACTO
 
     Column(verticalArrangement = Arrangement.spacedBy(espaciado.l)) {
@@ -393,7 +379,6 @@ fun ConfirmacionUI(
         )
 
         if (usarLayoutHorizontal) {
-            // ── Landscape compacto: Card a la izquierda, botón a la derecha ──
             Row(
                 modifier              = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(espaciado.l),
@@ -401,9 +386,8 @@ fun ConfirmacionUI(
             ) {
                 Card(modifier = Modifier.weight(1f)) {
                     CuerpoConfirmacion(
-                        destinatarioEdit, asuntoEdit, mensajeEdit,
-                        campoEditando,
-                        onCampoEdit  = { campoEditando = it },
+                        destinatarioEdit, asuntoEdit, mensajeEdit, campoEditando,
+                        onCampoEdit          = { campoEditando = it },
                         onDestinatarioChange = { destinatarioEdit = it; campoEditando = null; onEditar("destinatario:$it") },
                         onAsuntoChange       = { asuntoEdit = it;       campoEditando = null; onEditar("asunto:$it") },
                         onMensajeChange      = { mensajeEdit = it;      campoEditando = null; onEditar("mensaje:$it") }
@@ -411,20 +395,16 @@ fun ConfirmacionUI(
                 }
                 Button(
                     onClick  = onConfirmar,
-                    modifier = Modifier
-                        .widthIn(min = 120.dp)
-                        .align(Alignment.CenterVertically)
+                    modifier = Modifier.widthIn(min = 120.dp).align(Alignment.CenterVertically)
                 ) {
                     Text(stringResource(R.string.txt_enviarcorreo_btn_enviar), color = Color.White)
                 }
             }
         } else {
-            // ── Portrait / tableta / plegable: layout vertical normal ─────────
             Card(modifier = Modifier.fillMaxWidth()) {
                 CuerpoConfirmacion(
-                    destinatarioEdit, asuntoEdit, mensajeEdit,
-                    campoEditando,
-                    onCampoEdit  = { campoEditando = it },
+                    destinatarioEdit, asuntoEdit, mensajeEdit, campoEditando,
+                    onCampoEdit          = { campoEditando = it },
                     onDestinatarioChange = { destinatarioEdit = it; campoEditando = null; onEditar("destinatario:$it") },
                     onAsuntoChange       = { asuntoEdit = it;       campoEditando = null; onEditar("asunto:$it") },
                     onMensajeChange      = { mensajeEdit = it;      campoEditando = null; onEditar("mensaje:$it") }
@@ -437,7 +417,6 @@ fun ConfirmacionUI(
     }
 }
 
-/** Contenido interior de la Card de confirmación, extraído para reutilizar. */
 @Composable
 private fun CuerpoConfirmacion(
     destinatarioEdit: String,
@@ -451,8 +430,8 @@ private fun CuerpoConfirmacion(
 ) {
     val espaciado = LocalEspaciado.current
     Column(
-        modifier              = Modifier.padding(espaciado.l),
-        verticalArrangement   = Arrangement.spacedBy(espaciado.m)
+        modifier            = Modifier.padding(espaciado.l),
+        verticalArrangement = Arrangement.spacedBy(espaciado.m)
     ) {
         FilaConfirmacion(
             etiqueta  = stringResource(R.string.txt_enviarcorreo_etiqueta_para),
@@ -479,7 +458,7 @@ private fun CuerpoConfirmacion(
 }
 
 // ---------------------------------------------------------------------------
-// FilaConfirmacion — sin cambios funcionales
+// FilaConfirmacion
 // ---------------------------------------------------------------------------
 
 @Composable
@@ -492,14 +471,13 @@ fun FilaConfirmacion(
 ) {
     val espaciado = LocalEspaciado.current
     val tamano    = LocalTamanioPantalla.current
-
     var textoTemp by remember(valor) { mutableStateOf(valor) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text  = etiqueta,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.Gray,
+            text     = etiqueta,
+            style    = MaterialTheme.typography.labelSmall,
+            color    = Color.Gray,
             fontSize = tamano.textoBody
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -539,7 +517,7 @@ fun FilaConfirmacion(
 }
 
 // ---------------------------------------------------------------------------
-// PasoUI — adaptado a orientación
+// PasoUI
 // ---------------------------------------------------------------------------
 
 @Composable
@@ -552,7 +530,6 @@ fun PasoUI(
     val espaciado = LocalEspaciado.current
     val tamano    = LocalTamanioPantalla.current
 
-    // En landscape compacto: título + descripción en Row, Card debajo
     if (horizontal && tamano == TamanioPantalla.COMPACTO) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -581,16 +558,11 @@ fun PasoUI(
             }
             if (valor.isNotEmpty()) {
                 Card(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        valor,
-                        modifier = Modifier.padding(espaciado.m),
-                        fontSize = tamano.textoBody
-                    )
+                    Text(valor, modifier = Modifier.padding(espaciado.m), fontSize = tamano.textoBody)
                 }
             }
         }
     } else {
-        // Portrait / tableta / plegable: layout vertical original
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(espaciado.m)
@@ -611,11 +583,7 @@ fun PasoUI(
             )
             if (valor.isNotEmpty()) {
                 Card {
-                    Text(
-                        valor,
-                        modifier = Modifier.padding(espaciado.m),
-                        fontSize = tamano.textoBody
-                    )
+                    Text(valor, modifier = Modifier.padding(espaciado.m), fontSize = tamano.textoBody)
                 }
             }
         }
@@ -623,7 +591,7 @@ fun PasoUI(
 }
 
 // ---------------------------------------------------------------------------
-// ResumenCorreo — sin cambios
+// ResumenCorreo
 // ---------------------------------------------------------------------------
 
 @Composable
@@ -638,11 +606,11 @@ fun ResumenCorreo(para: String, asunto: String, modo: String) {
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier              = Modifier.padding(espaciado.l),
-            verticalArrangement   = Arrangement.spacedBy(espaciado.xs)
+            modifier            = Modifier.padding(espaciado.l),
+            verticalArrangement = Arrangement.spacedBy(espaciado.xs)
         ) {
-            Text(stringResource(R.string.txt_enviarcorreo_resumen_para, para),   fontSize = tamano.textoBody)
-            Text(stringResource(R.string.txt_enviarcorreo_resumen_asunto, asunto), fontSize = tamano.textoBody)
+            Text(stringResource(R.string.txt_enviarcorreo_resumen_para, para),      fontSize = tamano.textoBody)
+            Text(stringResource(R.string.txt_enviarcorreo_resumen_asunto, asunto),  fontSize = tamano.textoBody)
             Text(stringResource(R.string.txt_enviarcorreo_resumen_modo, modoTexto), fontSize = tamano.textoBody)
         }
     }

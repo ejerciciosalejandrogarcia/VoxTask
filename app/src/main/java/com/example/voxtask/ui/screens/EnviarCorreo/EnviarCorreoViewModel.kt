@@ -16,6 +16,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -30,15 +32,19 @@ class EnviarCorreoViewModel : ViewModel() {
         const val WEB_CLIENT_ID = "820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com"
     }
 
-    var paso by mutableStateOf(PasoEnvio.DESTINATARIO)
-    var destinatario by mutableStateOf("")
-    var asunto by mutableStateOf("")
-    var modo by mutableStateOf("manual")
-    var mensaje by mutableStateOf("")
-    var errorMensaje by mutableStateOf("")
-    var accessToken by mutableStateOf("")
+    var paso          by mutableStateOf(PasoEnvio.DESTINATARIO)
+    var destinatario  by mutableStateOf("")
+    var asunto        by mutableStateOf("")
+    var modo          by mutableStateOf("manual")
+    var mensaje       by mutableStateOf("")
+    var accessToken   by mutableStateOf("")
     var necesitaVincularGoogle by mutableStateOf(false)
     var cargandoToken by mutableStateOf(false)
+
+    private val _errorChannel = Channel<String>(Channel.BUFFERED)
+    val errorFlow = _errorChannel.receiveAsFlow()
+
+    // -----------------------------------------------------------------------
 
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         return GoogleSignIn.getClient(
@@ -110,7 +116,7 @@ class EnviarCorreoViewModel : ViewModel() {
             ) {
                 necesitaVincularGoogle = true
             } else {
-                errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_token, e.message)
+                _errorChannel.send(contexto.getString(R.string.txt_enviarcorreo_error_token, e.message))
                 paso = PasoEnvio.ERROR
             }
         }
@@ -169,23 +175,21 @@ class EnviarCorreoViewModel : ViewModel() {
             val (nombre, valor) = campo.split(":", limit = 2)
             when (nombre) {
                 "destinatario" -> destinatario = valor
-                "asunto" -> asunto = valor
-                "mensaje" -> mensaje = valor
+                "asunto"       -> asunto = valor
+                "mensaje"      -> mensaje = valor
             }
         }
     }
 
-    private fun enviarCorreo(contexto: Context) {
+    fun enviarCorreo(contexto: Context) {
         viewModelScope.launch {
             paso = PasoEnvio.ENVIANDO
 
-            // Reutiliza obtenerToken en lugar de duplicar la lógica
             obtenerToken(contexto)
 
-            // Si obtenerToken falló, ya habrá puesto paso = ERROR o necesitaVincularGoogle
             if (paso == PasoEnvio.ERROR || necesitaVincularGoogle) return@launch
             if (accessToken.isEmpty()) {
-                errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío")
+                _errorChannel.send(contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío"))
                 paso = PasoEnvio.ERROR
                 return@launch
             }
@@ -193,15 +197,16 @@ class EnviarCorreoViewModel : ViewModel() {
             try {
                 android.util.Log.d("TOKEN_ENVIO", "Token a enviar: ${accessToken.take(30)}")
                 android.util.Log.d("TOKEN_ENVIO", "Para: $destinatario")
+
                 val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
                 val idiomaActual = prefs.getString("idioma", "es") ?: "es"
 
                 val request = EnviarCorreoRequest(
-                    token = accessToken,
-                    para = destinatario,
+                    token  = accessToken,
+                    para   = destinatario,
                     asunto = asunto,
                     mensaje = mensaje,
-                    modo = modo,
+                    modo   = modo,
                     idioma = idiomaActual
                 )
                 val response = N8nClient.api.enviarCorreo(request)
@@ -209,24 +214,26 @@ class EnviarCorreoViewModel : ViewModel() {
                     paso = PasoEnvio.ENVIADO
                     TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_exito))
                 } else {
-                    errorMensaje = contexto.getString(R.string.txt_enviarcorreo_error_generico)
+                    val mensajeError = contexto.getString(R.string.txt_enviarcorreo_error_generico)
+                    _errorChannel.send(mensajeError)
                     paso = PasoEnvio.ERROR
-                    TextoAVoz.hablar(contexto, errorMensaje)
+                    TextoAVoz.hablar(contexto, mensajeError)
                 }
             } catch (e: Exception) {
-                errorMensaje = e.message ?: contexto.getString(R.string.txt_enviarcorreo_error_generico)
+                val mensajeError = e.message ?: contexto.getString(R.string.txt_enviarcorreo_error_generico)
+                _errorChannel.send(mensajeError)
                 paso = PasoEnvio.ERROR
                 TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_error_generico))
             }
         }
     }
+
     fun reiniciar(contexto: Context) {
         destinatario = ""
-        asunto = ""
-        modo = "manual"
-        mensaje = ""
-        errorMensaje = ""
-        paso = PasoEnvio.DESTINATARIO
+        asunto       = ""
+        modo         = "manual"
+        mensaje      = ""
+        paso         = PasoEnvio.DESTINATARIO
         viewModelScope.launch {
             TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_paso_destinatario_pregunta))
         }

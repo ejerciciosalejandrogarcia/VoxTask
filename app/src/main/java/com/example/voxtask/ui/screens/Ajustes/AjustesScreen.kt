@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -75,6 +74,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.platform.LocalConfiguration
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -315,11 +315,9 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         TamanioPantalla.MEDIO     -> 48.dp
         TamanioPantalla.EXPANDIDO -> 56.dp
     }
-    val altoGrid = when (tamano) {
-        TamanioPantalla.COMPACTO  -> 100.dp
-        TamanioPantalla.MEDIO     -> 120.dp
-        TamanioPantalla.EXPANDIDO -> 150.dp
-    }
+
+    // Número de colores por fila en modo vertical (2 filas aprox)
+    val coloresPorFila = (ColoresClaros.size + 1) / 2
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -331,15 +329,12 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
             )
         },
         text = {
-            // La columna principal mantiene su scroll vertical por si la pantalla es muy pequeña
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                // ───────────────────────────────────────────────────────────
-                // PALETA MODO CLARO (Deslizable Horizontalmente)
-                // ───────────────────────────────────────────────────────────
+                // ── MODO CLARO ──
                 Text(
                     text = stringResource(R.string.opcion_color_interfaz_modo_claro),
                     fontSize = tamano.textoBody,
@@ -347,35 +342,52 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.padding(bottom = espaciado.s)
                 )
 
-                // Usamos una Row con horizontalScroll y un estado de scroll independiente para cada paleta
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()) // <- Esto activa el scroll horizontal
-                        .padding(vertical = espaciado.xs),
-                    horizontalArrangement = Arrangement.spacedBy(espaciado.xs) // Espaciado automático entre círculos
-                ) {
-                    ColoresClaros.forEach { color ->
-                        Box(
+                // En horizontal: una sola fila scrollable
+                // En vertical: dos filas estáticas con wrap (chunked)
+                val configLocal = LocalConfiguration.current
+                val esHorizontal = configLocal.screenWidthDp > configLocal.screenHeightDp
+
+                if (esHorizontal) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(vertical = espaciado.xs),
+                        horizontalArrangement = Arrangement.spacedBy(espaciado.xs)
+                    ) {
+                        ColoresClaros.forEach { color ->
+                            CirculoColor(
+                                color = color,
+                                seleccionado = color == colorClaro,
+                                tamano = tamanoCirculo,
+                                onClick = { themeManager.setColorClaro(color) }
+                            )
+                        }
+                    }
+                } else {
+                    // Dividir en 2 filas para evitar crash de LazyGrid en scroll anidado
+                    ColoresClaros.chunked(coloresPorFila).forEach { fila ->
+                        Row(
                             modifier = Modifier
-                                .size(tamanoCirculo)
-                                .clip(CircleShape)
-                                .background(color)
-                                .clickable { themeManager.setColorClaro(color) }
-                                .then(
-                                    if (color == colorClaro)
-                                        Modifier.border(3.dp, Color.White, CircleShape)
-                                    else Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = espaciado.xs),
+                            horizontalArrangement = Arrangement.spacedBy(espaciado.xs)
+                        ) {
+                            fila.forEach { color ->
+                                CirculoColor(
+                                    color = color,
+                                    seleccionado = color == colorClaro,
+                                    tamano = tamanoCirculo,
+                                    onClick = { themeManager.setColorClaro(color) }
                                 )
-                        )
+                            }
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(espaciado.l))
 
-                // ───────────────────────────────────────────────────────────
-                // PALETA MODO OSCURO (Deslizable Horizontalmente)
-                // ───────────────────────────────────────────────────────────
+                // ── MODO OSCURO ──
                 Text(
                     text = stringResource(R.string.opcion_color_interfaz_modo_oscuro),
                     fontSize = tamano.textoBody,
@@ -383,27 +395,42 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.padding(bottom = espaciado.s)
                 )
 
-                // Segunda Row con su propio scroll independiente
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()) // <- Esto activa el scroll horizontal
-                        .padding(vertical = espaciado.xs),
-                    horizontalArrangement = Arrangement.spacedBy(espaciado.xs)
-                ) {
-                    ColoresOscuros.forEach { color ->
-                        Box(
+                val coloresOscurosPorFila = (ColoresOscuros.size + 1) / 2
+
+                if (esHorizontal) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(vertical = espaciado.xs),
+                        horizontalArrangement = Arrangement.spacedBy(espaciado.xs)
+                    ) {
+                        ColoresOscuros.forEach { color ->
+                            CirculoColor(
+                                color = color,
+                                seleccionado = color == colorOscuro,
+                                tamano = tamanoCirculo,
+                                onClick = { themeManager.setColorOscuro(color) }
+                            )
+                        }
+                    }
+                } else {
+                    ColoresOscuros.chunked(coloresOscurosPorFila).forEach { fila ->
+                        Row(
                             modifier = Modifier
-                                .size(tamanoCirculo)
-                                .clip(CircleShape)
-                                .background(color)
-                                .clickable { themeManager.setColorOscuro(color) }
-                                .then(
-                                    if (color == colorOscuro)
-                                        Modifier.border(3.dp, Color.White, CircleShape)
-                                    else Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = espaciado.xs),
+                            horizontalArrangement = Arrangement.spacedBy(espaciado.xs)
+                        ) {
+                            fila.forEach { color ->
+                                CirculoColor(
+                                    color = color,
+                                    seleccionado = color == colorOscuro,
+                                    tamano = tamanoCirculo,
+                                    onClick = { themeManager.setColorOscuro(color) }
                                 )
-                        )
+                            }
+                        }
                     }
                 }
             }
@@ -417,6 +444,28 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                 )
             }
         }
+    )
+}
+
+// Composable auxiliar extraído para no repetir lógica
+@Composable
+private fun CirculoColor(
+    color: Color,
+    seleccionado: Boolean,
+    tamano: androidx.compose.ui.unit.Dp,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(tamano)
+            .clip(CircleShape)
+            .background(color)
+            .clickable(onClick = onClick)
+            .then(
+                if (seleccionado)
+                    Modifier.border(3.dp, Color.White, CircleShape)
+                else Modifier
+            )
     )
 }
 

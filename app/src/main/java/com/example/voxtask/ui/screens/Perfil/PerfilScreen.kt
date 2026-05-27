@@ -122,16 +122,6 @@ fun PerfilScreen(
                     }
 
                     Spacer(modifier = Modifier.height(espaciado.s))            // antes: 8.dp
-
-                    Text(
-                        text = "@${uiState.nombreUsuario}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = tamano.textoBody
-                    )
-
-                    Spacer(modifier = Modifier.height(espaciado.xl))           // antes: 24.dp
-
                     if (uiState.cargando) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     } else {
