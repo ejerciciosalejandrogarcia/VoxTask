@@ -169,4 +169,7 @@ class AjustesViewModel : ViewModel() {
             }
         }
     }
+    fun resetearIdiomaEspanol(contexto: Context) {
+        cargarIdiomas(contexto, "es") {}
+    }
 }

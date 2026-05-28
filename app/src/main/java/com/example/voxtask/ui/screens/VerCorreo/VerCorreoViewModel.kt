@@ -1,52 +1,122 @@
 package com.example.voxtask.ui.screens.VerCorreo
 
-import android.app.Application
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Correo
 import com.example.voxtask.databases.network.N8nClient
+import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+
+sealed class VerCorreoUiState {
+    object Cargando : VerCorreoUiState()
+    data class Exito(val correo: Correo) : VerCorreoUiState()
+    data class Error(val mensaje: Int, val esErrorDeCarga: Boolean = false) : VerCorreoUiState()
+}
 
 class VerCorreoViewModel : ViewModel() {
 
-    var correo by mutableStateOf<Correo?>(null)
-        private set
-    var cargando by mutableStateOf(false)
-    var error by mutableStateOf<String?>(null)
+    private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
-    fun obtenerTokenYCorreo(id: String,contexto: Context) {
+    private val _uiState = MutableStateFlow<VerCorreoUiState>(VerCorreoUiState.Cargando)
+    val uiState: StateFlow<VerCorreoUiState> = _uiState
+
+    private val _errorChannel = Channel<String>(Channel.BUFFERED)
+    val errorFlow = _errorChannel.receiveAsFlow()
+
+    // Guardamos el id para poder reintentar
+    private var correoId: String? = null
+
+    fun obtenerTokenYCorreo(id: String, contexto: Context) {
+        correoId = id
         viewModelScope.launch {
-            cargando = true
-            error = null
+            _uiState.value = VerCorreoUiState.Cargando
+
+            val uid = auth.currentUser?.uid
+            if (uid == null) {
+                _errorChannel.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_sin_sesion))
+                return@launch
+            }
+
             try {
-                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
-                val doc = FirebaseFirestore.getInstance()
-                    .collection("usuarios")
+                val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
+                val emailFirebase = auth.currentUser?.email ?: ""
+
+                if (cuentaGoogle?.account == null || cuentaGoogle.email != emailFirebase) {
+                    _uiState.value = VerCorreoUiState.Error(
+                        mensaje = R.string.error_general,
+                        esErrorDeCarga = false
+                    )
+                    return@launch
+                }
+
+                val accessToken = try {
+                    withContext(Dispatchers.IO) {
+                        val tokenActual = GoogleAuthUtil.getToken(
+                            contexto,
+                            cuentaGoogle.account!!,
+                            "oauth2:https://www.googleapis.com/auth/gmail.readonly"
+                        )
+                        GoogleAuthUtil.clearToken(contexto, tokenActual)
+                        GoogleAuthUtil.getToken(
+                            contexto,
+                            cuentaGoogle.account!!,
+                            "oauth2:https://www.googleapis.com/auth/gmail.readonly"
+                        )
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("VerCorreo", "Error obteniendo token: ${e.message}")
+                    _errorChannel.send(contexto.getString(R.string.error_general))
+                    return@launch
+                }
+
+                // Actualizamos el token en Firestore igual que en CorreoViewModel
+                firestore.collection("usuarios")
                     .document(uid)
-                    .get()
+                    .set(
+                        mapOf("gmailAccessToken" to accessToken),
+                        com.google.firebase.firestore.SetOptions.merge()
+                    )
                     .await()
-                val token = doc.getString("gmailAccessToken") ?: return@launch
 
-                // Añade esto para ver la URL exacta
-                android.util.Log.d("VerCorreo", "Llamando con id: $id")
-                android.util.Log.d("VerCorreo", "URL: ${N8nClient.BASE_URL}webhook/correo-detalle/correo/$id")
+                cargarCorreo(id, accessToken, contexto)
 
-                correo = N8nClient.api.obtenerCorreoPorId(id, token)
             } catch (e: Exception) {
-                error = contexto.getString(R.string.error_cargar_correo, e.message ?: "")
-                android.util.Log.e("VerCorreo", "Error: ${e.message}", e)
-            } finally {
-                cargando = false
+                android.util.Log.e("VerCorreo", "Exception general: ${e.message}")
+                _errorChannel.send(contexto.getString(R.string.error_general))
             }
         }
     }
 
+    private suspend fun cargarCorreo(id: String, token: String, contexto: Context) {
+        try {
+            android.util.Log.d("VerCorreo", "Llamando con id: $id")
+            val correo = N8nClient.api.obtenerCorreoPorId(id, token)
+            _uiState.value = VerCorreoUiState.Exito(correo)
+        } catch (e: Exception) {
+            android.util.Log.e("VerCorreo", "Error cargando correo: ${e.message}")
+            _errorChannel.send(contexto.getString(R.string.error_cargar_correo))
+            _uiState.value = VerCorreoUiState.Error(
+                mensaje = R.string.error_cargar_correo,
+                esErrorDeCarga = true
+            )
+        }
+    }
+
+    // Para el botón reintentar de la Screen
+    fun reintentar(contexto: Context) {
+        correoId?.let { obtenerTokenYCorreo(it, contexto) }
+    }
 }

@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">VoxTask</string>
+    <string name="txt_error">Erro: </string>
+    <string name="cerrar_sesion">Sair</string>
+    <string name="desc_boton_informacion">Informação</string>
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Criar conta</string>
@@ -29,7 +32,7 @@
     <string name="txt_destinatario_para">Para</string>
     <string name="txt_destinatario_tu">tu</string>
     <string name="error_cargar_correo">Erro ao carregar o e-mail: %1$s</string>
-
+    <string name="txt_error_ver_correo">Não foi possível visualizar o e-mail.\nTente novamente.</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Olá, como estás %1$s? O que gostarias que fizesse por ti?</string>
     <string name="menu_clima_titulo">Clima</string>
@@ -142,6 +145,7 @@
     <!-- Correo Screen -->
     <string name="txt_title_advertencia_ver_correos">Associa a tua conta Gmail para veres os teus e-mails</string>
     <string name="txt_btn_conectar_gmail">Associar Gmail</string>
+    <string name="txt_btn_reintentar_cargar_correos">Não foi possível carregar os e-mails. Tentar novamente</string>
     <string name="txt_title_no_correos">Não tens e-mails</string>
     <string name="txt_btne_crear_correo">Criar e-mail</string>
     <string name="error_sin_sesion">Não há nenhuma sessão ativa</string>
@@ -174,7 +178,7 @@
     <string name="txt_enviarcorreo_estado_enviando">A enviar e-mail...</string>
     <string name="txt_enviarcorreo_exito">E-mail enviado</string>
     <string name="txt_enviarcorreo_btn_otro">Enviar outro</string>
-    <string name="txt_enviarcorreo_btn_reintentar">Tentar novamente</string>
+    <string name="txt_enviarcorreo_btn_enviarcorreo">Não foi possível enviar o e-mail.\nTente novamente.</string>
     <string name="txt_enviarcorreo_resumen_para">Para: %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Assunto: %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Modo: %1$s</string>
@@ -192,6 +196,7 @@
     <string name="campo_nombre_usuario">Nome de utilizador</string>
     <string name="campo_contrasenia">Palavra-passe</string>
     <string name="btn_iniciar_sesion">Iniciar sessão</string>
+    <string name="desc_logo_google">Logotipo do Google</string>
     <string name="txt_o">ou</string>
     <string name="txt_iniciar_google">Continuar com o Google</string>
     <string name="txt_pregunta">Não tens conta?</string>

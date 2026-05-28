@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">VoxTask</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="desc_boton_informacion">Información</string>
+
+    <string name="txt_error">Error: </string>
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Crear cuenta</string>
@@ -30,7 +34,7 @@
     <string name="txt_destinatario_para">Para</string>
     <string name="txt_destinatario_tu">tú</string>
     <string name="error_cargar_correo">Error al cargar el correo: %1$s</string>
-
+    <string name="txt_error_ver_correo">No se pudo visualizar el correo.\nInténtelo de nuevo.</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hola, ¿cómo estás? %1$s. ¿Qué te gustaría que hiciera por ti?</string>
     <string name="menu_clima_titulo">Clima</string>
@@ -143,6 +147,7 @@
     <string name="txt_title_advertencia_ver_correos">Conecta tu cuenta de Gmail para ver tus correos</string>
     <string name="txt_btn_conectar_gmail">Conectar Gmail</string>
     <string name="txt_title_no_correos">No tienes correos</string>
+    <string name="txt_btn_reintentar_cargar_correos">No se pudieron cargar los correos. Intentar de nuevo</string>
     <string name="txt_btne_crear_correo">Crear correo</string>
     <string name="error_sin_sesion">No hay sesión activa</string>
     <string name="error_general">Se ha producido un error. Inténtalo de nuevo</string>
@@ -173,7 +178,7 @@
     <string name="txt_enviarcorreo_estado_enviando">Enviando correo...</string>
     <string name="txt_enviarcorreo_exito">Correo enviado</string>
     <string name="txt_enviarcorreo_btn_otro">Enviar otro</string>
-    <string name="txt_enviarcorreo_btn_reintentar">Intentar de nuevo</string>
+    <string name="txt_enviarcorreo_btn_enviarcorreo">No se pudo enviar el correo.\nInténtelo de nuevo.</string>
     <string name="txt_enviarcorreo_resumen_para">Para: %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Asunto: %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Modo: %1$s</string>
@@ -192,6 +197,7 @@
     <string name="campo_contrasenia">Contraseña</string>
     <string name="btn_iniciar_sesion">Iniciar sesión</string>
     <string name="txt_o">o</string>
+    <string name="desc_logo_google">Logo de Google</string>
     <string name="txt_iniciar_google">Continuar con Google</string>
     <string name="txt_pregunta">¿No tienes cuenta?</string>
     <string name="txt_respuesta">Regístrate</string>

@@ -75,7 +75,7 @@ class VerificacionViewModel : ViewModel() {
         if (introducido == correcto) {
             _estadoUi.value = _estadoUi.value.copy(verificado = true, mensajeError = null)
         } else {
-            _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_codigo_incorrecto)
+            _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_codigo_incorrecto)
         }
     }
 

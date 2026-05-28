@@ -58,15 +58,15 @@ class InicioSesionViewModel(
 
         when {
             nombreUsuario.isBlank() || contrasena.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_campos_vacios)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_campos_vacios)
                 return
             }
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_nombre_usuario_invalido)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_nombre_usuario_invalido)
                 return
             }
             !regexContrasenia.matches(contrasena) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_contrasenia_debil)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_contrasenia_debil)
                 return
             }
             else -> {
@@ -75,7 +75,7 @@ class InicioSesionViewModel(
                     resultado.onSuccess {
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true, mensajeError = null)
                     }.onFailure {
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_credenciales_incorrectas)
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_credenciales_incorrectas)
                     }
                 }
             }
@@ -100,7 +100,7 @@ class InicioSesionViewModel(
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true)
                     }
                 } else {
-                    _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_google_auth)
+                    _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_google_auth)
                 }
             }
     }
@@ -127,7 +127,7 @@ class InicioSesionViewModel(
 
                 ref.set(nuevoUsuario)
                     .addOnSuccessListener { alTerminar() }
-                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError =  R.string.err_firestore) }
+                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError =  R.string.txt_error+R.string.err_firestore) }
             }
         }.addOnFailureListener {
             _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_conexion)

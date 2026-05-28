@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">VoxTask</string>
+    <string name="txt_error">Error: </string>
+    <string name="cerrar_sesion">Log out</string>
+    <string name="desc_boton_informacion">Information</string>
+
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Create account</string>
@@ -29,7 +33,7 @@
     <string name="txt_destinatario_para">To</string>
     <string name="txt_destinatario_tu">you</string>
     <string name="error_cargar_correo">Error loading email: %1$s</string>
-
+    <string name="txt_error_ver_correo">Could not display the email.\nPlease try again.</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hello, how are you %1$s? What would you like me to do for you?</string>
     <string name="menu_clima_titulo">Weather</string>
@@ -143,6 +147,7 @@
     <string name="txt_title_advertencia_ver_correos">Connect your Gmail account to view your emails</string>
     <string name="txt_btn_conectar_gmail">Connect Gmail</string>
     <string name="txt_title_no_correos">You have no emails</string>
+    <string name="txt_btn_reintentar_cargar_correos">Couldn\'t load emails. Try again</string>
     <string name="txt_btne_crear_correo">Create email</string>
     <string name="error_sin_sesion">No active session</string>
     <string name="error_general">An error occurred. Please try again</string>
@@ -174,7 +179,7 @@
     <string name="txt_enviarcorreo_estado_enviando">Sending email...</string>
     <string name="txt_enviarcorreo_exito">Email sent</string>
     <string name="txt_enviarcorreo_btn_otro">Send another</string>
-    <string name="txt_enviarcorreo_btn_reintentar">Try again</string>
+    <string name="txt_enviarcorreo_btn_enviarcorreo">Could not send the email.\nPlease try again.</string>
     <string name="txt_enviarcorreo_resumen_para">To: %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Subject: %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Mode: %1$s</string>
@@ -189,6 +194,8 @@
     <string name="txt_enviarcorreo_error_generico">There was an error sending the email.</string>
 
     <!-- Inicio de Sesión Screen -->
+    <string name="desc_logo_google">Google logo</string>
+
     <string name="campo_nombre_usuario">Username</string>
     <string name="campo_contrasenia">Password</string>
     <string name="btn_iniciar_sesion">Log in</string>

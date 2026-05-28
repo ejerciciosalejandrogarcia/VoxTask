@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">VoxTask</string>
+    <string name="txt_error">Errore: </string>
+    <string name="cerrar_sesion">Disconnettersi</string>
+    <string name="desc_boton_informacion">Informazione</string>
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Crea un account</string>
@@ -29,7 +32,7 @@
     <string name="txt_destinatario_para">Per</string>
     <string name="txt_destinatario_tu">te</string>
     <string name="error_cargar_correo">Errore durante il caricamento dell\'email: %1$s</string>
-
+    <string name="txt_error_ver_correo">Impossibile visualizzare l\'email.\nRiprovare.</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Ciao %1$s, come stai? Cosa posso fare per te?</string>
     <string name="menu_clima_titulo">Meteo</string>
@@ -142,6 +145,7 @@
     <!-- Correo Screen -->
     <string name="txt_title_advertencia_ver_correos">Collega il tuo account Gmail per vedere le tue email</string>
     <string name="txt_btn_conectar_gmail">Collega Gmail</string>
+    <string name="txt_btn_reintentar_cargar_correos">Impossibile caricare le e-mail. Riprova</string>
     <string name="txt_title_no_correos">Non ci sono email</string>
     <string name="txt_btne_crear_correo">Crea email</string>
     <string name="error_sin_sesion">Nessuna sessione attiva</string>
@@ -175,7 +179,7 @@
     <string name="txt_enviarcorreo_estado_enviando">Invio email in corso...</string>
     <string name="txt_enviarcorreo_exito">Email inviata</string>
     <string name="txt_enviarcorreo_btn_otro">Inviane un\'altra</string>
-    <string name="txt_enviarcorreo_btn_reintentar">Riprova</string>
+    <string name="txt_enviarcorreo_btn_enviarcorreo">Impossibile inviare l\'email.\nRiprovare.</string>
     <string name="txt_enviarcorreo_resumen_para">A: %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Oggetto: %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Modalità: %1$s</string>
@@ -189,6 +193,7 @@
     <string name="txt_enviarcorreo_error_generico">Si è verificato un errore durante l\'invio dell\'email.</string>
 
     <!-- Inicio de Sesión Screen -->
+    <string name="desc_logo_google">Logo Google</string>
     <string name="campo_nombre_usuario">Nome utente</string>
     <string name="campo_contrasenia">Password</string>
     <string name="btn_iniciar_sesion">Accedi</string>

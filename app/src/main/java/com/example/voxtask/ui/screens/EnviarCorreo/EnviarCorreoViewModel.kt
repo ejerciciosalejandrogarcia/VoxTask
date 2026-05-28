@@ -189,7 +189,7 @@ class EnviarCorreoViewModel : ViewModel() {
 
             if (paso == PasoEnvio.ERROR || necesitaVincularGoogle) return@launch
             if (accessToken.isEmpty()) {
-                _errorChannel.send(contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío"))
+                _errorChannel.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío"))
                 paso = PasoEnvio.ERROR
                 return@launch
             }
@@ -215,12 +215,12 @@ class EnviarCorreoViewModel : ViewModel() {
                     TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_exito))
                 } else {
                     val mensajeError = contexto.getString(R.string.txt_enviarcorreo_error_generico)
-                    _errorChannel.send(mensajeError)
+                    _errorChannel.send(contexto.getString(R.string.txt_error)+mensajeError)
                     paso = PasoEnvio.ERROR
                     TextoAVoz.hablar(contexto, mensajeError)
                 }
             } catch (e: Exception) {
-                val mensajeError = e.message ?: contexto.getString(R.string.txt_enviarcorreo_error_generico)
+                val mensajeError = e.message ?: contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_generico)
                 _errorChannel.send(mensajeError)
                 paso = PasoEnvio.ERROR
                 TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_error_generico))
@@ -238,4 +238,8 @@ class EnviarCorreoViewModel : ViewModel() {
             TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_paso_destinatario_pregunta))
         }
     }
+
+
+
+
 }

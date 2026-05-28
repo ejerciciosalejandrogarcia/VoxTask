@@ -77,7 +77,7 @@ class PerfilViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_cargar_datos)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_cargar_datos)
             } finally {
                 _estadoUi.value = _estadoUi.value.copy(cargando = false)
             }
@@ -96,23 +96,23 @@ class PerfilViewModel : ViewModel() {
 
         when {
             nombre.isBlank() || nombreUsuario.isBlank() || primerApellido.isBlank() || segundoApellido.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_campos_vacios)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_campos_vacios)
                 return
             }
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_nombre_usuario_invalido)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_nombre_usuario_invalido)
                 return
             }
             !regexNombre.matches(nombre) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_nombre_invalido)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_nombre_invalido)
                 return
             }
             !regexNombre.matches(primerApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_primer_apellido_invalido)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_primer_apellido_invalido)
                 return
             }
             !regexNombre.matches(segundoApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_segundo_apellido_invalido)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_segundo_apellido_invalido)
                 return
             }
             else -> {

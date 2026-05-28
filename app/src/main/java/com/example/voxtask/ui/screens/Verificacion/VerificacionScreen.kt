@@ -300,23 +300,28 @@ fun VerificacionScreen(
                                     val lista = codigo.toMutableList()
                                     lista[i] = nuevo
                                     codigo = lista
-                                    if (nuevo.isNotEmpty() && i < 4) {
-                                        focusRequesters[i + 1].requestFocus()
+
+                                    when {
+                                        nuevo.isNotEmpty() && i < 4 -> focusRequesters[i + 1].requestFocus()
+                                        nuevo.isEmpty() && i > 0    -> focusRequesters[i - 1].requestFocus()
                                     }
                                 },
                                 modifier = Modifier
                                     .size(width = campoAncho, height = campoAlto)
                                     .focusRequester(focusRequesters[i])
                                     .onKeyEvent { evento ->
-                                        if (evento.key == Key.Backspace &&
-                                            evento.type == KeyEventType.KeyDown &&
-                                            codigo[i].isEmpty() && i > 0
-                                        ) {
-                                            val lista = codigo.toMutableList()
-                                            lista[i - 1] = ""
-                                            codigo = lista
-                                            focusRequesters[i - 1].requestFocus()
-                                            true
+                                        if (evento.key == Key.Backspace && evento.type == KeyEventType.KeyDown) {
+                                            if (codigo[i].isEmpty() && i > 0) {
+                                                // Campo vacío → borra el anterior y retrocede
+                                                val lista = codigo.toMutableList()
+                                                lista[i - 1] = ""
+                                                codigo = lista
+                                                focusRequesters[i - 1].requestFocus()
+                                                true
+                                            } else {
+                                                // Campo con contenido → deja que onValueChange lo gestione
+                                                false
+                                            }
                                         } else false
                                     },
                                 singleLine = true,

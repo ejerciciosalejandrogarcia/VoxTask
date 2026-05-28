@@ -34,7 +34,6 @@ import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
-
 // ---------------------------------------------------------------------------
 // Helpers de orientación y layout
 // ---------------------------------------------------------------------------
@@ -240,14 +239,42 @@ fun EnviarCorreoScreen(
                                 )
                             }
                             PasoEnvio.ENVIADO -> {
+                                // Cuenta atrás automática
+                                var segundos by remember { mutableStateOf(5) }
+
+                                LaunchedEffect(Unit) {
+                                    while (segundos > 0) {
+                                        kotlinx.coroutines.delay(1000)
+                                        segundos--
+                                    }
+                                    viewModel.reiniciar(contexto)
+                                }
+
                                 Text(
                                     text       = stringResource(R.string.txt_enviarcorreo_exito),
                                     style      = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color      = MaterialTheme.colorScheme.primary
                                 )
-                                Spacer(modifier = Modifier.height(espaciado.xl))
-                                Spacer(modifier = Modifier.height(espaciado.xl))
+                                Spacer(modifier = Modifier.height(espaciado.l))
+
+                                // Círculo con número
+                                Box(contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(
+                                        progress   = segundos / 5f,
+                                        modifier   = Modifier.size(64.dp),
+                                        color      = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text  = "$segundos",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(espaciado.l))
+
+                                // Botón para saltarse la espera
                                 Button(
                                     onClick  = { viewModel.reiniciar(contexto) },
                                     modifier = Modifier.fillMaxWidth()
@@ -261,7 +288,7 @@ fun EnviarCorreoScreen(
                                     modifier = Modifier.wrapContentWidth()
                                 ) {
                                     Text(
-                                        stringResource(R.string.txt_enviarcorreo_btn_reintentar),
+                                        stringResource(R.string.txt_enviarcorreo_btn_enviarcorreo),
                                         color = Color.White
                                     )
                                 }

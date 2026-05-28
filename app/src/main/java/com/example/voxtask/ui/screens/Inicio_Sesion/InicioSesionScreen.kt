@@ -310,7 +310,7 @@ fun InicioSesionScreen(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_google_logo),
-                                contentDescription = "Logo de Google",
+                                contentDescription = stringResource(R.string.desc_logo_google),
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(espaciado.s))

@@ -77,36 +77,36 @@ class RegistroUsuarioViewModel(
                     fechaNacimiento.isBlank() ||
                     correoElectronico.isBlank() ||
                     contrasenia.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_campos_vacios_registro)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_campos_vacios_registro)
                 return
             }
 
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_nombre_usuario_invalido_registro)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_nombre_usuario_invalido_registro)
                 return
             }
             !regexNombre.matches(nombre) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_nombre_invalido_registro)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_nombre_invalido_registro)
                 return
             }
 
             !regexNombre.matches(primerApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_primer_apellido_invalido_registro)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_primer_apellido_invalido_registro)
                 return
             }
 
             !regexNombre.matches(segundoApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_segundo_apellido_invalido_registro)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_segundo_apellido_invalido_registro)
                 return
             }
 
             !Patterns.EMAIL_ADDRESS.matcher(correoElectronico).matches() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_correo_invalido)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_correo_invalido)
                 return
             }
 
             !regexContrasenia.matches(contrasenia) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_contrasenia_debil_registro)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_contrasenia_debil_registro)
                 return
             }
 
@@ -130,7 +130,7 @@ class RegistroUsuarioViewModel(
                         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
                     } else {
                         val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_registro_fallido)
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_registro_fallido)
                     }
                 }
             }

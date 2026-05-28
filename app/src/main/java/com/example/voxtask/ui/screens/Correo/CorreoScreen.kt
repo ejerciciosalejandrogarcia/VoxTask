@@ -20,6 +20,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.utils.LocalEspaciado
@@ -32,6 +33,7 @@ import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.example.voxtask.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,13 +47,28 @@ fun CorreoScreen(
     val tamano = LocalTamanioPantalla.current
     val uiState by viewModel.uiState.collectAsState()
 
-    // Valores adaptativos
     val paddingContenido = dimensionResource(R.dimen.correo_padding_contenido)
     val tamanoBotonCrear = dimensionResource(R.dimen.correo_boton_crear)
     val tamanoIconoCrear = dimensionResource(R.dimen.correo_icono_crear)
-
-    // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Primero suscribimos el collector, luego llamamos a iniciar()
+    // así el Channel nunca pierde el mensaje
+    LaunchedEffect(Unit) {
+        launch {
+            viewModel.errorFlow.collect { mensaje ->
+                android.util.Log.d("SNACKBAR_TEST", "Error recibido: $mensaje")
+                snackbarHostState.showSnackbar(
+                    message = mensaje,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+        viewModel.iniciar(contexto)
+    }
 
     val lanzadorGoogle = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -66,23 +83,28 @@ fun CorreoScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.iniciar(contexto)
-    }
-
     PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { padding ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(paddingContenido),
-            contentAlignment = Alignment.Center
+                .padding(paddingContenido)
         ) {
-            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = espaciado.xl)
+                    .zIndex(10f)
+            )
+
             val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier
                     .widthIn(max = anchoMaximoContenido)
                     .fillMaxSize()
+                    .align(Alignment.Center)
             } else {
                 Modifier.fillMaxSize()
             }
@@ -106,7 +128,7 @@ fun CorreoScreen(
                             Text(
                                 text = stringResource(R.string.txt_title_advertencia_ver_correos),
                                 style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(bottom = espaciado.xl)  // antes: 24.dp
+                                modifier = Modifier.padding(bottom = espaciado.xl)
                             )
                             Button(
                                 onClick = {
@@ -125,7 +147,7 @@ fun CorreoScreen(
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(espaciado.s)  // antes: 8.dp
+                                verticalArrangement = Arrangement.spacedBy(espaciado.s)
                             ) {
                                 items(estado.correos) { correo ->
                                     TarjetaCorreo(correo, navController = navController)
@@ -135,21 +157,19 @@ fun CorreoScreen(
                     }
 
                     is CorreoUiState.Error -> {
-                        Text(
-                            text = stringResource(estado.mensaje),
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        if (estado.esErrorDeCarga) {
+                            Button(onClick = { viewModel.iniciar(contexto) }) {
+                                Text(stringResource(R.string.txt_btn_reintentar_cargar_correos))
+                            }
+                        }
                     }
                 }
 
-                // Botón para crear un correo
                 Button(
-                    onClick = {
-                        navController.navigate(VoxTaskScreen.EnviarCorreo.name)
-                    },
+                    onClick = { navController.navigate(VoxTaskScreen.EnviarCorreo.name) },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = espaciado.s, end = espaciado.xs)  // antes: 8.dp, 4.dp
+                        .padding(bottom = espaciado.s, end = espaciado.xs)
                         .size(tamanoBotonCrear),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -175,11 +195,10 @@ fun TarjetaCorreo(
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
 
-    // Valores adaptativos
     val paddingTarjeta = when (tamano) {
-        TamanioPantalla.COMPACTO  -> espaciado.m       // 12 dp
-        TamanioPantalla.MEDIO     -> espaciado.l       // 16 dp
-        TamanioPantalla.EXPANDIDO -> espaciado.xl      // 24 dp
+        TamanioPantalla.COMPACTO  -> espaciado.m
+        TamanioPantalla.MEDIO     -> espaciado.l
+        TamanioPantalla.EXPANDIDO -> espaciado.xl
     }
 
     Card(
@@ -199,13 +218,13 @@ fun TarjetaCorreo(
                 text = "De: ${correo.remitente}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = espaciado.xs)    // antes: 4.dp
+                modifier = Modifier.padding(top = espaciado.xs)
             )
             Text(
                 text = correo.fecha,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(top = espaciado.xs / 2) // antes: 2.dp
+                modifier = Modifier.padding(top = espaciado.xs / 2)
             )
         }
     }

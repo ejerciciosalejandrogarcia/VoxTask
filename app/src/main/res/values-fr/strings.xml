@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">VoxTask</string>
+    <string name="txt_error">Erreur : </string>
+    <string name="cerrar_sesion">Se déconnecter</string>
+    <string name="desc_boton_informacion">Information</string>
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Créer un compte</string>
@@ -29,6 +32,8 @@
     <string name="txt_destinatario_para">Pour</string>
     <string name="txt_destinatario_tu">toi</string>
     <string name="error_cargar_correo">Erreur lors du chargement de l\'e-mail : %1$s</string>
+    <string name="txt_error_ver_correo">Impossible d\'afficher l\'e-mail.\nVeuillez réessayer.</string>
+    <string name="txt_enviarcorreo_btn_enviarcorreo">Impossible d\'envoyer l\'e-mail.\nVeuillez réessayer.</string>
 
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Bonjour, comment vas-tu %1$s ? Que puis-je faire pour toi ?</string>
@@ -142,6 +147,7 @@
     <!-- Correo Screen -->
     <string name="txt_title_advertencia_ver_correos">Connecte ton compte Gmail pour voir tes e-mails</string>
     <string name="txt_btn_conectar_gmail">Connecter Gmail</string>
+    <string name="txt_btn_reintentar_cargar_correos">Impossible de charger les e-mails. Réessayer</string>
     <string name="txt_title_no_correos">Tu n\'as pas d\'e-mails</string>
     <string name="txt_btne_crear_correo">Créer un e-mail</string>
     <string name="error_sin_sesion">Aucune session active</string>
@@ -191,6 +197,7 @@
     <!-- Inicio de Sesión Screen -->
     <string name="campo_nombre_usuario">Nom d\'utilisateur</string>
     <string name="campo_contrasenia">Mot de passe</string>
+    <string name="desc_logo_google">Logo Google</string>
     <string name="btn_iniciar_sesion">Se connecter</string>
     <string name="txt_o">ou</string>
     <string name="txt_iniciar_google">Continuer avec Google</string>

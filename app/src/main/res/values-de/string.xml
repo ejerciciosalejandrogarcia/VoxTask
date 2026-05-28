@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">VoxTask</string>
+    <string name="txt_error">Fehler: </string>
+    <string name="cerrar_sesion">Abmelden</string>
+    <string name="desc_boton_informacion">Information</string>
 
     <!-- Registro Usuario Screen -->
     <string name="btn_registrar_usuario">Konto erstellen</string>
@@ -29,7 +32,7 @@
     <string name="txt_destinatario_para">An</string>
     <string name="txt_destinatario_tu">dich</string>
     <string name="error_cargar_correo">Fehler beim Laden der E-Mail: %1$s</string>
-
+    <string name="txt_error_ver_correo">Die E-Mail konnte nicht angezeigt werden.\nBitte erneut versuchen.</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hallo, wie geht es dir, %1$s? Was kann ich für dich tun?</string>
     <string name="menu_clima_titulo">Wetter</string>
@@ -143,6 +146,7 @@
     <string name="txt_title_advertencia_ver_correos">Verknüpfe dein Gmail-Konto, um deine E-Mails zu sehen</string>
     <string name="txt_btn_conectar_gmail">Gmail verknüpfen</string>
     <string name="txt_title_no_correos">Du hast keine E-Mails</string>
+    <string name="txt_btn_reintentar_cargar_correos">E-Mails konnten nicht geladen werden. Erneut versuchen</string>
     <string name="txt_btne_crear_correo">E-Mail erstellen</string>
     <string name="error_sin_sesion">Keine aktive Sitzung</string>
     <string name="error_general">Ein Fehler ist aufgetreten. Bitte versuche es erneut</string>
@@ -174,7 +178,7 @@
     <string name="txt_enviarcorreo_estado_enviando">E-Mail wird gesendet...</string>
     <string name="txt_enviarcorreo_exito">E-Mail gesendet</string>
     <string name="txt_enviarcorreo_btn_otro">Weitere senden</string>
-    <string name="txt_enviarcorreo_btn_reintentar">Erneut versuchen</string>
+    <string name="txt_enviarcorreo_btn_enviarcorreo">Die E-Mail konnte nicht gesendet werden.\nBitte erneut versuchen.</string>
     <string name="txt_enviarcorreo_resumen_para">An: %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Betreff: %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Modus: %1$s</string>
@@ -189,6 +193,7 @@
     <string name="txt_enviarcorreo_error_generico">Beim Senden der E-Mail ist ein Fehler aufgetreten.</string>
 
     <!-- Inicio de Sesión Screen -->
+    <string name="desc_logo_google">Google-Logo</string>
     <string name="campo_nombre_usuario">Benutzername</string>
     <string name="campo_contrasenia">Passwort</string>
     <string name="btn_iniciar_sesion">Anmelden</string>

@@ -84,7 +84,7 @@ fun PlantillaBase(
                             }) {
                                 Icon(
                                     Icons.Default.Info,
-                                    contentDescription = "Información",
+                                    contentDescription = stringResource(R.string.desc_boton_informacion),
                                     tint = Color.White
                                 )
                             }
@@ -97,7 +97,7 @@ fun PlantillaBase(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ExitToApp,
-                                    contentDescription = "Cerrar sesión",
+                                    contentDescription = stringResource(R.string.cerrar_sesion),
                                     tint = Color.White
                                 )
                             }

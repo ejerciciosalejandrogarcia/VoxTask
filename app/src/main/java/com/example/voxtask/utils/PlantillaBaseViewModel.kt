@@ -2,6 +2,7 @@ package com.example.voxtask.utils
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +16,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.voxtask.ui.screens.Ajustes.AjustesViewModel
+import java.util.Locale
 
 class PlantillaBaseViewModel : ViewModel() {
 
@@ -33,17 +36,19 @@ class PlantillaBaseViewModel : ViewModel() {
     }
 
     //Funcion que cierra sesion del usuario logueado y cierra la aplicacion
-    fun cerrarSesion(contexto: Context, actividad: Activity, alCerrar: () -> Unit) {
+    fun cerrarSesion(
+        contexto: Context,
+        actividad: Activity,
+        alCerrar: () -> Unit
+    ) {
         val uid = auth.currentUser?.uid
 
-        // Borrar el gmailAccessToken de Firestore
         if (uid != null) {
             firestore.collection("usuarios")
                 .document(uid)
                 .update("gmailAccessToken", "")
         }
 
-        // Cerrar sesión de Google primero, luego Firebase
         val clienteGoogle = GoogleSignIn.getClient(
             contexto,
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
@@ -51,10 +56,24 @@ class PlantillaBaseViewModel : ViewModel() {
 
         clienteGoogle.signOut().addOnCompleteListener {
             auth.signOut()
+            resetearIdiomaEspanol(contexto)  // ← directo, sin jaleo
             val themeManager = ThemeManager(contexto)
             themeManager.resetearColores()
             alCerrar()
             actividad.finishAffinity()
         }
+    }
+    fun resetearIdiomaEspanol(contexto: Context) {
+        val locale = Locale("es")
+        Locale.setDefault(locale)
+
+        val config = Configuration(contexto.resources.configuration)
+        config.setLocale(locale)
+        contexto.resources.updateConfiguration(config, contexto.resources.displayMetrics)
+
+        contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+            .edit()
+            .putString("idioma", "es")
+            .commit()
     }
 }
