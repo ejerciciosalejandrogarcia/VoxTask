@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.google.android.gms.location.CurrentLocationRequest
+import com.google.android.gms.location.Priority
 import com.google.android.gms.location.LocationServices
 import com.example.voxtask.R
 import com.example.voxtask.utils.PlantillaBase
@@ -63,13 +65,30 @@ fun ClimaScreen(
     val paddingVerticalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
     val tamanoIconoClimaPrincipal = dimensionResource(R.dimen.cambiar_contrasena_icono_email)
 
+    // ✅ Función reutilizable para obtener ubicación actual
+    fun obtenerUbicacionYCargar() {
+        val solicitud = CurrentLocationRequest.Builder()
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .build()
+
+        fusedClient.getCurrentLocation(solicitud, null)
+            .addOnSuccessListener { loc ->
+                if (loc != null) {
+                    viewModel.cargarClima(loc.latitude, loc.longitude)
+                } else {
+                    viewModel.establecerSinUbicacion()
+                }
+            }
+            .addOnFailureListener {
+                viewModel.establecerSinUbicacion()
+            }
+    }
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
         if (concedido) {
-            fusedClient.lastLocation.addOnSuccessListener { loc ->
-                loc?.let { viewModel.cargarClima(it.latitude, it.longitude) }
-            }
+            obtenerUbicacionYCargar() // ✅ Usa getCurrentLocation
         } else {
             viewModel.establecerSinUbicacion()
         }
@@ -80,15 +99,13 @@ fun ClimaScreen(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         )
         if (permiso == PackageManager.PERMISSION_GRANTED) {
-            fusedClient.lastLocation.addOnSuccessListener { loc ->
-                loc?.let { viewModel.cargarClima(it.latitude, it.longitude) }
-            }
+            obtenerUbicacionYCargar() // ✅ También aquí
         } else {
             launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    // --- ESCUCHA DE ERRORES AL ESTILO INICIO DE SESIÓN ---
+    // --- ESCUCHA DE ERRORES ---
     LaunchedEffect(uiState.mensajeErrorResId, uiState.errorMensajeDinamico) {
         if (uiState.mensajeErrorResId != null) {
             val mensajeFinal = if (uiState.errorMensajeDinamico != null) {
@@ -96,7 +113,6 @@ fun ClimaScreen(
             } else {
                 context.getString(uiState.mensajeErrorResId!!)
             }
-
             snackbarHostState.showSnackbar(
                 message = mensajeFinal,
                 duration = SnackbarDuration.Short
@@ -106,46 +122,22 @@ fun ClimaScreen(
     }
 
     // --- LÓGICA DE DEGRADADOS DINÁMICOS ---
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val colorArribaPorDefecto = MaterialTheme.colorScheme.surface
+    val colorAbajoPorDefecto = MaterialTheme.colorScheme.surfaceVariant
 
     val (colorArriba, colorAbajo, iconoClima) = if (uiState.datos != null) {
         val datos = uiState.datos!!
         val c = datos.codigo
         when {
-            !datos.es_de_dia -> Triple(
-                Color(0xFF0F172A).copy(alpha = 0.85f).compositeOver(primaryColor),
-                Color(0xFF1E293B).copy(alpha = 0.85f).compositeOver(primaryColor),
-                Icons.Default.NightsStay
-            )
-            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(
-                Color(0xFF475569).copy(alpha = 0.8f).compositeOver(primaryColor),
-                Color(0xFF64748B).copy(alpha = 0.8f).compositeOver(primaryColor),
-                Icons.Default.WaterDrop
-            )
-            c == 1030 || c == 1135 || c == 1147 -> Triple(
-                Color(0xFF64748B).copy(alpha = 0.75f).compositeOver(primaryColor),
-                Color(0xFF94A3B8).copy(alpha = 0.75f).compositeOver(primaryColor),
-                Icons.Default.BlurOn
-            )
-            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(
-                Color(0xFF1E3A8A).copy(alpha = 0.8f).compositeOver(primaryColor),
-                Color(0xFF3B82F6).copy(alpha = 0.8f).compositeOver(primaryColor),
-                Icons.Default.AcUnit
-            )
-            datos.temperatura >= 30.0 -> Triple(
-                Color(0xFFEA580C).copy(alpha = 0.85f).compositeOver(primaryColor),
-                Color(0xFFFBBF24).copy(alpha = 0.85f).compositeOver(primaryColor),
-                Icons.Default.WbSunny
-            )
-            else -> Triple(
-                primaryColor.copy(alpha = 0.85f).compositeOver(surfaceColor),
-                primaryColor.copy(alpha = 0.6f).compositeOver(surfaceColor),
-                Icons.Default.CloudQueue
-            )
+            !datos.es_de_dia -> Triple(Color(0xFF0F172A), Color(0xFF1E293B), Icons.Default.NightsStay)
+            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(Color(0xFF475569), Color(0xFF64748B), Icons.Default.WaterDrop)
+            c == 1030 || c == 1135 || c == 1147 -> Triple(Color(0xFF64748B), Color(0xFF94A3B8), Icons.Default.BlurOn)
+            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(Color(0xFF1E3A8A), Color(0xFF3B82F6), Icons.Default.AcUnit)
+            datos.temperatura >= 30.0 -> Triple(Color(0xFFEA580C), Color(0xFFFBBF24), Icons.Default.WbSunny)
+            else -> Triple(Color(0xFF0284C7), Color(0xFF38BDF8), Icons.Default.CloudQueue)
         }
     } else {
-        Triple(surfaceColor, MaterialTheme.colorScheme.surfaceVariant, Icons.Default.Cloud)
+        Triple(colorArribaPorDefecto, colorAbajoPorDefecto, Icons.Default.Cloud)
     }
 
     val animadoArriba by animateColorAsState(targetValue = colorArriba, animationSpec = tween(1000), label = "animArriba")
@@ -153,10 +145,8 @@ fun ClimaScreen(
 
     val colorDeContenido = if (uiState.datos != null) Color.White else MaterialTheme.colorScheme.onSurface
 
-    // === ¡SOLUCIÓN AQUÍ! Envolvemos todo en un Box raíz global ===
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Capa inferior: La interfaz base y la tarjeta del clima
         PlantillaBase(
             viewModel = viewModelPlantilla,
             navController = navController,
@@ -219,6 +209,7 @@ fun ClimaScreen(
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(Modifier.height(espaciado.m))
+                                    // ✅ Botón corregido: lanza el permiso, cargarClima se llama en el callback
                                     Button(
                                         onClick = { launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
                                         shape = RoundedCornerShape(14.dp)
@@ -240,7 +231,9 @@ fun ClimaScreen(
                                     )
                                     if (uiState.estaCargando) {
                                         CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp).padding(4.dp),
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .padding(4.dp),
                                             strokeWidth = 2.dp,
                                             color = colorDeContenido
                                         )
@@ -251,11 +244,7 @@ fun ClimaScreen(
                             else -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Button(
-                                        onClick = {
-                                            fusedClient.lastLocation.addOnSuccessListener { loc ->
-                                                loc?.let { viewModel.cargarClima(it.latitude, it.longitude) }
-                                            }
-                                        },
+                                        onClick = { obtenerUbicacionYCargar() }, // ✅ También corregido aquí
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.primary,
                                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -275,15 +264,11 @@ fun ClimaScreen(
             }
         }
 
-        // Capa superior absoluta: El SnackbarHost al estar dentro del Box raíz,
-        // ya reconoce perfectamente el .align() y se dibuja POR ENCIMA de la plantilla.
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
-                // Bajamos un poco el error (por ejemplo 56.dp que suele medir la TopAppBar)
-                // para que flote elegantemente sin tapar los botones de la cabecera
                 .padding(top = 56.dp)
                 .padding(horizontal = 16.dp)
                 .zIndex(999f)
