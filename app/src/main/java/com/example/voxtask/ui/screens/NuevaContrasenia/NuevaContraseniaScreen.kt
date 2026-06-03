@@ -30,7 +30,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -40,11 +39,12 @@ import com.example.voxtask.ui.theme.*
 import com.example.voxtask.R
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.LocalTamanioPantalla
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun NuevaContraseniaScreen(
@@ -52,6 +52,7 @@ fun NuevaContraseniaScreen(
     viewModel: CambiarContraseniaViewModel = viewModel(),
     oobCode: String = ""
 ) {
+    /** Variables */
     val estado by viewModel.estadoNueva.collectAsState()
     var verNueva by remember { mutableStateOf(false) }
     var verConfirmar by remember { mutableStateOf(false) }
@@ -60,8 +61,6 @@ fun NuevaContraseniaScreen(
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-
-    // Valores adaptativos
     val paddingHorizontalCard = dimensionResource(R.dimen.nueva_contrasenia_padding_horizontal)
     val paddingVerticalCard = dimensionResource(R.dimen.nueva_contrasenia_padding_vertical)
     val alturaBoton = dimensionResource(R.dimen.nueva_contrasenia_altura_boton)
@@ -71,11 +70,10 @@ fun NuevaContraseniaScreen(
     val tamanoCirculoMediano = dimensionResource(R.dimen.nueva_contrasenia_circulo_mediano)
     val tamanoCirculoPequeno = dimensionResource(R.dimen.nueva_contrasenia_circulo_pequeno)
     val anchoMaximoCard = tamano.anchoMaximoContenido
-
-    // Detectar orientación
     val configuracion = LocalConfiguration.current
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
+    /** SnackBar */
     LaunchedEffect(estadoNueva.mensajeError) {
         estadoNueva.mensajeError?.let { resId ->
             snackbarHostState.showSnackbar(
@@ -99,8 +97,8 @@ fun NuevaContraseniaScreen(
                 .zIndex(10f)
         )
 
+        /** Fondo de la aplicacion */
         if (esLandscape) {
-            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -117,7 +115,6 @@ fun NuevaContraseniaScreen(
                     .background(MaterialTheme.colorScheme.primary)
             )
         } else {
-            // ── Portrait: círculos originales ─────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -149,7 +146,7 @@ fun NuevaContraseniaScreen(
                     .blur(1.dp)
             )
         }
-
+        /** Formulario de nuevo cambio de contraseña */
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -179,7 +176,7 @@ fun NuevaContraseniaScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     when {
-                        // Cargando
+                        /** Pantalla cuando se esta procesando el cambio de contraseña */
                         estado.cargando -> {
                             CircularProgressIndicator(
                                 color = MaterialTheme.colorScheme.primary,
@@ -194,7 +191,7 @@ fun NuevaContraseniaScreen(
                             )
                         }
 
-                        // Éxito
+                        /** Pantalla cuando se ha cambiado la contraseña exitosamente */
                         estado.cambioExitoso -> {
                             var visible by remember { mutableStateOf(false) }
                             LaunchedEffect(Unit) { visible = true }
@@ -251,7 +248,7 @@ fun NuevaContraseniaScreen(
                             }
                         }
 
-                        // Formulario
+                        /** Formulario para cambiar la contraseña */
                         else -> {
                             Text(
                                 stringResource(R.string.txt_titulo_nueva_contrasena),

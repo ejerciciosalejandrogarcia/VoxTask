@@ -19,11 +19,10 @@ import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import androidx.compose.ui.graphics.compositeOver
 
 class AjustesViewModel : ViewModel() {
 
-    //Variables
+    /** Variables */
     var mostrarSelectorVoz by mutableStateOf(false)
     var vocesDisponibles by mutableStateOf<List<Voice>>(emptyList())
     var vozActual by mutableStateOf(TextoAVoz.vozElegida ?: "Por defecto")
@@ -41,7 +40,7 @@ class AjustesViewModel : ViewModel() {
     )
 
 
-    // Funcion que carga las voces y los textos
+    /** Permite cargar las voces disponibles */
     fun cargarVoces(contexto: android.content.Context) {
         val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idiomaActualCodigo = prefs.getString("idioma", "es") ?: "es"
@@ -52,7 +51,7 @@ class AjustesViewModel : ViewModel() {
                     !it.isNetworkConnectionRequired &&
                             it.locale.language == idiomaActualCodigo
                 }
-                .distinctBy { it.locale.country } // <- Una sola voz por región/acento
+                .distinctBy { it.locale.country }
                 .sortedBy { it.locale.getDisplayName(java.util.Locale("es", "ES")) }
         }
 
@@ -67,7 +66,7 @@ class AjustesViewModel : ViewModel() {
         }
     }
 
-
+    /** Permite cargar los idiomas disponibles */
     fun cargarIdiomas(contexto: Context, idioma: String, onListo: () -> Unit) {
         val locale = Locale(idioma)
         Locale.setDefault(locale)
@@ -84,7 +83,6 @@ class AjustesViewModel : ViewModel() {
 
         idiomaActual = idiomasDisponibles.find { it.first == idioma }?.second ?: idioma
 
-        // 👇 Cambiar idioma del TTS y dar mensaje de prueba en el nuevo idioma
         viewModelScope.launch {
             TextoAVoz.cambiarIdioma(locale)
             val mensajePrueba = when (idioma) {
@@ -100,13 +98,14 @@ class AjustesViewModel : ViewModel() {
 
         onListo()
     }
+    /** Permite que la aplicación mantenga el idioma seleccionado */
     fun inicializarIdioma(contexto: Context) {
         val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idioma = prefs.getString("idioma", "es") ?: "es"
         idiomaActual = idiomasDisponibles.find { it.first == idioma }?.second ?: "Español"
     }
 
-    //Funcion que aplica la voz seleccionada por el usuario y despues mostramos una prueba de como se escucha la voz elegida
+    /** Permite actualizar la voz seleccionada y la voz seleccionada dice la frase 'Esto es una prueba' segun el idioma seleccionado */
     fun aplicarVoz(nombreVoz: String, contexto: Activity) {
         TextoAVoz.cambiarVoz(nombreVoz)
         val voz = vocesDisponibles.find { it.name == nombreVoz }
@@ -126,7 +125,7 @@ class AjustesViewModel : ViewModel() {
         }
     }
 
-
+    /** Permite compartir el archivo APK de la aplicación mediante el selector de archivos */
     fun compartirAplicacion(contexto: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -134,7 +133,6 @@ class AjustesViewModel : ViewModel() {
                 val archivos = contexto.assets.list("")
                 Log.d("ASSETS", "Archivos disponibles: ${archivos?.joinToString()}")
 
-                // Copia desde assets donde metes tu APK release firmado
                 contexto.assets.open("VoxTask.apk").use { input ->
                     apkCompartido.outputStream().use { output ->
                         input.copyTo(output)
@@ -168,8 +166,5 @@ class AjustesViewModel : ViewModel() {
                 }
             }
         }
-    }
-    fun resetearIdiomaEspanol(contexto: Context) {
-        cargarIdiomas(contexto, "es") {}
     }
 }

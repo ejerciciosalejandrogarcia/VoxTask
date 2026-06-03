@@ -38,13 +38,16 @@ import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
 import kotlinx.coroutines.delay
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun VerificacionScreen(
     viewModel: VerificacionViewModel = viewModel(),
     navController: NavController
 ) {
+    /** Variables */
     val estadoUi by viewModel.estadoUi.collectAsState()
     var codigo by remember { mutableStateOf(List(5) { "" }) }
     val codigoUnido = codigo.joinToString("")
@@ -53,11 +56,7 @@ fun VerificacionScreen(
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
-
-    // Detectar orientación
-    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
-
-    // Valores adaptativos desde dimens.xml
+    val esLandscape= configuracion.screenWidthDp > configuracion.screenHeightDp
     val paddingHorizontal  = dimensionResource(R.dimen.verificacion_padding_horizontal)
     val paddingCardH       = dimensionResource(R.dimen.verificacion_padding_card_horizontal)
     val paddingCardV       = dimensionResource(R.dimen.verificacion_padding_card_vertical)
@@ -68,10 +67,14 @@ fun VerificacionScreen(
     val tamanoCirculoMediano = dimensionResource(R.dimen.inicio_sesion_circulo_mediano)
     val tamanoCirculoPequeno = dimensionResource(R.dimen.inicio_sesion_circulo_pequeno)
     val anchoMaximo        = tamano.anchoMaximoContenido
-
     var segundosRestantes by remember { mutableStateOf(300) }
     var expirado by remember { mutableStateOf(false) }
 
+    /**
+     * Gestiona los siguientes efectos:
+     * navegación tras éxito, control de temporizadores de caducidad y
+     * visualización de mensajes de error mediante snackbars.
+     */
     LaunchedEffect(estadoUi.verificado) {
         if (estadoUi.verificado) {
             navController.navigate(VoxTaskScreen.Inicio.name) {
@@ -125,6 +128,7 @@ fun VerificacionScreen(
     val focusRequesters = remember { List(5) { FocusRequester() } }
     LaunchedEffect(Unit) { focusRequesters[0].requestFocus() }
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -137,9 +141,9 @@ fun VerificacionScreen(
                 .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
+        /** Fondo de la apicacion */
 
         if (esLandscape) {
-            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -156,7 +160,6 @@ fun VerificacionScreen(
                     .background(MaterialTheme.colorScheme.primary)
             )
         } else {
-            // ── Portrait: círculos originales ─────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -188,7 +191,7 @@ fun VerificacionScreen(
                     .blur(1.dp)
             )
         }
-
+        /** Formulario de verificacion */
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -199,7 +202,6 @@ fun VerificacionScreen(
         ) {
             Spacer(modifier = Modifier.height(espaciado.xl))
 
-            // Limita el ancho en tabletas y plegables
             val modificadorCard = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier.widthIn(max = anchoMaximo).fillMaxWidth()
             } else {
@@ -254,6 +256,7 @@ fun VerificacionScreen(
                     Spacer(modifier = Modifier.height(espaciado.l))
 
                     if (estadoUi.cargando) {
+                        /** Cuando se envia el codigo al usuario */
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
@@ -265,6 +268,7 @@ fun VerificacionScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                     } else if (estadoUi.errorEnvio) {
+                        /** Si ha habido un error al enviar el codigo al usuario */
                         Text(
                             text = stringResource(R.string.txt_error_envio_codigo),
                             fontSize = tamano.textoBody,
@@ -272,6 +276,7 @@ fun VerificacionScreen(
                             color = Color(0xFFE53935)
                         )
                     } else {
+                        /** Si el codigo ha caducado */
                         Text(
                             text = if (expirado) stringResource(R.string.txt_codigo_expirado)
                             else stringResource(R.string.txt_expira_en, tiempoTexto),
@@ -283,7 +288,6 @@ fun VerificacionScreen(
 
                     Spacer(modifier = Modifier.height(espaciado.xl))
 
-                    // Campos del código
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -318,7 +322,6 @@ fun VerificacionScreen(
                                                 focusRequesters[i - 1].requestFocus()
                                                 true
                                             } else {
-                                                // Campo con contenido → deja que onValueChange lo gestione
                                                 false
                                             }
                                         } else false

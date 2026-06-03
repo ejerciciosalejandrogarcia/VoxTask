@@ -31,25 +31,24 @@ import com.example.voxtask.ui.theme.*
 import com.example.voxtask.R
 import com.example.voxtask.utils.LocalTamanioPantalla
 import com.example.voxtask.utils.LocalEspaciado
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.textoTitulo
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.anchoMaximoContenido
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun CambiarContrasenaScreen(
     navController: NavController,
     viewModel: CambiarContraseniaViewModel = viewModel()
 ) {
+    /** Variables */
     val context = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-
     val estadoUi by viewModel.estadoUi.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // Valores adaptativos
     val paddingHorizontalCard = dimensionResource(R.dimen.cambiar_contrasena_padding_card_horizontal)
     val paddingVerticalCard = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
     val alturaBoton = dimensionResource(R.dimen.cambiar_contrasena_altura_boton)
@@ -58,11 +57,10 @@ fun CambiarContrasenaScreen(
     val tamanoCirculoMediano = dimensionResource(R.dimen.cambiar_contrasena_circulo_mediano)
     val tamanoCirculoPequeno = dimensionResource(R.dimen.cambiar_contrasena_circulo_pequeno)
     val anchoMaximoCard = tamano.anchoMaximoContenido
-
-    // Detectar orientación
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
+    /** SnackBar */
     LaunchedEffect(estadoUi.mensajeError) {
         if (estadoUi.mensajeError != 0) {
             snackbarHostState.showSnackbar(
@@ -91,8 +89,8 @@ fun CambiarContrasenaScreen(
                 .zIndex(10f)
         )
 
+        /** Fondo de la pantalla */
         if (esLandscape) {
-            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -109,7 +107,6 @@ fun CambiarContrasenaScreen(
                     .background(MaterialTheme.colorScheme.primary)
             )
         } else {
-            // ── Portrait: círculos originales ─────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -141,7 +138,7 @@ fun CambiarContrasenaScreen(
                     .blur(1.dp)
             )
         }
-
+        /** Formulario cambio de contraseña */
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -173,9 +170,8 @@ fun CambiarContrasenaScreen(
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
+                    /** Pantalla informativo al enviar el correo */
                     if (estadoUi.correoEnviado) {
-                        // ── Pantalla de éxito ──
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = null,
@@ -212,7 +208,7 @@ fun CambiarContrasenaScreen(
                         }
 
                     } else {
-                        // ── Formulario ──
+                        /** Formulario para introducir el corre electronico para cambiar la contraseña */
                         Text(
                             text = stringResource(R.string.txt_titulo_recuperar_contrasenia),
                             fontSize = tamano.textoTitulo,

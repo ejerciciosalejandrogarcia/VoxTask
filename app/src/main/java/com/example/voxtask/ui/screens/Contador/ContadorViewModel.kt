@@ -26,23 +26,21 @@ import kotlinx.coroutines.withContext
 
 class ContadorViewModel(application: Application) : AndroidViewModel(application) {
 
+    /** Variables */
     private val _textoReconocido = MutableStateFlow("")
     val textoReconocido: StateFlow<String> = _textoReconocido
-
     var tiempoFormato   by mutableStateOf("00:00:00")
     var mostrarContador by mutableStateOf(false)
     var corriendo       by mutableStateOf(false)
         private set
-
     var terminado       by mutableStateOf(false)
         private set
-
     private var countdownJob: Job? = null
     private var mediaPlayer: android.media.MediaPlayer? = null
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Restaurar estado si el servicio estaba activo al volver a la pantalla
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite recuperar el estado del contador desde el servicio al volver a la pantalla
+     */
     fun restaurarSiServicioActivo() {
         if (ContadorService.segundosRestantes > 0) {
             mostrarContador = true
@@ -58,15 +56,17 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Entrada de voz
-    // ─────────────────────────────────────────────────────────────────────────
+    /** Permite recibir lo que el usuario dice y procesarlo */
     @RequiresApi(Build.VERSION_CODES.O)
     fun onTextoRecibido(texto: String, contexto: Context) {
         _textoReconocido.value = texto
         procesarComando(texto, contexto)
     }
 
+    /**
+     * Permite analizar el texto recibido, identificar los números y unidades de tiempo
+     * en varios idiomas y calcula el total para iniciar el contador
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun procesarComando(texto: String, contexto: Context) {
         android.util.Log.d("CONTADOR", "Texto recibido: $texto")
@@ -108,6 +108,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    /** *
+     * Permite iniciar el servicio de contador en primer plano pasando los segundos calculados
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun iniciarContadorConServicio(contexto: Context, totalSegundos: Int) {
         val intent = Intent(contexto, ContadorService::class.java).apply {
@@ -117,14 +120,13 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         contexto.startForegroundService(intent)
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Sonido + vibración
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Ejecuta una alarma sonora y vibracion para avisar al usuario cuando finaliza el contador
+     */
     private fun reproducirSonidoFin() {
         viewModelScope.launch(Dispatchers.Main) {
             val contexto = getApplication<Application>()
 
-            // 1. Sonido con MediaPlayer
             try {
                 val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                     ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -147,7 +149,6 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
                 android.util.Log.e("CONTADOR", "Error al reproducir sonido: ${e.message}")
             }
 
-            // 2. Vibración
             try {
                 val patron = longArrayOf(0, 400, 200, 400)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -172,9 +173,10 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Cuenta atrás principal
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite inicia la cuenta atrás visual, actualizando el formato
+     * del tiempo cada segundo y gestionando el evento de finalización
+     */
     fun iniciarContador(totalSegundos: Int) {
         mostrarContador = true
         corriendo       = true
@@ -204,9 +206,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Reanudar tras pausa
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite reanudar la cuenta atrás sincronizando tanto la interfaz de usuario como el servicio en segundo plano
+     */
     fun iniciar(contexto: Context) {
         val partes    = tiempoFormato.split(":")
         val restantes = partes[0].toInt() * 3600 + partes[1].toInt() * 60 + partes[2].toInt()
@@ -244,9 +246,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Parar / Cancelar
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite parar la cuenta atrás sincronizando tanto la interfaz de usuario como el servicio en segundo plano
+     */
     fun parar(contexto: Context) {
         corriendo = false
         countdownJob?.cancel()
@@ -256,6 +258,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         contexto.startService(intent)
     }
 
+    /**
+     * Permite cancelar la cuenta atrás sincronizando tanto la interfaz de usuario como el servicio en segundo plano
+     */
     fun cancelar(contexto: Context) {
         corriendo       = false
         mostrarContador = false
@@ -263,7 +268,6 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         countdownJob?.cancel()
         tiempoFormato   = "00:00:00"
 
-        // Parar sonido inmediatamente
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
@@ -274,6 +278,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         contexto.startService(intent)
     }
 
+    /**
+     * Permite cancelar cualquier tarea pendiente y liberar los recursos
+     */
     override fun onCleared() {
         super.onCleared()
         countdownJob?.cancel()
@@ -281,9 +288,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         mediaPlayer = null
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Sincronización con el servicio
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite mantener la interfaz de usuario sincronizada con el estado real del servicio
+     */
     fun comprobarEstadoService() {
         viewModelScope.launch {
             while (true) {
@@ -310,9 +317,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Normalización de números por idioma
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite traducir las palabras que representan números a su formato numérico según el idioma seleccionado.
+     */
     private fun normalizarNumeros(
         texto: String,
         idioma: String = TextoAVoz.localeActual.language

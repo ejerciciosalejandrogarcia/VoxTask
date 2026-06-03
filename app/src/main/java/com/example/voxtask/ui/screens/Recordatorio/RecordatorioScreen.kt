@@ -41,7 +41,6 @@ import com.example.voxtask.utils.TextoAVoz
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.util.Locale
 import com.example.voxtask.R
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -49,10 +48,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalLocale
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Pantalla principal
-// ──────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Pantalla principal
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RecordatorioScreen(
@@ -60,33 +58,32 @@ fun RecordatorioScreen(
     viewModel: RecordatorioViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val configuracion = LocalConfiguration.current
-
     val esLayout2Columnas = when (tamano) {
         TamanioPantalla.EXPANDIDO -> true
         TamanioPantalla.MEDIO     -> true
         TamanioPantalla.COMPACTO  ->
             configuracion.screenWidthDp > configuracion.screenHeightDp
     }
-
     val paddingContenido = dimensionResource(R.dimen.recordatorio_padding_contenido)
     val anchoMaximoContenido = tamano.anchoMaximoContenido
-
     @Suppress("NonObservableStateRead")
     val idiomaActual = TextoAVoz.localeActual.language
 
+    /**
+     * Da intrucciones auditivas segun el idioma seleccionado
+     */
     LaunchedEffect(Unit) {
-        // 1. Conectar PRIMERO el callback
         viewModel.onHablar = { texto ->
             CoroutineScope(Dispatchers.Main).launch {
                 TextoAVoz.hablar(contexto, texto)
             }
         }
 
-        // 2. Mensaje de bienvenida DESPUÉS
         val mensaje = when (idiomaActual) {
             "en" -> "Say 'create event' or 'delete event'"
             "fr" -> "Dites 'créer événement' ou 'supprimer événement'"
@@ -97,6 +94,8 @@ fun RecordatorioScreen(
         }
         TextoAVoz.hablar(contexto, mensaje)
     }
+
+
     PlantillaBase(
         viewModel = viewModelPlantilla,
         navController = navController,
@@ -150,11 +149,9 @@ fun RecordatorioScreen(
         }
     }
 }
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Grid del calendario
-// ──────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Esta funcion permite mostrar el calendario del mes y permite tocar los días
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarioGrid(viewModel: RecordatorioViewModel) {
@@ -272,10 +269,9 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
     }
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Panel de eventos del día seleccionado
-// ──────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Esta funcion permite mostrar la lista de eventos del día seleccionado y borrarlos
+ */
 @SuppressLint("NonObservableLocale")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -289,10 +285,8 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
     val tamanoIconoEliminar   = dimensionResource(R.dimen.recordatorio_icono_eliminar)
     val paddingFilaEvento     = dimensionResource(R.dimen.recordatorio_padding_fila_evento)
 
-    // ✅ No mostrar nada mientras se está creando un evento por voz
     if (viewModel.creandoEvento) return
 
-    // ✅ No mostrar nada si no hay día seleccionado
     if (viewModel.diaSeleccionado == null) {
         Box(
             modifier = Modifier

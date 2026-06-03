@@ -28,7 +28,6 @@ import com.example.voxtask.R
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.LocalTamanioPantalla
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
@@ -38,7 +37,9 @@ import com.example.voxtask.utils.TextoAVoz
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,22 +48,22 @@ fun InicioScreen(
     navController: NavController,
     plantillaBaseViewModel: PlantillaBaseViewModel
 ) {
+    /** Variables */
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val usuario = FirebaseAuth.getInstance().currentUser
     val uid = usuario?.uid
     var mostrarTextos by remember { mutableStateOf(false) }
-
     var tieneLista by remember { mutableStateOf(false) }
     var tieneEventos by remember { mutableStateOf(false) }
-
-    // Valores adaptativos
     val paddingHorizontal = dimensionResource(R.dimen.inicio_padding_horizontal)
     val paddingVertical = dimensionResource(R.dimen.inicio_padding_vertical)
-    // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
+    /**
+     * Le da una bienvenida al usuario y proporciona una guia auditiva
+     */
     LaunchedEffect(uid) {
         val nombreUsuarioGenerico = contexto.getString(R.string.txt_usuario_generico)
 
@@ -133,13 +134,12 @@ fun InicioScreen(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = paddingHorizontal, vertical = paddingVertical), // antes: 20.dp, 24.dp
+                    .padding(horizontal = paddingHorizontal, vertical = paddingVertical),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 AnimatedVisibility(visible = mostrarTextos) {
 
-                    // Nuevo: limita el ancho en tabletas y plegables, centrado automático
                     val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
                         Modifier
                             .widthIn(max = anchoMaximoContenido)
@@ -147,10 +147,10 @@ fun InicioScreen(
                     } else {
                         Modifier.fillMaxWidth()
                     }
-
+                    /** Opciones del inicio */
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(espaciado.m), // antes: 12.dp
+                        verticalArrangement = Arrangement.spacedBy(espaciado.m),
                         modifier = modificadorContenido
                     ) {
                         TarjetaMenu(
@@ -184,7 +184,7 @@ fun InicioScreen(
                             titulo = stringResource(R.string.menu_clima_titulo),
                             subtexto = stringResource(R.string.menu_clima_subtexto)
                         )
-                        Spacer(modifier = Modifier.height(espaciado.xl))        // antes: 32.dp
+                        Spacer(modifier = Modifier.height(espaciado.xl))
                     }
                 }
             }
@@ -192,6 +192,9 @@ fun InicioScreen(
     }
 }
 
+/**
+ * Esta funcion crea las tarjetas de cada opcion con su icono,titulo y descripcion
+ */
 @Composable
 fun TarjetaMenu(
     icono: ImageVector,
@@ -200,8 +203,6 @@ fun TarjetaMenu(
 ) {
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-
-    // Valores adaptativos
     val paddingTarjeta = dimensionResource(R.dimen.inicio_padding_tarjeta)
     val tamanoIcono = dimensionResource(R.dimen.inicio_icono_tarjeta)
 
@@ -215,15 +216,15 @@ fun TarjetaMenu(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(paddingTarjeta),                               // antes: 20.dp fijo
+                .padding(paddingTarjeta),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(espaciado.l)  // antes: 16.dp
+            horizontalArrangement = Arrangement.spacedBy(espaciado.l)
         ) {
             Icon(
                 imageVector = icono,
                 contentDescription = titulo,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(tamanoIcono)                   // antes: 32.dp fijo
+                modifier = Modifier.size(tamanoIcono)
             )
             Column {
                 Text(

@@ -30,26 +30,26 @@ import com.example.voxtask.utils.TextoAVoz
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Producto
 import com.example.voxtask.utils.PlantillaBaseViewModel
-
+/**
+ * Pantalla principal
+ */
 @Composable
 fun ListaCompraScreen(
     viewModelPlantilla: PlantillaBaseViewModel,
     viewModel: ListaCompraViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     var itemAEliminar by remember { mutableStateOf<Producto?>(null) }
-
-    // Valores adaptativos
     val paddingContenido = dimensionResource(R.dimen.lista_compra_padding_contenido)
     val paddingFilaHorizontal = dimensionResource(R.dimen.lista_compra_padding_fila_horizontal)
     val paddingFilaVertical = dimensionResource(R.dimen.lista_compra_padding_fila_vertical)
-    // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
-    // Mensaje de confirmación a la hora de eliminar un producto
+    /** Ventana emergente de la opcion 'eliminar producto' */
     itemAEliminar?.let { producto ->
         AlertDialog(
             onDismissRequest = { itemAEliminar = null },
@@ -71,6 +71,9 @@ fun ListaCompraScreen(
         )
     }
 
+    /**
+     * Da intrucciones auditivas segun el idioma seleccionado
+     */
     LaunchedEffect(Unit) {
         val idioma = TextoAVoz.localeActual.language
         val mensaje = when (idioma) {
@@ -83,6 +86,7 @@ fun ListaCompraScreen(
         }
         TextoAVoz.hablar(contexto, mensaje)
     }
+    /** Lista de la compra */
     PlantillaBase(
         viewModel = viewModelPlantilla,
         textoInformacion = stringResource(R.string.txt_info_lista_compra),
@@ -93,10 +97,9 @@ fun ListaCompraScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(paddingContenido),             // antes: 16.dp fijo
+                .padding(paddingContenido),
             contentAlignment = Alignment.TopCenter
         ) {
-            // Nuevo: limita el ancho en tabletas y plegables, centrado automático
             val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier
                     .widthIn(max = anchoMaximoContenido)
@@ -106,7 +109,7 @@ fun ListaCompraScreen(
             }
 
             Column(modifier = modificadorContenido) {
-                // Cuando no haya ningún producto en la lista
+                 /** Pantalla cuando no hay ningun producto registrado */
                 if (viewModel.productos.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -119,10 +122,10 @@ fun ListaCompraScreen(
                             fontSize = tamano.textoBody
                         )
                     }
-                    // Si hay productos en la lista
+                    /** Pantalla cuando hay productos registrados */
                 } else {
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(espaciado.s) // antes: 8.dp
+                        verticalArrangement = Arrangement.spacedBy(espaciado.s)
                     ) {
                         items(viewModel.productos) { item ->
                             Row(
@@ -131,8 +134,8 @@ fun ListaCompraScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                                     .padding(
-                                        horizontal = paddingFilaHorizontal,  // antes: 16.dp fijo
-                                        vertical = paddingFilaVertical       // antes: 12.dp fijo
+                                        horizontal = paddingFilaHorizontal,
+                                        vertical = paddingFilaVertical
                                     ),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween

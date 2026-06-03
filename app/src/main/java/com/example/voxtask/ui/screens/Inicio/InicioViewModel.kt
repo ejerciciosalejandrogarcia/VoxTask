@@ -1,26 +1,15 @@
 package com.example.voxtask.ui.screens.Inicio
 
 
-import android.app.Activity
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.example.voxtask.utils.TextoAVoz
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 class InicioViewModel : ViewModel() {
 
-
-    //Variables
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+    /** Variables */
     var bienvenidaDada = false
     private val _textoReconocido = MutableStateFlow("")
-    val textoReconocido: StateFlow<String> = _textoReconocido
     var abrirContador: () -> Unit = {}
     var abrirListaCompra: () -> Unit = {}
     var abrirRecordatorio: () -> Unit = {}
@@ -28,13 +17,13 @@ class InicioViewModel : ViewModel() {
     var abrirClima: () -> Unit = {}
 
 
-    //Funcion que recibe el texto transformado por voz y lo convierte a minusculas y elimina espacios
+    /** Permite recibir el texto transformado por voz y lo convierte a minusculas y elimina los espacions */
     fun onTextoRecibido(texto: String) {
         _textoReconocido.value = texto
         procesarComando(texto)
     }
 
-    //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
+    /** Permite procesar el texto mediante la voz y ejecutar las acciones programadas dependiendo del idioma seleccionado */
     private fun procesarComando(texto: String) {
         val textoLower = texto.lowercase()
         val idioma = TextoAVoz.localeActual.language
@@ -57,30 +46,6 @@ class InicioViewModel : ViewModel() {
             textoLower.contains(comandoRecordatorio) -> abrirRecordatorio()
             textoLower.contains(comandoLista)        -> abrirListaCompra()
             textoLower.contains(comandoClima)        -> abrirClima()
-
-        }
-    }
-
-    fun cerrarSesion(contexto: Context, actividad: Activity, alCerrar: () -> Unit) {
-        val uid = auth.currentUser?.uid
-
-        // Borrar el gmailAccessToken de Firestore
-        if (uid != null) {
-            firestore.collection("usuarios")
-                .document(uid)
-                .update("gmailAccessToken", "")
-        }
-
-        // Cerrar sesión de Google primero, luego Firebase
-        val clienteGoogle = GoogleSignIn.getClient(
-            contexto,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-        )
-
-        clienteGoogle.signOut().addOnCompleteListener {
-            auth.signOut()
-            alCerrar()
-            actividad.finishAffinity()
         }
     }
 }

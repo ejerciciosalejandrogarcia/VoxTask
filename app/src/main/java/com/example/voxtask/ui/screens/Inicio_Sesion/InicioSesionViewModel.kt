@@ -19,11 +19,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import android.content.Context
-import android.provider.Settings.Global.getString
-import androidx.compose.ui.res.stringResource
 import com.example.voxtask.R
 import com.google.android.gms.common.api.Scope
-
+/**
+ * Representa el estado de la UI
+ */
 data class InicioSesionUiState(
     val nombreUsuario: String = "",
     val contrasena: String = "",
@@ -35,20 +35,21 @@ class InicioSesionViewModel(
     private val usuarioRepository: UsuarioDao = UsuarioRepository()
 ) : ViewModel() {
 
+    /** Variables */
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-
     private val _estadoUi = MutableStateFlow(InicioSesionUiState())
     val estadoUi: StateFlow<InicioSesionUiState> = _estadoUi.asStateFlow()
 
+    /** Actualiza el nombre de usuario en el estado */
     fun alCambiarNombreUsuario(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(nombreUsuario = valor)
     }
-
+    /** Actualiza la contraseña en el estado */
     fun alCambiarContrasena(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(contrasena = valor)
     }
-
+    /** Permite gestionar los posibles errores a la hora de iniciar sesion y si es exitoso el usuario se le redijira a 'Verificacion' */
     fun iniciarSesion() {
         val nombreUsuario = _estadoUi.value.nombreUsuario.trim()
         val contrasena = _estadoUi.value.contrasena.trim()
@@ -82,6 +83,10 @@ class InicioSesionViewModel(
         }
     }
 
+    /**
+     * Permite autenticar al usuario en Firebase utilizando las credenciales de Google y actualiza
+     * el usuario, marcando el estado de inicio de sesión como exitoso
+     */
     fun autenticarConGoogle(tokenGoogle: String, serverAuthCode: String? = null) {
         val credencial = GoogleAuthProvider.getCredential(tokenGoogle, null)
 
@@ -104,7 +109,9 @@ class InicioSesionViewModel(
                 }
             }
     }
-
+    /**
+     * Permiet inicializar o actualizar el perfil del usuario en Firestore si no existe
+     */
     private fun guardarOActualizarUsuarioEnFirestore(uid: String, alTerminar: () -> Unit) {
         val usuarioFirebase = auth.currentUser ?: return
         val ref = firestore.collection("usuarios").document(uid)
@@ -134,9 +141,19 @@ class InicioSesionViewModel(
         }
     }
 
+    /**
+     * Permite limpiar los mensajes de error de la pantalla 'Cambiar Contrasenia'
+     */
     fun limpiarError() { _estadoUi.value = _estadoUi.value.copy(mensajeError = null) }
+    /**
+     * Permite reiniciar la UI
+     */
     fun limpiarEstadoInicioSesion() { _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = false) }
 
+    /**
+     * Permite devolver el cliente de inicio de sesión de Google con los permisos
+     * necesarios para acceder a la API de Gmail en modo lectura
+     */
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")

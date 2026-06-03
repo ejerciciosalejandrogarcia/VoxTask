@@ -4,13 +4,17 @@ import com.example.voxtask.databases.dao.ProductoDao
 import com.example.voxtask.databases.model.Producto
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-
+/**
+ * Repositorio encargado de las operaciones para los productos
+ */
 class ProductoRepository : ProductoDao {
 
-    //Variables
+    /** Variables */
     private val db = FirebaseFirestore.getInstance()
 
-    //Funciones
+    /**
+     * Agrega un nuevo producto al subcoleccion 'lista_compra' de un usuario en especifico
+     */
     override suspend fun agregar(usuarioId: String, producto: Producto) {
         db.collection("usuarios")
             .document(usuarioId)
@@ -19,6 +23,9 @@ class ProductoRepository : ProductoDao {
             .set(producto)
             .await()
     }
+    /**
+     * Elimina un producto al subcoleccion 'lista_compra' de un usuario en especifico
+     */
     override suspend fun eliminar(usuarioId: String, productoId: String) {
         db.collection("usuarios")
             .document(usuarioId)
@@ -28,6 +35,9 @@ class ProductoRepository : ProductoDao {
             .await()
     }
 
+    /**
+     * Obtiene una lista de productos de un usuario en especifico
+     */
     override suspend fun obtenerPorUsuario(usuarioId: String): List<Producto> {
         return db.collection("usuarios")
             .document(usuarioId)

@@ -38,11 +38,12 @@ import com.example.voxtask.VoxTaskScreen
 import com.example.voxtask.ui.theme.*
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.LocalTamanioPantalla
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
-
+/**
+ * Pantalla principal
+ */
 @RequiresApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
@@ -52,6 +53,7 @@ fun InicioSesionScreen(
     alPulsarGoogle: () -> Unit,
     viewModel: InicioSesionViewModel = viewModel()
 ) {
+    /** Variables */
     val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -59,11 +61,7 @@ fun InicioSesionScreen(
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
-
-    // Detectar orientación
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
-
-    // Valores adaptativos
     val paddingHorizontalCard = dimensionResource(R.dimen.inicio_sesion_padding_card_horizontal)
     val paddingVerticalCard = dimensionResource(R.dimen.inicio_sesion_padding_card_vertical)
     val alturaBotonPrincipal = dimensionResource(R.dimen.inicio_sesion_altura_boton_principal)
@@ -73,6 +71,11 @@ fun InicioSesionScreen(
     val tamanoCirculoPequeno = dimensionResource(R.dimen.inicio_sesion_circulo_pequeno)
     val anchoMaximoCard = tamano.anchoMaximoContenido
 
+    /**
+     * Gestiona el estado y la navegacion del inicio de sesion. Si el usuario se pudo loguear,
+     * se le redirije a la pantall de 'Verificacion' y restablece el estado
+     * de inicio de sesión
+     */
     LaunchedEffect(estadoUi.inicioSesionExitoso) {
         if (estadoUi.inicioSesionExitoso) {
             alIniciarSesionExitosamente()
@@ -85,6 +88,7 @@ fun InicioSesionScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        /** SnackBar */
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
@@ -92,9 +96,8 @@ fun InicioSesionScreen(
                 .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
-
+        /** Fondo de la aplicacion */
         if (esLandscape) {
-            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -111,7 +114,6 @@ fun InicioSesionScreen(
                     .background(MaterialTheme.colorScheme.primary)
             )
         } else {
-            // ── Portrait: círculos originales ─────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -143,8 +145,7 @@ fun InicioSesionScreen(
                     .blur(1.dp)
             )
         }
-
-        // ── Contenido ─────────────────────────────────────────────────────────
+        /** Formulario de inicio de sesion */
         Column(
             modifier = Modifier
                 .fillMaxSize()

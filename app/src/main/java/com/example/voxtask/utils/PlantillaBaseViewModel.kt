@@ -16,16 +16,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.example.voxtask.ui.screens.Ajustes.AjustesViewModel
 import java.util.Locale
 
 class PlantillaBaseViewModel : ViewModel() {
 
-    //Variables
+    /** Variables */
     private val auth = FirebaseAuth.getInstance()
-
     private val firestore = FirebaseFirestore.getInstance()
-    // Estado para la URI del fondo personalizado
     var fondoPersonalizadoUri by mutableStateOf<Uri?>(null)
     private val _fondoUri = MutableStateFlow<Uri?>(null)
     val fondoUri: StateFlow<Uri?> = _fondoUri.asStateFlow()
@@ -35,7 +32,7 @@ class PlantillaBaseViewModel : ViewModel() {
         fondoPersonalizadoUri = uri
     }
 
-    //Funcion que cierra sesion del usuario logueado y cierra la aplicacion
+    /** Permite que cierra sesion del usuario logueado,borre sus preferencias y cierra la aplicacion */
     fun cerrarSesion(
         contexto: Context,
         actividad: Activity,
@@ -56,13 +53,14 @@ class PlantillaBaseViewModel : ViewModel() {
 
         clienteGoogle.signOut().addOnCompleteListener {
             auth.signOut()
-            resetearIdiomaEspanol(contexto)  // ← directo, sin jaleo
+            resetearIdiomaEspanol(contexto)
             val themeManager = ThemeManager(contexto)
             themeManager.resetearColores()
             alCerrar()
             actividad.finishAffinity()
         }
     }
+    /** Permite que resetee el idioma seleccionado y que pase a español */
     fun resetearIdiomaEspanol(contexto: Context) {
         val locale = Locale("es")
         Locale.setDefault(locale)

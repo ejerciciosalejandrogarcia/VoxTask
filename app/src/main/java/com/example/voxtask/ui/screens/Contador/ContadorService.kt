@@ -16,27 +16,29 @@ import kotlinx.coroutines.*
 
 class ContadorService : Service() {
 
+    /** Variables */
     private val scope = CoroutineScope(Dispatchers.Default + Job())
     private var contadorJob: Job? = null
 
+    /** Configuracion del contador */
     companion object {
+        /** Variables */
         const val CHANNEL_ID              = "contador_channel"
         const val CHANNEL_ID_FINALIZADO   = "contador_channel_finalizado"
         const val NOTIF_ID                = 1
-
         const val EXTRA_SEGUNDOS  = "segundos"
-
         const val ACCION_INICIAR  = "INICIAR"
         const val ACCION_PARAR    = "PARAR"
         const val ACCION_REANUDAR = "REANUDAR"
         const val ACCION_CANCELAR = "CANCELAR"
-
         var estaActivo: Boolean    = false
         var estaPausado: Boolean   = false
         var segundosRestantes: Int = 0
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite gestionar las siguientes peticiones: iniciar, pausar, reanudar o cancelar
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         crearCanales()
 
@@ -95,9 +97,7 @@ class ContadorService : Service() {
         return START_NOT_STICKY
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Cuenta atrás del servicio
-    // ─────────────────────────────────────────────────────────────────────────
+    /** Inicia la cuenta atrás del contador actualizando el estado y las notificaciones al usuario */
     private fun iniciarContador(totalSegundos: Int) {
         estaActivo = true
         contadorJob?.cancel()
@@ -110,7 +110,6 @@ class ContadorService : Service() {
                 val finalizado = restantes == 0
 
                 if (finalizado) {
-                    // ── Actualizamos la MISMA notificación en lugar de crear una nueva
                     actualizarNotificacion(
                         titulo     = getString(R.string.txt_titulo_contador_terminado),
                         contenido  = getString(R.string.txt_titulo_contador_finalizado),
@@ -135,9 +134,8 @@ class ContadorService : Service() {
             segundosRestantes = 0
         }
     }
-    // ─────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────────────
+
+    /**  Convierte el tiempo en el siguiente formato:'HH:MM:SS'    */
     private fun formatearTiempo(segundos: Int): String {
         val h = segundos / 3600
         val m = (segundos % 3600) / 60
@@ -145,12 +143,13 @@ class ContadorService : Service() {
         return String.format("%02d:%02d:%02d", h, m, s)
     }
 
+    /** Permite el acceso para volver a la app al pulsar la notificación */
     private fun crearPendingIntent(): PendingIntent {
         val intent = Intent(this, MainActivity::class.java).apply {
             action = "ABRIR_CONTADOR"
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT  // ← añadir esto
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }
         return PendingIntent.getActivity(
             this, 0, intent,
@@ -158,6 +157,7 @@ class ContadorService : Service() {
         )
     }
 
+    /** Permite crear un botón de accion para interactuar servicio desde la notificación */
     private fun pendingIntentAccion(action: String): PendingIntent {
         val intent = Intent(this, ContadorService::class.java).apply {
             this.action = action
@@ -168,14 +168,14 @@ class ContadorService : Service() {
         )
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Canales de notificación
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite registrar los canales de notificación en el sistema con distintas prioridades:
+     * uno silencioso para la cuenta atras y uno ruidoso para avisar al finalizar
+     */
     private fun crearCanales() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val nm = getSystemService(NotificationManager::class.java)
 
-            // Canal silencioso → usado durante la cuenta atrás
             val canalSilencioso = NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.txt_name_canal),
@@ -186,7 +186,6 @@ class ContadorService : Service() {
                 enableVibration(false)
             }
 
-            // Canal con sonido + vibración → usado solo al llegar a 0
             val canalFinalizado = NotificationChannel(
                 CHANNEL_ID_FINALIZADO,
                 "${getString(R.string.txt_name_canal)} – fin",
@@ -209,9 +208,9 @@ class ContadorService : Service() {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Notificaciones
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Permite crear la estructura de la notificacion
+     */
     private fun crearNotificacion(titulo: String,contenido: String,pausado: Boolean,finalizado: Boolean = false): NotificationCompat.Builder {
         val canalId = if (finalizado) CHANNEL_ID_FINALIZADO else CHANNEL_ID
         val builder = NotificationCompat.Builder(this, canalId)
@@ -243,6 +242,10 @@ class ContadorService : Service() {
         }
         return builder
     }
+
+    /**
+     * Permite actualizar la notificacion
+     */
     private fun actualizarNotificacion(
         titulo: String,
         contenido: String,
@@ -253,8 +256,13 @@ class ContadorService : Service() {
             .notify(NOTIF_ID, crearNotificacion(titulo, contenido, pausado, finalizado).build())
     }
 
+    /**
+     * Indica que el servicio no permite la vinculación (binding) con componentes de la interfaz
+     */
     override fun onBind(intent: Intent?): IBinder? = null
-
+    /**
+     * Permite destruir la notificacion
+     */
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()

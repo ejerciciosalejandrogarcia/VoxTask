@@ -25,6 +25,9 @@ import com.example.voxtask.R
 import com.example.voxtask.VoxTaskScreen
 import kotlinx.coroutines.launch
 
+/**
+ * Esqueleto de una pantalla
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantillaBase(
@@ -38,11 +41,15 @@ fun PlantillaBase(
     onTextoReconocido: (String) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
+    /** Variables */
     val contexto = LocalContext.current
     val actividad = contexto as Activity
     val coroutineScope = rememberCoroutineScope()
     val (vozState, iniciarEscucha) = rememberVozATexto()
 
+    /**
+     * Permite observar el texto reconocido por voz
+     */
     LaunchedEffect(vozState.textoReconocido) {
         if (vozState.textoReconocido.isNotEmpty()) {
             onTextoReconocido(vozState.textoReconocido)
@@ -51,6 +58,9 @@ fun PlantillaBase(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
+        /**
+         * Muestra el fondo personalizado seleccionado por el usuario
+         */
         viewModel.fondoPersonalizadoUri?.let { uri ->
             AsyncImage(
                 model = uri,
@@ -63,6 +73,7 @@ fun PlantillaBase(
         Scaffold(
             containerColor = if (viewModel.fondoPersonalizadoUri != null) Color.Transparent else MaterialTheme.colorScheme.background,
             topBar = {
+                /**Cabecera de la plantilla */
                 TopAppBar(
                     title = {
                         Text(
@@ -106,10 +117,12 @@ fun PlantillaBase(
                 )
             },
             bottomBar = {
+                /** Pie de la navegacion de la plantilla */
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White
                 ) {
+                    /** Botones de navegacion (Ajustes,Inicio y microfono) */
                     if (mostrarBotonAjustes) {
                         NavigationBarItem(
                             icon = {

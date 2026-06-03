@@ -5,27 +5,28 @@ import com.example.voxtask.databases.model.Usuario
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-
+/**
+ * Repositorio encargado de las operaciones para los usuarios
+ */
 class UsuarioRepository : UsuarioDao {
 
+    /** Variables */
     private val auth = FirebaseAuth.getInstance()
     private  val db = FirebaseFirestore.getInstance()
     private val coleccion = db.collection("usuarios")
 
+    /**
+     * Registra un nuevo usuario en Firebase Authentication y persiste su información en Firestore
+     */
     override suspend fun registrarUsuario(usuario: Usuario): Result<Usuario> {
         return try {
-            // Crear cuenta en Firebase Auth
             val authResult = auth
                 .createUserWithEmailAndPassword(usuario.correo_electronico, usuario.contrasenia)
                 .await()
-
             val uid = authResult.user?.uid
                 ?: return Result.failure(Exception("No se pudo obtener el UID"))
-
-            // Guardar datos
             val usuarioConId = usuario.copy(id = uid, contrasenia = "")
             coleccion.document(uid).set(usuarioConId).await()
-
             Result.success(usuarioConId)
 
         } catch (e: Exception) {
@@ -33,6 +34,9 @@ class UsuarioRepository : UsuarioDao {
         }
     }
 
+    /**
+     * Obtiene los datos de un usuario desde Firestore mediante su identificador
+     */
     override suspend fun obtenerUsuario(uid: String): Result<Usuario> {
         return try {
             val doc = coleccion.document(uid).get().await()
@@ -44,6 +48,9 @@ class UsuarioRepository : UsuarioDao {
         }
     }
 
+    /**
+     * Permite a los usuarios a iniciar sesion mediante su nombre de usuario y contraseña
+     */
     override suspend fun iniciarSesion(
         nombreUsuario: String,
         contrasena: String
@@ -69,7 +76,9 @@ class UsuarioRepository : UsuarioDao {
             Result.failure(e)
         }
     }
-
+    /**
+     * Busca el usuario mediante su dirección de correo electrónico en Firestore
+     */
     override suspend fun obtenerUsuarioPorEmail(email: String): Result<Usuario> {
         return try {
             val query = coleccion
@@ -91,6 +100,9 @@ class UsuarioRepository : UsuarioDao {
         }
     }
 
+    /**
+     * Verifica si un correo electrónico ya está registrado en Firebase Authentication.
+     */
     override suspend fun correoEstaRegistrado(email: String): Boolean {
         return try {
             val result = auth.fetchSignInMethodsForEmail(email).await()

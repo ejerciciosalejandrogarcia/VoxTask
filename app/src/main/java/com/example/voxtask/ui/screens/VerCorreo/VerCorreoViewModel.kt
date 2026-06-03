@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-
+/**
+ * Define los posibles estados de la interfaz en la pantalla
+ */
 sealed class VerCorreoUiState {
     object Cargando : VerCorreoUiState()
     data class Exito(val correo: Correo) : VerCorreoUiState()
@@ -26,19 +28,18 @@ sealed class VerCorreoUiState {
 }
 
 class VerCorreoViewModel : ViewModel() {
-
+    /** Variables */
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-
     private val _uiState = MutableStateFlow<VerCorreoUiState>(VerCorreoUiState.Cargando)
     val uiState: StateFlow<VerCorreoUiState> = _uiState
-
     private val _errorChannel = Channel<String>(Channel.BUFFERED)
     val errorFlow = _errorChannel.receiveAsFlow()
-
-    // Guardamos el id para poder reintentar
     private var correoId: String? = null
-
+    /**
+     * Permite validar la sesión del usuario, refrescar el token de acceso de Google
+     * y lo sincroniza en Firestore para habilitar la lectura de correos
+     */
     fun obtenerTokenYCorreo(id: String, contexto: Context) {
         correoId = id
         viewModelScope.launch {
@@ -82,7 +83,6 @@ class VerCorreoViewModel : ViewModel() {
                     return@launch
                 }
 
-                // Actualizamos el token en Firestore igual que en CorreoViewModel
                 firestore.collection("usuarios")
                     .document(uid)
                     .set(
@@ -100,6 +100,9 @@ class VerCorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite realiza la petición a la API para obtener el cuerpo del correo
+     */
     private suspend fun cargarCorreo(id: String, token: String, contexto: Context) {
         try {
             android.util.Log.d("VerCorreo", "Llamando con id: $id")
@@ -115,7 +118,9 @@ class VerCorreoViewModel : ViewModel() {
         }
     }
 
-    // Para el botón reintentar de la Screen
+    /**
+     * Permite intenta recuperar el flujo de obtención de datos
+     */
     fun reintentar(contexto: Context) {
         correoId?.let { obtenerTokenYCorreo(it, contexto) }
     }

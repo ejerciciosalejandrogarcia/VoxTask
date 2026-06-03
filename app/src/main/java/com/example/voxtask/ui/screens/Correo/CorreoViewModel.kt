@@ -21,7 +21,9 @@ import com.example.voxtask.R
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
-
+/**
+ * Define los posibles estados de la interfaz en la pantalla
+ */
 sealed class CorreoUiState {
     object Cargando : CorreoUiState()
     object NecesitaConectarGoogle : CorreoUiState()
@@ -30,16 +32,19 @@ sealed class CorreoUiState {
 }
 
 class CorreoViewModel : ViewModel() {
-
+    /** Variables */
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-
     private val _uiState = MutableStateFlow<CorreoUiState>(CorreoUiState.Cargando)
     val uiState: StateFlow<CorreoUiState> = _uiState
-
     private val _errorChannel = Channel<String>(Channel.BUFFERED)
     val errorFlow = _errorChannel.receiveAsFlow()
 
+    /**
+     * Permite validar la cuenta de Google,
+     * obtiene el token de acceso, lo almacena en Firestore
+     * y dispara la carga de los correos electrónicos.
+     */
     fun iniciar(contexto: Context) {
         viewModelScope.launch {
             _uiState.value = CorreoUiState.Cargando
@@ -105,6 +110,9 @@ class CorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite solicitar la lista de correos utilizando el token de autenticación
+     */
     private suspend fun cargarCorreos(contexto: Context, token: String) {
         try {
             android.util.Log.d("CORREO_DEBUG", "Llamando N8nClient...")
@@ -121,6 +129,9 @@ class CorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Obtiene el token de acceso de Google, lo guarda en Firestore y dispara la carga inicial de los correos.
+     */
     fun guardarTokenYCargarCorreos(contexto: Context, serverAuthCode: String?) {
         viewModelScope.launch {
             _uiState.value = CorreoUiState.Cargando
@@ -167,6 +178,10 @@ class CorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite devolver el cliente de inicio de sesión de Google con los permisos
+     * necesarios para acceder a la API de Gmail en modo lectura
+     */
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com")

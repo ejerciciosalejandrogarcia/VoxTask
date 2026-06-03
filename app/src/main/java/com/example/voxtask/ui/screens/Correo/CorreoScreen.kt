@@ -34,7 +34,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.example.voxtask.R
 import kotlinx.coroutines.launch
-
+/**
+ * Pantalla principal
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CorreoScreen(
@@ -42,21 +44,31 @@ fun CorreoScreen(
     viewModel: CorreoViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val uiState by viewModel.uiState.collectAsState()
-
     val paddingContenido = dimensionResource(R.dimen.correo_padding_contenido)
     val tamanoBotonCrear = dimensionResource(R.dimen.correo_boton_crear)
     val tamanoIconoCrear = dimensionResource(R.dimen.correo_icono_crear)
     val anchoMaximoContenido = tamano.anchoMaximoContenido
-
+    val lanzadorGoogle = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { resultado ->
+        if (resultado.resultCode == Activity.RESULT_OK) {
+            try {
+                val cuenta = GoogleSignIn
+                    .getSignedInAccountFromIntent(resultado.data)
+                    .getResult(ApiException::class.java)
+                viewModel.guardarTokenYCargarCorreos(contexto, cuenta.serverAuthCode)
+            } catch (e: ApiException) { }
+        }
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Primero suscribimos el collector, luego llamamos a iniciar()
-    // así el Channel nunca pierde el mensaje
+    /** SnackBar */
     LaunchedEffect(Unit) {
         launch {
             viewModel.errorFlow.collect { mensaje ->
@@ -70,18 +82,7 @@ fun CorreoScreen(
         viewModel.iniciar(contexto)
     }
 
-    val lanzadorGoogle = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { resultado ->
-        if (resultado.resultCode == Activity.RESULT_OK) {
-            try {
-                val cuenta = GoogleSignIn
-                    .getSignedInAccountFromIntent(resultado.data)
-                    .getResult(ApiException::class.java)
-                viewModel.guardarTokenYCargarCorreos(contexto, cuenta.serverAuthCode)
-            } catch (e: ApiException) { }
-        }
-    }
+
 
     PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { padding ->
 
@@ -114,11 +115,11 @@ fun CorreoScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (val estado = uiState) {
-
+                    /** Pantalla a la hora de cargar el correo */
                     is CorreoUiState.Cargando -> {
                         CircularProgressIndicator()
                     }
-
+                    /** Pantalla a la hora de que accedas a la aplicacion sin una cuenta de google */
                     is CorreoUiState.NecesitaConectarGoogle -> {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -140,7 +141,7 @@ fun CorreoScreen(
                             }
                         }
                     }
-
+                    /** Pantalla a la hora de que haya correos */
                     is CorreoUiState.Exito -> {
                         if (estado.correos.isEmpty()) {
                             Text(stringResource(R.string.txt_title_no_correos))
@@ -155,7 +156,7 @@ fun CorreoScreen(
                             }
                         }
                     }
-
+                    /** Pantalla a la hora de que hubo un error al cargar el correo */
                     is CorreoUiState.Error -> {
                         if (estado.esErrorDeCarga) {
                             Button(onClick = { viewModel.iniciar(contexto) }) {
@@ -165,6 +166,7 @@ fun CorreoScreen(
                     }
                 }
 
+                /** Boton para enviar un nuevo correo */
                 Button(
                     onClick = { navController.navigate(VoxTaskScreen.EnviarCorreo.name) },
                     modifier = Modifier
@@ -186,7 +188,9 @@ fun CorreoScreen(
         }
     }
 }
-
+/**
+ * Esta funcion crea las tarjetas de cada gmail con el asunto del mensaje, remitente,fecha y hora
+ */
 @Composable
 fun TarjetaCorreo(
     correo: com.example.voxtask.databases.model.Correo,

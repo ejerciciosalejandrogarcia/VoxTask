@@ -77,13 +77,13 @@ data class VerificacionResponse(
  */
 interface N8nApiService {
     /** Obtiene la lista de correos asociado al token de la cuenta */
-    @GET("webhook/get-emails")
+    @GET("webhook/obtener-emails")
     suspend fun obtenerCorreos(
         @Query("token") token: String
     ): List<Correo>
 
     /** Envía un correo usando el flujo de redacción */
-    @POST("webhook/send-email")
+    @POST("webhook/enviar-email")
     suspend fun enviarCorreo(
         @Body body: EnviarCorreoRequest
     ): retrofit2.Response<Unit>
@@ -102,8 +102,8 @@ interface N8nApiService {
         @Query("token") token: String
     ): Correo
 
-    /** Envia el código de verificacion */
-    @POST("webhook/send-verification")
+    /** Envia el código de verificacion al iniciar sesion*/
+    @POST("webhook/enviar-verificacion")
     suspend fun enviarCodigoVerificacion(
         @Body body: VerificacionRequest
     ): VerificacionResponse
@@ -116,9 +116,8 @@ interface N8nApiService {
 }
 
 /**
- * Singleton que proporciona la instancia única de [N8nApiService] mediante Retrofit.
- * Configura timeouts de 30 segundos para adaptarse a los tiempos de respuesta
- * variables de los flujos de n8n.
+ * Configura el cliente de red para comunicarse con n8n,
+ * gestionando tiempos de espera y la conversión de datos JSON.
  */
 object N8nClient {
     const val BASE_URL = "http://192.168.1.49:5678/"

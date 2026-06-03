@@ -23,9 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -75,7 +72,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.platform.LocalConfiguration
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,23 +83,19 @@ fun AjustesScreen(
     plantillaBaseViewModel: PlantillaBaseViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val contexto = LocalContext.current
     val actividad = contexto as Activity
     val fondoUri by plantillaBaseViewModel.fondoUri.collectAsState()
-
-    // — igual que VerificacionScreen —
     val anchoMaximo = tamano.anchoMaximoContenido
-
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> uri?.let { plantillaBaseViewModel.actualizarFondo(it) } }
-
     val permisos = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted -> if (isGranted) imageLauncher.launch("image/*") }
-
     val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_IMAGES
     } else {
@@ -115,11 +110,11 @@ fun AjustesScreen(
         navController = navController
     ) { paddingValues ->
 
-        // Diálogos
+        /** Ventana emergente de la opcion 'Color de la interfaz' */
         if (viewModel.mostrarSelectorColor) {
             ColorInterfazDialog(onDismiss = { viewModel.mostrarSelectorColor = false })
         }
-
+        /** Ventana emergente de la opcion 'Cambiar voz' */
         if (viewModel.mostrarSelectorVoz) {
             LaunchedEffect(Unit) { viewModel.cargarVoces(contexto) }
             AlertDialog(
@@ -156,6 +151,7 @@ fun AjustesScreen(
                 },
                 confirmButton = {},
                 dismissButton = {
+                    /** Boton cerrar */
                     TextButton(onClick = { viewModel.mostrarSelectorVoz = false }) {
                         Text(
                             text = stringResource(R.string.cancelar),
@@ -166,9 +162,11 @@ fun AjustesScreen(
             )
         }
 
+        /** Ventana emergente de la opcion 'Cambiar idioma' */
         if (viewModel.mostrarSelectorIdioma) {
             AlertDialog(
                 onDismissRequest = { viewModel.mostrarSelectorIdioma = false },
+                /** Titulo de la ventaa emergente */
                 title = {
                     Text(
                         text = stringResource(R.string.selecciona_idioma),
@@ -178,6 +176,7 @@ fun AjustesScreen(
                 },
                 text = {
                     LazyColumn {
+                        /** Voces disponibles */
                         items(viewModel.idiomasDisponibles) { (codigo, nombre) ->
                             TextButton(
                                 onClick = {
@@ -197,6 +196,7 @@ fun AjustesScreen(
                 },
                 confirmButton = {},
                 dismissButton = {
+                    /** Boton cerrar */
                     TextButton(onClick = { viewModel.mostrarSelectorIdioma = false }) {
                         Text(
                             text = stringResource(R.string.cancelar),
@@ -207,7 +207,6 @@ fun AjustesScreen(
             )
         }
 
-        // Contenedor con ancho máximo igual que VerificacionScreen
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -225,6 +224,7 @@ fun AjustesScreen(
             LazyColumn(
                 modifier = modificadorLista.padding(espaciado.l)
             ) {
+                /** Opciones de los ajustes */
                 item {
                     OpcionAjuste(
                         icono = Icons.Default.RecordVoiceOver,
@@ -302,6 +302,9 @@ fun AjustesScreen(
     }
 }
 
+/**
+ * Esta funcion crea la ventana emergente de la opcion 'Color de la interfaz'
+ */
 @Composable
 fun ColorInterfazDialog(onDismiss: () -> Unit) {
     val themeManager = LocalThemeManager.current
@@ -316,12 +319,12 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         TamanioPantalla.EXPANDIDO -> 56.dp
     }
 
-    // Número de colores por fila en modo vertical (2 filas aprox)
     val coloresPorFila = (ColoresClaros.size + 1) / 2
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
+            /** Titulo de la ventana */
             Text(
                 text = stringResource(R.string.opcion_color_interfaz),
                 fontSize = tamano.textoTitulo,
@@ -334,7 +337,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                // ── MODO CLARO ──
+                /** Colores del modo claro */
                 Text(
                     text = stringResource(R.string.opcion_color_interfaz_modo_claro),
                     fontSize = tamano.textoBody,
@@ -342,8 +345,6 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.padding(bottom = espaciado.s)
                 )
 
-                // En horizontal: una sola fila scrollable
-                // En vertical: dos filas estáticas con wrap (chunked)
                 val configLocal = LocalConfiguration.current
                 val esHorizontal = configLocal.screenWidthDp > configLocal.screenHeightDp
 
@@ -365,7 +366,6 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                         }
                     }
                 } else {
-                    // Dividir en 2 filas para evitar crash de LazyGrid en scroll anidado
                     ColoresClaros.chunked(coloresPorFila).forEach { fila ->
                         Row(
                             modifier = Modifier
@@ -387,7 +387,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(espaciado.l))
 
-                // ── MODO OSCURO ──
+                /** Colores del modo oscuro */
                 Text(
                     text = stringResource(R.string.opcion_color_interfaz_modo_oscuro),
                     fontSize = tamano.textoBody,
@@ -436,6 +436,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
+            /** Boton de cerrar */
             TextButton(onClick = onDismiss) {
                 Text(
                     text = stringResource(R.string.model_cerrar),
@@ -446,8 +447,9 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         }
     )
 }
-
-// Composable auxiliar extraído para no repetir lógica
+/**
+ * Esta funcion crea los colores que se implementa en la ventana emergente de la opcion 'Color de la interfaz'
+ */
 @Composable
 private fun CirculoColor(
     color: Color,
@@ -469,13 +471,16 @@ private fun CirculoColor(
     )
 }
 
+/**
+ * Esta funcion crea las opciones con su icono,titulo y descripcion
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OpcionAjuste(
     icono: ImageVector,
     titulo: String,
     descripcion: String,
-    tamanoTexto: TamanioPantalla,          // ← nuevo parámetro
+    tamanoTexto: TamanioPantalla,
     onClick: () -> Unit
 ) {
     val espaciado = LocalEspaciado.current
@@ -488,6 +493,7 @@ fun OpcionAjuste(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         ListItem(
+            /** Titulo */
             headlineContent = {
                 Text(
                     text = titulo,
@@ -495,12 +501,14 @@ fun OpcionAjuste(
                     fontWeight = FontWeight.SemiBold
                 )
             },
+            /** Descripcion */
             supportingContent = {
                 Text(
                     text = descripcion,
                     fontSize = tamanoTexto.textoBody
                 )
             },
+            /** Icono */
             leadingContent = {
                 Icon(
                     imageVector = icono,

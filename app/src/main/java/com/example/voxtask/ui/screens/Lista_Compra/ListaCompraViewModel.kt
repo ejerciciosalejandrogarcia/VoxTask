@@ -12,19 +12,19 @@ import java.util.UUID
 
 class ListaCompraViewModel : ViewModel() {
 
-    //Variables
+    /** Variables */
     private val repository = ProductoRepository()
     val productos = mutableStateListOf<Producto>()
     private val usuarioId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
-    //Cargar los productos del usuario logueado
+    /** Carga los productos de el usuario logueado */
     init {
         cargarProductos()
     }
 
-    //Funcion para cargar los productos de la lista de la compra del usuario
+    /** Permite cargar los productos de la lista de la compra del usuario  */
     private fun cargarProductos() {
-        if (usuarioId.isEmpty()) return  // ← añade esto
+        if (usuarioId.isEmpty()) return
         viewModelScope.launch {
             try {
                 val listaProductos = repository.obtenerPorUsuario(usuarioId)
@@ -38,12 +38,12 @@ class ListaCompraViewModel : ViewModel() {
         }
     }
 
-    //Funcion que recibe el texto transformado por voz y lo convierte a minusculas y elimina espacios
+    /** Permite recibir el texto transformado por voz y lo convierte a minusculas y elimina los espacions */
     fun onTextoRecibido(texto: String) {
         procesarComando(texto.lowercase().trim())
     }
 
-    //Funcion para procesar el texto mediante la voz y ejecutar las acciones programadas
+    /** Permite procesar el texto mediante la voz y ejecutar las acciones programadas dependiendo del idioma seleccionado */
     private fun procesarComando(texto: String) {
         val idioma = TextoAVoz.localeActual.language
 
@@ -82,7 +82,7 @@ class ListaCompraViewModel : ViewModel() {
             }
         }
     }
-    //Funcion para agregar un producto en la lista de la compra
+    /** Permite agregar un producto en la lista de la compra */
     private fun agregarProducto(nombre: String) {
         viewModelScope.launch {
             val producto = Producto(
@@ -94,15 +94,15 @@ class ListaCompraViewModel : ViewModel() {
         }
     }
 
-    //Funcion para eliminar un producto en la lista de la compra (Se elimina por boton)
-     fun eliminarProducto(producto: Producto) {
+    /** Permite eliminar un producto en la lista de la compra (Se elimina por boton)*/
+    fun eliminarProducto(producto: Producto) {
         viewModelScope.launch {
             repository.eliminar(usuarioId, producto.id)
             productos.remove(producto)
         }
     }
 
-    // Funcion para eliminar un producto en la lista de la compra (Se elimina por voz mediante el nombre del producto)
+    /** Permite eliminar un producto en la lista de la compra (Se elimina por voz mediante el nombre del producto)*/
     private fun eliminarProductoPorNombre(nombre: String) {
         viewModelScope.launch {
             val producto = productos.find { it.nombre.equals(nombre, ignoreCase = true) }

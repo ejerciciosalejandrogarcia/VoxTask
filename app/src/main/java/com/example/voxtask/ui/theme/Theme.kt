@@ -20,30 +20,38 @@ import androidx.compose.runtime.compositionLocalOf
 
 class ThemeManager(private val context: Context) {
 
+    /** Variables */
     private val prefs = context.getSharedPreferences("tema_ajustes", Context.MODE_PRIVATE)
 
-    // Color para modo claro — por defecto VerdePrimario
     private val _colorClaro = MutableStateFlow(
         Color(prefs.getInt("color_claro", VerdePrimario.toArgb()))
     )
     val colorClaro: StateFlow<Color> = _colorClaro.asStateFlow()
 
-    // Color para modo oscuro — por defecto VerdePrimario
     private val _colorOscuro = MutableStateFlow(
         Color(prefs.getInt("color_oscuro", VerdePrimario.toArgb()))
     )
     val colorOscuro: StateFlow<Color> = _colorOscuro.asStateFlow()
 
+    /**
+     * Permite guardar el color claro seleccionado por el usuario y que persista despues de cerrar la aplicacion
+     */
     fun setColorClaro(color: Color) {
         _colorClaro.value = color
         prefs.edit().putInt("color_claro", color.toArgb()).apply()
     }
-
+    /**
+     * Permite guardar el color oscuro seleccionado por el usuario y que persista despues de cerrar la aplicacion
+     */
     fun setColorOscuro(color: Color) {
         _colorOscuro.value = color
         prefs.edit().putInt("color_oscuro", color.toArgb()).apply()
     }
 
+    /**
+     * Permite resetear los colores personalizados de la aplicación a sus
+     * valores predeterminados (VerdePrimario)
+     */
     fun resetearColores() {
         val colorDefault = VerdePrimario
 
@@ -57,14 +65,24 @@ class ThemeManager(private val context: Context) {
     }
 }
 
+/**
+ * Permite crear y guardar una única instancia del gestor de temas
+ */
 @Composable
 fun rememberThemeManager(): ThemeManager {
     val context = LocalContext.current
     return remember { ThemeManager(context) }
 }
 
+/**
+ * Permite que cualquier componente de la interfaz cambiar el tema sin pasar el objeto por parámetro
+ */
 val LocalThemeManager = compositionLocalOf<ThemeManager> { error("No ThemeManager") }
 
+/**
+ * Permite configurar los colores de la app y los adapta
+ * automáticamente al modo claro u oscuro del dispositivo
+ */
 @Composable
 fun VoxTaskTheme(
     themeManager: ThemeManager = rememberThemeManager(),
@@ -73,7 +91,6 @@ fun VoxTaskTheme(
     val colorClaro by themeManager.colorClaro.collectAsState()
     val colorOscuro by themeManager.colorOscuro.collectAsState()
 
-    // Detecta automáticamente el modo del dispositivo
     val esModoOscuro = isSystemInDarkTheme()
 
     val colorScheme = if (esModoOscuro) {

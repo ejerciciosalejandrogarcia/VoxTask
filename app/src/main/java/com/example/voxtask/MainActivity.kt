@@ -23,14 +23,15 @@ import com.example.voxtask.utils.TextoAVoz
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : ComponentActivity() {
-
+    /** Variables */
     var navController: NavController? = null
     private val plantillaBaseViewModel: PlantillaBaseViewModel by viewModels()
     private lateinit var themeManager: ThemeManager
-
-    // 👇 Guardamos el intent pendiente hasta que el NavController esté listo
     private var intentPendiente: Intent? = null
 
+    /**
+     * Permite asegurar que el idioma seleccionado por el usuario se aplique desde el inicio
+     * */
     override fun attachBaseContext(newBase: Context) {
         val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idioma = prefs.getString("idioma", "es") ?: "es"
@@ -41,6 +42,10 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
+    /**
+     * Registra la respuesta del usuario ante la solicitud de permisos
+     * del micrófono, manejando el caso en que el acceso sea denegado
+     */
     private val pedirPermiso = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -49,6 +54,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Inicializa los servicios básicos, solicita permisos de audio,
+     * configura la navegación y renderiza la interfaz principal
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         themeManager = ThemeManager(applicationContext)
@@ -56,7 +65,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
 
-        // 👇 Guardar el intent solo en la primera creación real
         if (savedInstanceState == null) {
             intentPendiente = intent
         }
@@ -70,10 +78,9 @@ class MainActivity : ComponentActivity() {
                         plantillaBaseViewModel = plantillaBaseViewModel,
                         onNavControllerReady   = { nc ->
                             navController = nc
-                            // 👇 Ahora sí tenemos NavController: procesar el intent pendiente
                             intentPendiente?.let {
                                 manejarIntent(it)
-                                intentPendiente = null  // Limpiar para no reprocesar
+                                intentPendiente = null
                             }
                         },
                         deepLinkIntent = intent
@@ -82,12 +89,13 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+    /**
+     * Permite garantizar que la aplicación no pierda ni ignore ninguna instrucción externa,
+     * como enlaces o notificaciones
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // Si el NavController ya está listo, procesar ahora
-        // Si no, guardarlo como pendiente
         if (navController != null) {
             manejarIntent(intent)
         } else {
@@ -95,6 +103,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Permite analizar y procesa los comandos de navegación recibidos,
+     * redirigiendo al usuario a la pantalla correspondiente según la acción o enlace.
+     */
     private fun manejarIntent(intent: Intent?) {
         if (intent?.action == "ABRIR_CONTADOR") {
             navController?.navigate(VoxTaskScreen.Contador.name) {

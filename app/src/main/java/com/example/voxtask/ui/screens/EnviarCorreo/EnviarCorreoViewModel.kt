@@ -22,16 +22,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+/**
+ * Define las diferentes etapas del proceso de envío de un correo electrónico
+ */
 enum class PasoEnvio {
     DESTINATARIO, ASUNTO, MODO, MENSAJE, CONFIRMACION, ENVIANDO, ENVIADO, ERROR
 }
 
 class EnviarCorreoViewModel : ViewModel() {
 
+    /**
+     * Permite autenticar la aplicación ante los servicios de Google Cloud Platform.
+     */
     companion object {
         const val WEB_CLIENT_ID = "820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com"
     }
-
+    /** Variables */
     var paso          by mutableStateOf(PasoEnvio.DESTINATARIO)
     var destinatario  by mutableStateOf("")
     var asunto        by mutableStateOf("")
@@ -44,8 +50,10 @@ class EnviarCorreoViewModel : ViewModel() {
     private val _errorChannel = Channel<String>(Channel.BUFFERED)
     val errorFlow = _errorChannel.receiveAsFlow()
 
-    // -----------------------------------------------------------------------
-
+    /**
+     * Permite devolver el cliente de inicio de sesión configurado para leer y enviar
+     * correos electrónicos mediante la API de Gmail.
+     */
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         return GoogleSignIn.getClient(
             contexto,
@@ -56,7 +64,10 @@ class EnviarCorreoViewModel : ViewModel() {
                 .build()
         )
     }
-
+    /**
+     * Permite verificar si el usuario ha iniciado sesión y si posee los permisos necesarios
+     * para interactuar con la API de Gmail
+     */
     fun iniciar(contexto: Context) {
         viewModelScope.launch {
             val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
@@ -73,6 +84,11 @@ class EnviarCorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite cerrar cualquier sesión de Google activa para asegurar que el proceso de
+     * vinculación comience desde 0 y el usuario pueda seleccionar
+     * su cuenta sin problemas
+     */
     fun vincularGoogle(contexto: Context, onListo: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -82,6 +98,10 @@ class EnviarCorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite gestionar el flujo de vinculación con Google, controlando los estados de carga
+     * y avisarle al usuario tras completar el proceso.
+     */
     fun guardarToken(contexto: Context) {
         viewModelScope.launch {
             necesitaVincularGoogle = false
@@ -94,34 +114,40 @@ class EnviarCorreoViewModel : ViewModel() {
         }
     }
 
-    private suspend fun obtenerToken(contexto: Context) {
-        try {
-            val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
-            if (cuentaGoogle?.account != null) {
-                accessToken = withContext(Dispatchers.IO) {
-                    val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
-                    try {
-                        val tokenViejo = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
-                        GoogleAuthUtil.clearToken(contexto, tokenViejo)
-                    } catch (e: Exception) { }
-                    GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
+    /**
+     * Permite obtener un token de acceso fresco para la API de Gmail.
+     */
+        private suspend fun obtenerToken(contexto: Context) {
+            try {
+                val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
+                if (cuentaGoogle?.account != null) {
+                    accessToken = withContext(Dispatchers.IO) {
+                        val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
+                        try {
+                            val tokenViejo = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
+                            GoogleAuthUtil.clearToken(contexto, tokenViejo)
+                        } catch (e: Exception) { }
+                        GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
+                    }
+                } else {
+                    necesitaVincularGoogle = true
                 }
-            } else {
-                necesitaVincularGoogle = true
-            }
-        } catch (e: Exception) {
-            if (e.message?.contains("consent") == true ||
-                e.message?.contains("remote") == true ||
-                e.javaClass.simpleName == "UserRecoverableAuthException"
-            ) {
-                necesitaVincularGoogle = true
-            } else {
-                _errorChannel.send(contexto.getString(R.string.txt_enviarcorreo_error_token, e.message))
-                paso = PasoEnvio.ERROR
+            } catch (e: Exception) {
+                if (e.message?.contains("consent") == true ||
+                    e.message?.contains("remote") == true ||
+                    e.javaClass.simpleName == "UserRecoverableAuthException"
+                ) {
+                    necesitaVincularGoogle = true
+                } else {
+                    _errorChannel.send(contexto.getString(R.string.txt_enviarcorreo_error_token, e.message))
+                    paso = PasoEnvio.ERROR
+                }
             }
         }
-    }
 
+    /**
+     * Permite procesar la entrada de voz del usuario para la configuracion del nuevo correo
+     */
     fun procesarVoz(texto: String, contexto: Context) {
         if (necesitaVincularGoogle || cargandoToken) return
         val textoLimpio = texto.lowercase().trim()
@@ -166,10 +192,16 @@ class EnviarCorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite enviar el correo configurado tras la confirmación del usuario.
+     */
     fun confirmarEnvio(contexto: Context) {
         enviarCorreo(contexto)
     }
 
+    /**
+     * Permite actualizar el valor de un campo específico del correo electrónico
+     */
     fun editarCampo(campo: String) {
         if (campo.contains(":")) {
             val (nombre, valor) = campo.split(":", limit = 2)
@@ -181,6 +213,9 @@ class EnviarCorreoViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite el envio del correo configurado
+     */
     fun enviarCorreo(contexto: Context) {
         viewModelScope.launch {
             paso = PasoEnvio.ENVIANDO
@@ -227,7 +262,9 @@ class EnviarCorreoViewModel : ViewModel() {
             }
         }
     }
-
+    /**
+     * Permite que el formulario se restablezca a su estado inicial
+     */
     fun reiniciar(contexto: Context) {
         destinatario = ""
         asunto       = ""

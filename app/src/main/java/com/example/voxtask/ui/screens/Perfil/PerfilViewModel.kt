@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
+/**
+ * Representa el estado de la UI
+ */
 data class PerfilUiState(
     val nombre: String = "",
     val nombreUsuario: String = "",
@@ -22,6 +24,10 @@ data class PerfilUiState(
     val modoEdicion: Boolean = false,
     val operacionExitosa:Boolean = false
 )
+/**
+ * Permite mapear el nombre de un avatar a su foto,
+ * devuelve null si el nombre proporcionado no tiene una imagen asociada
+ */
 fun nombreAvatar(nombre: String): Int? = when (nombre) {
     "tigre"   -> R.drawable.tigre
     "leon"      -> R.drawable.leon
@@ -31,35 +37,40 @@ fun nombreAvatar(nombre: String): Int? = when (nombre) {
 }
 
 class PerfilViewModel : ViewModel() {
-
+    /** Variables */
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-
     private val _estadoUi = MutableStateFlow(PerfilUiState())
     val estadoUi: StateFlow<PerfilUiState> = _estadoUi.asStateFlow()
-
     val avatarOpciones = listOf("tigre", "leon", "zorro", "astronauta")
 
+    /** Carga los datos de el usuario logueado */
     init {
         cargarPerfil()
     }
 
+    /** Actualiza el nombre del usuario en el estado */
     fun alCambiarNombre(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(nombre = valor)
     }
+    /** Actualiza el nombre de usuario en el estado */
     fun alCambiarNombreUsuario(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(nombreUsuario = valor)
     }
+    /** Actualiza el primer apellido del usuario en el estado */
     fun alCambiarPrimerApellido(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(primerApellido = valor)
     }
+    /** Actualiza el segundo apellido del usuario en el estado */
     fun alCambiarSegundoApellido(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(segundoApellido = valor)
     }
+    /** Actualiza el modo edicion en el estado */
     fun conmutarModoEdicion() {
         _estadoUi.value = _estadoUi.value.copy(modoEdicion = !_estadoUi.value.modoEdicion)
     }
 
+    /** Permite obtener los datos del usuario logueado desde Firebase */
     private fun cargarPerfil() {
         val idUsuario = auth.currentUser?.uid ?: return
 
@@ -84,6 +95,7 @@ class PerfilViewModel : ViewModel() {
         }
     }
 
+    /** Permite gestionar los posibles errores a la hora de guardar los datos y si es exitoso mostrara un mensaje de que se ha guardado los nuevos datos */
     fun guardarPerfil() {
         val uiState = _estadoUi.value
         val nombre = uiState.nombre.trim()
@@ -147,6 +159,10 @@ class PerfilViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permte actualizar el avatar del usuario tanto en el estado de la interfaz de usuario
+     * como en Firestore
+     */
     fun seleccionarYGuardarAvatar(nombreAvatar: String) {
         _estadoUi.value = _estadoUi.value.copy(avatarSeleccionado = nombreAvatar)
         viewModelScope.launch {
@@ -161,6 +177,9 @@ class PerfilViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite limpiar los mensajes de error de la pantalla 'Cambiar Contrasenia'
+     */
     fun limpiarError() {
         _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
     }

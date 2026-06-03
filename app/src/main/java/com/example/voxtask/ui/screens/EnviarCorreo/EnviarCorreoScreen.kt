@@ -34,16 +34,16 @@ import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
-// ---------------------------------------------------------------------------
-// Helpers de orientación y layout
-// ---------------------------------------------------------------------------
 
+/**
+ * Detecta si la orientación del dispositivo es horizontal y devuelve
+ * el padding correspondiente ajustado al diseño actual
+ */
 @Composable
 private fun esHorizontal(): Boolean {
     val config = LocalConfiguration.current
     return config.screenWidthDp > config.screenHeightDp
 }
-
 @Composable
 private fun paddingVerticalAdaptativo(horizontal: Boolean): Dp {
     return if (horizontal) {
@@ -52,11 +52,9 @@ private fun paddingVerticalAdaptativo(horizontal: Boolean): Dp {
         dimensionResource(R.dimen.enviar_correo_padding_vertical)
     }
 }
-
-// ---------------------------------------------------------------------------
-// Pantalla principal
-// ---------------------------------------------------------------------------
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun EnviarCorreoScreen(
@@ -64,16 +62,15 @@ fun EnviarCorreoScreen(
     viewModel: EnviarCorreoViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val contexto          = LocalContext.current
     val espaciado         = LocalEspaciado.current
     val tamano            = LocalTamanioPantalla.current
     val horizontal        = esHorizontal()
     val snackbarHostState = remember { SnackbarHostState() }
-
     val paddingHorizontal = dimensionResource(R.dimen.enviar_correo_padding_horizontal)
     val paddingVertical   = paddingVerticalAdaptativo(horizontal)
     val anchoMax          = tamano.anchoMaximoContenido
-
     val lanzadorGoogle = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { resultado ->
@@ -98,7 +95,7 @@ fun EnviarCorreoScreen(
         }
     }
 
-    // Escucha el canal de errores y muestra el Snackbar
+    /** Snackbar */
     LaunchedEffect(Unit) {
         viewModel.errorFlow.collect { mensajeError ->
             snackbarHostState.showSnackbar(
@@ -121,7 +118,6 @@ fun EnviarCorreoScreen(
                 .padding(horizontal = paddingHorizontal, vertical = paddingVertical)
         ) {
 
-            // Snackbar anclado en TopCenter
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier  = Modifier
@@ -130,7 +126,7 @@ fun EnviarCorreoScreen(
                     .zIndex(10f)
             )
 
-            // Indicador de pasos
+            /** Pasos */
             if (!viewModel.necesitaVincularGoogle &&
                 !viewModel.cargandoToken &&
                 viewModel.paso !in listOf(
@@ -240,7 +236,7 @@ fun EnviarCorreoScreen(
                                 )
                             }
                             PasoEnvio.ENVIADO -> {
-                                // Cuenta atrás automática
+                                /** Pantalla para poder enviar un nuevo correo */
                                 var segundos by remember { mutableStateOf(5) }
 
                                 LaunchedEffect(Unit) {
@@ -259,7 +255,6 @@ fun EnviarCorreoScreen(
                                 )
                                 Spacer(modifier = Modifier.height(espaciado.l))
 
-                                // Círculo con número
                                 Box(contentAlignment = Alignment.Center) {
                                     CircularProgressIndicator(
                                         progress   = segundos / 5f,
@@ -275,7 +270,6 @@ fun EnviarCorreoScreen(
 
                                 Spacer(modifier = Modifier.height(espaciado.l))
 
-                                // Botón para saltarse la espera
                                 Button(
                                     onClick  = { viewModel.reiniciar(contexto) },
                                     modifier = Modifier.fillMaxWidth()
@@ -304,10 +298,9 @@ fun EnviarCorreoScreen(
     }
 }
 
-// ---------------------------------------------------------------------------
-// VincularGoogleUI
-// ---------------------------------------------------------------------------
-
+/**
+ * Esta funcion permite mostrar una pantalla informativa que solicita al usuario vincular su cuenta de Google
+ */
 @Composable
 fun VincularGoogleUI(
     horizontal: Boolean,
@@ -372,10 +365,10 @@ fun VincularGoogleUI(
     }
 }
 
-// ---------------------------------------------------------------------------
-// ConfirmacionUI
-// ---------------------------------------------------------------------------
-
+/**
+ * Esta funcion permite mostrar una pantalla con un resumen de la configuracion del correo permitiendo al usuario modificar
+ * los datos del correo antes de enviarlo
+ */
 @Composable
 fun ConfirmacionUI(
     destinatario: String,
@@ -445,6 +438,9 @@ fun ConfirmacionUI(
     }
 }
 
+/**
+ * Esta funcion permite organizar los campos editables del correo
+ */
 @Composable
 private fun CuerpoConfirmacion(
     destinatarioEdit: String,
@@ -485,10 +481,10 @@ private fun CuerpoConfirmacion(
     }
 }
 
-// ---------------------------------------------------------------------------
-// FilaConfirmacion
-// ---------------------------------------------------------------------------
-
+/**
+ * Esta funcion permite mostrar el valor de cada campo y permite editarlo mediante
+ * un formulario que alterna entre modo lectura y modo edición
+ */
 @Composable
 fun FilaConfirmacion(
     etiqueta: String,
@@ -544,10 +540,10 @@ fun FilaConfirmacion(
     }
 }
 
-// ---------------------------------------------------------------------------
-// PasoUI
-// ---------------------------------------------------------------------------
-
+/**
+ * Esta funcion permite representar el paso de un proceso, mostrando un título,
+ * una descripción y un valor
+ */
 @Composable
 fun PasoUI(
     titulo: String,
@@ -614,32 +610,6 @@ fun PasoUI(
                     Text(valor, modifier = Modifier.padding(espaciado.m), fontSize = tamano.textoBody)
                 }
             }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// ResumenCorreo
-// ---------------------------------------------------------------------------
-
-@Composable
-fun ResumenCorreo(para: String, asunto: String, modo: String) {
-    val espaciado = LocalEspaciado.current
-    val tamano    = LocalTamanioPantalla.current
-
-    val modoTexto = if (modo == "ia")
-        stringResource(R.string.txt_enviarcorreo_modo_ia)
-    else
-        stringResource(R.string.txt_enviarcorreo_modo_manual)
-
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier            = Modifier.padding(espaciado.l),
-            verticalArrangement = Arrangement.spacedBy(espaciado.xs)
-        ) {
-            Text(stringResource(R.string.txt_enviarcorreo_resumen_para, para),      fontSize = tamano.textoBody)
-            Text(stringResource(R.string.txt_enviarcorreo_resumen_asunto, asunto),  fontSize = tamano.textoBody)
-            Text(stringResource(R.string.txt_enviarcorreo_resumen_modo, modoTexto), fontSize = tamano.textoBody)
         }
     }
 }

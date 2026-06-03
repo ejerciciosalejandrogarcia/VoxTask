@@ -14,6 +14,9 @@ import kotlinx.coroutines.launch
 import com.example.voxtask.databases.network.BienvenidaRequest
 import com.example.voxtask.databases.network.N8nClient
 
+/**
+ * Representa el estado de la UI para la pantalla de la recuperación de contraseña
+ */
 data class RegistrarUsuarioUiState(
     val nombreUsuario: String = "",
     val nombre: String = "",
@@ -30,32 +33,42 @@ data class RegistrarUsuarioUiState(
 class RegistroUsuarioViewModel(
     private val repositorio: UsuarioDao = UsuarioRepository()
 ) : ViewModel() {
-
+    /** Variables */
     private val _estadoUi = MutableStateFlow(RegistrarUsuarioUiState())
     val estadoUi: StateFlow<RegistrarUsuarioUiState> = _estadoUi.asStateFlow()
 
+    /** Actualiza el nombre de usuario en el estado */
     fun alCambiarNombreUsuario(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(nombreUsuario = valor)
     }
+    /** Actualiza el nombre del usuario en el estado */
     fun alCambiarNombre(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(nombre = valor)
     }
+    /** Actualiza el primer apellido del usuario en el estado */
     fun alCambiarPrimerApellido(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(primer_apellido = valor)
     }
+    /** Actualiza el segundo apellido del usuario en el estado */
     fun alCambiarSegundoApellido(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(segundo_apellido = valor)
     }
+    /** Actualiza la fecha de nacimiento del usuario en el estado */
     fun alCambiarFechaNacimiento(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(fecha_nacimiento = valor)
     }
+    /** Actualiza el correo electronico del usuario en el estado */
     fun alCambiarCorreoElectronico(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(correo_electronico = valor)
     }
+    /** Actualiza la contraseña del usuario en el estado */
     fun alCambiarContrasenia(valor: String) {
         _estadoUi.value = _estadoUi.value.copy(contrasenia = valor)
     }
 
+    /**
+     * Actualiza el estado de la interfaz para mostrar un mensaje de error
+     */
     private fun setError(detalle: Int) {
         _estadoUi.value = _estadoUi.value.copy(
             mensajeError = R.string.txt_error,
@@ -63,6 +76,7 @@ class RegistroUsuarioViewModel(
         )
     }
 
+    /** Permite gestionar los posibles errores a la hora de crear una cuenta y si es exitoso se envia un correo al usuario para darle la bienvenida */
     fun registrarUsuario() {
         val nombreUsuario       = _estadoUi.value.nombreUsuario.trim()
         val nombre              = _estadoUi.value.nombre.trim()
@@ -137,6 +151,10 @@ class RegistroUsuarioViewModel(
         }
     }
 
+    /**
+     * Permite envíar una solicitud a la API de n8n para disparar el flujo de
+     * correo de bienvenida al usuario registrado
+     */
     suspend fun enviarCorreoBienvenida(email: String) {
         try {
             val response = N8nClient.api.enviarCorreoBienvenida(BienvenidaRequest(email))
@@ -150,10 +168,15 @@ class RegistroUsuarioViewModel(
         }
     }
 
+    /**
+     * Permite limpiar los mensajes de error de la pantalla 'Cambiar Contrasenia'
+     */
     fun limpiarError() {
         _estadoUi.value = _estadoUi.value.copy(mensajeError = null, detalleError = null)
     }
-
+    /**
+     * Permite reiniciar la UI
+     */
     fun limpiarEstadoRegistro() {
         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = false)
     }

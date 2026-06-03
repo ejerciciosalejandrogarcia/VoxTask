@@ -53,7 +53,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.example.voxtask.R
 import com.example.voxtask.utils.anchoMaximoContenido
-
+/**
+ * Pantalla principal
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ContadorScreen(
@@ -61,15 +63,14 @@ fun ContadorScreen(
     viewModel: ContadorViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val contexto      = LocalContext.current
     val espaciado     = LocalEspaciado.current
     val tamano        = LocalTamanioPantalla.current
     val configuracion = LocalConfiguration.current
     val usuario       = FirebaseAuth.getInstance().currentUser
     val uid           = usuario?.uid
-
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
-
     val tamanoCirculo = if (esLandscape) {
         dimensionResource(R.dimen.contador_circulo_landscape)
     } else {
@@ -77,13 +78,14 @@ fun ContadorScreen(
     }
     val tamanoBoton      = dimensionResource(R.dimen.contador_boton)
     val tamanoIconoBoton = dimensionResource(R.dimen.contador_icono_boton)
-
     val anchoMaximoContenido = tamano.anchoMaximoContenido
-
     val lanzadorPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
 
+    /**
+     * Inicializa los servicios en segundo plano y solicita los permisos de notificación
+     */
     LaunchedEffect(Unit) {
         viewModel.restaurarSiServicioActivo()
         viewModel.comprobarEstadoService()
@@ -92,6 +94,10 @@ fun ContadorScreen(
         }
     }
 
+    /**
+     * Observa el estado del contador y notifica mediante voz cuando se crea el contador,
+     * adaptando el mensaje al idioma seleccionado
+     */
     LaunchedEffect(viewModel.mostrarContador) {
         if (viewModel.mostrarContador) {
             val idioma  = TextoAVoz.localeActual.language
@@ -107,6 +113,10 @@ fun ContadorScreen(
         }
     }
 
+    /**
+     * Saluda al usuario por su nombre y le solicita
+     * la duración del temporizador, adaptando el mensaje al idioma seleccionado.
+     */
     LaunchedEffect(uid) {
         if (!viewModel.mostrarContador) {
             val nombre = if (uid != null) {
@@ -166,7 +176,7 @@ fun ContadorScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
 
-                    // ── Círculo con el tiempo ─────────────────────────────────
+                    /** Contador */
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier         = Modifier
@@ -185,14 +195,13 @@ fun ContadorScreen(
 
                     Spacer(modifier = Modifier.height(espaciado.xl))
 
-                    // ── Botones ───────────────────────────────────────────────
+                    /** Botones */
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(espaciado.l),
                         verticalAlignment     = Alignment.CenterVertically
                     ) {
 
-                        // ── Botón Play / Pause
-                        // Deshabilitado cuando el contador ha terminado (terminado == true)
+                        /** Boton de parar y reanudar */
                         IconButton(
                             onClick  = {
                                 if (viewModel.corriendo) {
@@ -206,7 +215,6 @@ fun ContadorScreen(
                                 .size(tamanoBoton)
                                 .clip(CircleShape)
                                 .background(
-                                    // Gris cuando está deshabilitado, verde en caso contrario
                                     if (!viewModel.terminado) VerdePrimario else Color.Gray
                                 )
                         ) {
@@ -224,8 +232,7 @@ fun ContadorScreen(
                             )
                         }
 
-                        // ── Botón Cancelar (X)
-                        // Siempre activo: al pulsarlo se oculta el contador y para el sonido
+                        /** Boton de cancelar */
                         IconButton(
                             onClick  = { viewModel.cancelar(contexto) },
                             modifier = Modifier

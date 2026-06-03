@@ -43,8 +43,9 @@ import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.textoTitulo
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.anchoMaximoContenido
-import androidx.compose.ui.graphics.compositeOver
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("MissingPermission", "LocalContextGetResourceValueCall")
 @Composable
 fun ClimaScreen(
@@ -52,20 +53,40 @@ fun ClimaScreen(
     viewModel: ClimaViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val context = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val uiState by viewModel.uiState.collectAsState()
     val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-
     val anchoMaximoContenido = tamano.anchoMaximoContenido
     val snackbarHostState = remember { SnackbarHostState() }
-
     val paddingHorizontalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_horizontal)
     val paddingVerticalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
     val tamanoIconoClimaPrincipal = dimensionResource(R.dimen.cambiar_contrasena_icono_email)
+    val colorArribaPorDefecto = MaterialTheme.colorScheme.surface
+    val colorAbajoPorDefecto = MaterialTheme.colorScheme.surfaceVariant
+    val (colorArriba, colorAbajo, iconoClima) = if (uiState.datos != null) {
+        val datos = uiState.datos!!
+        val c = datos.codigo
+        when {
+            !datos.es_de_dia -> Triple(Color(0xFF0F172A), Color(0xFF1E293B), Icons.Default.NightsStay)
+            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(Color(0xFF475569), Color(0xFF64748B), Icons.Default.WaterDrop)
+            c == 1030 || c == 1135 || c == 1147 -> Triple(Color(0xFF64748B), Color(0xFF94A3B8), Icons.Default.BlurOn)
+            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(Color(0xFF1E3A8A), Color(0xFF3B82F6), Icons.Default.AcUnit)
+            datos.temperatura >= 30.0 -> Triple(Color(0xFFEA580C), Color(0xFFFBBF24), Icons.Default.WbSunny)
+            else -> Triple(Color(0xFF0284C7), Color(0xFF38BDF8), Icons.Default.CloudQueue)
+        }
+    } else {
+        Triple(colorArribaPorDefecto, colorAbajoPorDefecto, Icons.Default.Cloud)
+    }
+    val animadoArriba by animateColorAsState(targetValue = colorArriba, animationSpec = tween(1000), label = "animArriba")
+    val animadoAbajo by animateColorAsState(targetValue = colorAbajo, animationSpec = tween(1000), label = "animAbajo")
+    val colorDeContenido = if (uiState.datos != null) Color.White else MaterialTheme.colorScheme.onSurface
 
-    // ✅ Función reutilizable para obtener ubicación actual
+    /**
+     * Permite obtener la ubicacion del usuario y cargar el clima
+     */
     fun obtenerUbicacionYCargar() {
         val solicitud = CurrentLocationRequest.Builder()
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -83,29 +104,29 @@ fun ClimaScreen(
                 viewModel.establecerSinUbicacion()
             }
     }
-
+    /** Gestiona el acceso a la ubicación del usuario */
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
         if (concedido) {
-            obtenerUbicacionYCargar() // ✅ Usa getCurrentLocation
+            obtenerUbicacionYCargar()
         } else {
             viewModel.establecerSinUbicacion()
         }
     }
-
+    /** * Comprueba el estado del permiso de ubicación al iniciar la pantalla */
     LaunchedEffect(Unit) {
         val permiso = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         )
         if (permiso == PackageManager.PERMISSION_GRANTED) {
-            obtenerUbicacionYCargar() // ✅ También aquí
+            obtenerUbicacionYCargar()
         } else {
             launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    // --- ESCUCHA DE ERRORES ---
+    /** Snackbar */
     LaunchedEffect(uiState.mensajeErrorResId, uiState.errorMensajeDinamico) {
         if (uiState.mensajeErrorResId != null) {
             val mensajeFinal = if (uiState.errorMensajeDinamico != null) {
@@ -121,36 +142,11 @@ fun ClimaScreen(
         }
     }
 
-    // --- LÓGICA DE DEGRADADOS DINÁMICOS ---
-    val colorArribaPorDefecto = MaterialTheme.colorScheme.surface
-    val colorAbajoPorDefecto = MaterialTheme.colorScheme.surfaceVariant
-
-    val (colorArriba, colorAbajo, iconoClima) = if (uiState.datos != null) {
-        val datos = uiState.datos!!
-        val c = datos.codigo
-        when {
-            !datos.es_de_dia -> Triple(Color(0xFF0F172A), Color(0xFF1E293B), Icons.Default.NightsStay)
-            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(Color(0xFF475569), Color(0xFF64748B), Icons.Default.WaterDrop)
-            c == 1030 || c == 1135 || c == 1147 -> Triple(Color(0xFF64748B), Color(0xFF94A3B8), Icons.Default.BlurOn)
-            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(Color(0xFF1E3A8A), Color(0xFF3B82F6), Icons.Default.AcUnit)
-            datos.temperatura >= 30.0 -> Triple(Color(0xFFEA580C), Color(0xFFFBBF24), Icons.Default.WbSunny)
-            else -> Triple(Color(0xFF0284C7), Color(0xFF38BDF8), Icons.Default.CloudQueue)
-        }
-    } else {
-        Triple(colorArribaPorDefecto, colorAbajoPorDefecto, Icons.Default.Cloud)
-    }
-
-    val animadoArriba by animateColorAsState(targetValue = colorArriba, animationSpec = tween(1000), label = "animArriba")
-    val animadoAbajo by animateColorAsState(targetValue = colorAbajo, animationSpec = tween(1000), label = "animAbajo")
-
-    val colorDeContenido = if (uiState.datos != null) Color.White else MaterialTheme.colorScheme.onSurface
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         PlantillaBase(
             viewModel = viewModelPlantilla,
             navController = navController,
-            textoInformacion = stringResource(R.string.clima_info_plantilla),
             onTextoReconocido = {}
         ) { paddingValues ->
             Box(
@@ -181,6 +177,7 @@ fun ClimaScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         when {
+                            /** Pantalla al intentar obtener el clima del usuario */
                             uiState.estaCargando && uiState.datos == null -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -192,7 +189,7 @@ fun ClimaScreen(
                                     )
                                 }
                             }
-
+                            /** Pantalla cuando la aplicacion tiene desactivado la ubicacion del usuario */
                             uiState.sinUbicacion && uiState.datos == null -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Icon(
@@ -209,7 +206,6 @@ fun ClimaScreen(
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(Modifier.height(espaciado.m))
-                                    // ✅ Botón corregido: lanza el permiso, cargarClima se llama en el callback
                                     Button(
                                         onClick = { launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
                                         shape = RoundedCornerShape(14.dp)
@@ -218,7 +214,7 @@ fun ClimaScreen(
                                     }
                                 }
                             }
-
+                            /** Pantalla cuando la aplicacion tiene acceso a la ubicacion del usuario */
                             uiState.datos != null -> {
                                 Box(contentAlignment = Alignment.TopEnd) {
                                     TarjetaClimaContenido(
@@ -240,11 +236,11 @@ fun ClimaScreen(
                                     }
                                 }
                             }
-
+                            /** Pantalla de error al intentar obtener el clima del usuario */
                             else -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Button(
-                                        onClick = { obtenerUbicacionYCargar() }, // ✅ También corregido aquí
+                                        onClick = { obtenerUbicacionYCargar() },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.primary,
                                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -275,7 +271,9 @@ fun ClimaScreen(
         )
     }
 }
-
+/**
+ * Esta funcion crea todo el contenido del clima
+ */
 @Composable
 private fun TarjetaClimaContenido(
     datos: com.example.voxtask.databases.network.ClimaResponse,
@@ -349,6 +347,7 @@ private fun TarjetaClimaContenido(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             DatoClimaItem(
                 icono = Icons.Default.Thermostat,
                 valor = "${datos.sensacion_termica}°C",
@@ -379,7 +378,9 @@ private fun TarjetaClimaContenido(
         }
     }
 }
-
+/**
+ * Esta funcion muestra los datos del clima con su icono, valor y etiqueta
+ */
 @Composable
 private fun DatoClimaItem(
     icono: androidx.compose.ui.graphics.vector.ImageVector,

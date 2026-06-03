@@ -10,13 +10,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// 1. Redefinimos los estados: Ahora las alertas no destruyen la UI del clima actual
+/**
+ * Representa el estado de la UI
+ */
 data class ClimaUiState(
     val datos: ClimaResponse? = null,
     val estaCargando: Boolean = false,
     val sinUbicacion: Boolean = true,
-    val mensajeErrorResId: Int? = null,        // Para strings de error traducibles (R.string...)
-    val errorMensajeDinamico: String? = null   // Para capturar excepciones directas del servidor/SDK
+    val mensajeErrorResId: Int? = null,
+    val errorMensajeDinamico: String? = null
 )
 
 class ClimaViewModel : ViewModel() {
@@ -24,9 +26,9 @@ class ClimaViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ClimaUiState())
     val uiState: StateFlow<ClimaUiState> = _uiState.asStateFlow()
 
+    /** Permite obtener la informacion del clima dependiendo de la ubicacion del usuario */
     fun cargarClima(lat: Double, lon: Double) {
         viewModelScope.launch {
-            // Activamos la carga sin borrar los datos anteriores (así evitamos parpadeos molestos)
             _uiState.value = _uiState.value.copy(
                 estaCargando = true,
                 sinUbicacion = false,
@@ -41,17 +43,18 @@ class ClimaViewModel : ViewModel() {
                     estaCargando = false
                 )
             } catch (e: Exception) {
-                // Capturamos el fallo en las variables de alerta sin alterar los 'datos' que ya se veían en pantalla
                 _uiState.value = _uiState.value.copy(
                     estaCargando = false,
                     mensajeErrorResId = R.string.clima_error,
-                    errorMensajeDinamico = e.message ?: "Unknown error"
+                    errorMensajeDinamico = e.message
                 )
             }
         }
     }
 
-    // Al igual que en el login, este método resetea la alerta tras mostrarse en el Snackbar superior
+    /**
+     * Permite limpiar los mensajes de error de la pantalla 'Clima'
+     */
     fun limpiarError() {
         _uiState.value = _uiState.value.copy(
             mensajeErrorResId = null,
@@ -59,11 +62,12 @@ class ClimaViewModel : ViewModel() {
         )
     }
 
-    // Si el usuario deniega los permisos de localización de forma definitiva
+    /** Permite actualizar la UI si no esta activado la ubicacion */
     fun establecerSinUbicacion() {
         _uiState.value = _uiState.value.copy(
             sinUbicacion = true,
             estaCargando = false
         )
     }
+
 }

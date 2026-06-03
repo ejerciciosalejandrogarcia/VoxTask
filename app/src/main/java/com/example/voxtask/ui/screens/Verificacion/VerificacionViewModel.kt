@@ -11,7 +11,9 @@
     import kotlinx.coroutines.flow.StateFlow
     import kotlinx.coroutines.flow.asStateFlow
     import kotlinx.coroutines.launch
-
+    /**
+     * Representa el estado de la UI
+     */
     data class VerificacionUiState(
         val email: String = "",
         val codigoCorrecto: String = "",
@@ -24,50 +26,55 @@
 
     class VerificacionViewModel : ViewModel() {
 
+        /** Variables */
         private val _estadoUi = MutableStateFlow(VerificacionUiState())
         val estadoUi: StateFlow<VerificacionUiState> = _estadoUi.asStateFlow()
 
+        /** Envia el codigo al usuario cuando es logueado*/
         init {
             enviarCodigo()
         }
+        /**
+         * Permite enviar un correo electronico al usuario con el codigo mediante n8n
+         */
+            fun enviarCodigo(contexto: Context? = null) {
+                val usuario = FirebaseAuth.getInstance().currentUser ?: return
+                val email = usuario.email ?: return
+                val uid = usuario.uid
 
-        fun enviarCodigo(contexto: Context? = null) {
-            val usuario = FirebaseAuth.getInstance().currentUser ?: return
-            val email = usuario.email ?: return
-            val uid = usuario.uid
+                _estadoUi.value = _estadoUi.value.copy(
+                    email = email,
+                    cargando = true,
+                    mensajeError = null,
+                    errorDinamico = "",
+                    verificado = false,
+                    codigoCorrecto = "",
+                    errorEnvio = false
+                )
 
-            _estadoUi.value = _estadoUi.value.copy(
-                email = email,
-                cargando = true,
-                mensajeError = null,
-                errorDinamico = "",
-                verificado = false,
-                codigoCorrecto = "",
-                errorEnvio = false
-            )
-
-            viewModelScope.launch {
-                try {
-                    val respuesta = N8nClient.api.enviarCodigoVerificacion(
-                        VerificacionRequest(email = email, uid = uid)
-                    )
-                    android.util.Log.d("Verificacion", "Código recibido: '${respuesta.codigo}'")
-                    _estadoUi.value = _estadoUi.value.copy(
-                        codigoCorrecto = respuesta.codigo,
-                        cargando = false,
-                        errorEnvio = false
-                    )
-                } catch (e: Exception) {
-                    _estadoUi.value = _estadoUi.value.copy(
-                        errorDinamico = contexto?.getString(R.string.error_enviar_codigo, e.message ?: "")
-                            ?: "Error al enviar el código: ${e.message}",
-                        cargando = false,
-                        errorEnvio = true
-                    )
+                viewModelScope.launch {
+                    try {
+                        val respuesta = N8nClient.api.enviarCodigoVerificacion(
+                            VerificacionRequest(email = email, uid = uid)
+                        )
+                        android.util.Log.d("Verificacion", "Código recibido: '${respuesta.codigo}'")
+                        _estadoUi.value = _estadoUi.value.copy(
+                            codigoCorrecto = respuesta.codigo,
+                            cargando = false,
+                            errorEnvio = false
+                        )
+                    } catch (e: Exception) {
+                        _estadoUi.value = _estadoUi.value.copy(
+                            errorDinamico = contexto?.getString(R.string.error_enviar_codigo, e.message ?: "")
+                                ?: "Error al enviar el código: ${e.message}",
+                            cargando = false,
+                            errorEnvio = true
+                        )
+                    }
                 }
             }
-        }
 
+        /** Permite comprobar el codigo introducido del usuario*/
         fun verificarCodigo(codigoIntroducido: String) {
             val introducido = codigoIntroducido.trim().uppercase()
             val correcto = _estadoUi.value.codigoCorrecto.trim().uppercase()
@@ -78,7 +85,9 @@
                 _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_codigo_incorrecto)
             }
         }
-
+        /**
+         * Permite limpiar los mensajes de error de la pantalla 'Cambiar Contrasenia'
+         */
         fun limpiarError() {
             _estadoUi.value = _estadoUi.value.copy(mensajeError = null, errorDinamico = "")
         }

@@ -10,6 +10,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.voxtask.R
 
+/**
+ * Define las categorías de tamaño de pantalla para adaptar
+ * la interfaz de usuario de forma responsiva
+ */
 enum class TamanioPantalla { COMPACTO, MEDIO, EXPANDIDO }
 
 fun WindowWidthSizeClass.aTamanioPantalla() = when (this) {
@@ -18,6 +22,10 @@ fun WindowWidthSizeClass.aTamanioPantalla() = when (this) {
     else                         -> TamanioPantalla.EXPANDIDO
 }
 
+/**
+ * Convierte la clasificación de tamaño de pantalla del sistema
+ * al formato personalizado de la aplicación
+ */
 data class Espaciado(
     val xs: Dp,
     val s: Dp,
@@ -26,7 +34,10 @@ data class Espaciado(
     val xl: Dp,
     val xxl: Dp
 )
-
+/**
+ * Permite crear una instancia de espaciado cargando los valores definidos en los
+ * dimens.xml
+ */
 @Composable
 fun espaciadoFromDimens() = Espaciado(
     xs  = dimensionResource(R.dimen.espaciado_xs),
@@ -36,10 +47,11 @@ fun espaciadoFromDimens() = Espaciado(
     xl  = dimensionResource(R.dimen.espaciado_xl),
     xxl = dimensionResource(R.dimen.espaciado_xxl),
 )
-
+/** Variables */
 val LocalEspaciado       = compositionLocalOf { Espaciado(4.dp, 8.dp, 12.dp, 16.dp, 24.dp, 32.dp) }
 val LocalTamanioPantalla = compositionLocalOf { TamanioPantalla.COMPACTO }
 
+// Define el estilo y distribución según el dispositivo
 val TamanioPantalla.textoBody: TextUnit get() = when (this) {
     TamanioPantalla.COMPACTO  -> 14.sp
     TamanioPantalla.MEDIO     -> 16.sp

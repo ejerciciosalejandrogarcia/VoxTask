@@ -35,6 +35,9 @@ import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.R
 
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun PerfilScreen(
@@ -42,20 +45,19 @@ fun PerfilScreen(
     viewModel: PerfilViewModel,
     navController: NavController
 ) {
+    /** Variables */
     val uiState by viewModel.estadoUi.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val snackbarHostState = remember { SnackbarHostState() }
     var mostrarSelector by remember { mutableStateOf(false) }
-
-    // Valores adaptativos
     val paddingContenido = dimensionResource(R.dimen.perfil_padding_contenido)
     val tamanoAvatar = dimensionResource(R.dimen.perfil_tamano_avatar)
     val tamanoAvatarSelector = dimensionResource(R.dimen.perfil_tamano_avatar_selector)
-    // Nuevo: ancho máximo del contenido para tabletas y plegables
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
+    /** Gestion del SnackBar */
     LaunchedEffect(uiState.mensajeError) {
         uiState.mensajeError?.let { resId ->
             snackbarHostState.showSnackbar(
@@ -75,16 +77,14 @@ fun PerfilScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Nuevo: scroll para contenido largo y teclado abierto
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(paddingContenido),             // antes: 16.dp fijo
+                    .padding(paddingContenido),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                // Nuevo: limita el ancho en tabletas y plegables, centrado automático
                 val modificadorContenido = if (anchoMaximoContenido != androidx.compose.ui.unit.Dp.Unspecified) {
                     Modifier.widthIn(max = anchoMaximoContenido).fillMaxWidth()
                 } else {
@@ -95,10 +95,10 @@ fun PerfilScreen(
                     modifier = modificadorContenido,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Sección avatar
+                    /** Avatar */
                     Box(
                         modifier = Modifier
-                            .size(tamanoAvatar)                                // antes: 100.dp fijo
+                            .size(tamanoAvatar)
                             .clip(CircleShape)
                             .clickable { mostrarSelector = true },
                         contentAlignment = Alignment.Center
@@ -116,14 +116,16 @@ fun PerfilScreen(
                                 imageVector = Icons.Default.AccountCircle,
                                 contentDescription = stringResource(R.string.content_desc_avatar),
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(tamanoAvatar)         // antes: 100.dp fijo
+                                modifier = Modifier.size(tamanoAvatar)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(espaciado.s))            // antes: 8.dp
+                    Spacer(modifier = Modifier.height(espaciado.s))
+                    /** Pantalla cargando los datos */
                     if (uiState.cargando) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        /** Pantalla con los datos del usuario */
                     } else {
                         OutlinedTextField(
                             value = uiState.nombreUsuario,
@@ -134,7 +136,7 @@ fun PerfilScreen(
                             shape = RoundedCornerShape(14.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(espaciado.s))        // antes: 8.dp
+                        Spacer(modifier = Modifier.height(espaciado.s))
 
                         OutlinedTextField(
                             value = uiState.nombre,
@@ -145,7 +147,7 @@ fun PerfilScreen(
                             shape = RoundedCornerShape(14.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(espaciado.s))        // antes: 8.dp
+                        Spacer(modifier = Modifier.height(espaciado.s))
 
                         OutlinedTextField(
                             value = uiState.primerApellido,
@@ -156,7 +158,7 @@ fun PerfilScreen(
                             shape = RoundedCornerShape(14.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(espaciado.s))        // antes: 8.dp
+                        Spacer(modifier = Modifier.height(espaciado.s))
 
                         OutlinedTextField(
                             value = uiState.segundoApellido,
@@ -167,9 +169,9 @@ fun PerfilScreen(
                             shape = RoundedCornerShape(14.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(espaciado.xl))       // antes: 24.dp
+                        Spacer(modifier = Modifier.height(espaciado.xl))
 
-                        // Botones de acción
+                        /** Botones para editar y guardar los cambios dependiendo si esta en modo edicion o no*/
                         Button(
                             onClick = {
                                 if (uiState.modoEdicion) {
@@ -189,7 +191,7 @@ fun PerfilScreen(
                         }
 
                         if (uiState.modoEdicion) {
-                            Spacer(modifier = Modifier.height(espaciado.s))    // antes: 8.dp
+                            Spacer(modifier = Modifier.height(espaciado.s))
                             TextButton(
                                 onClick = { viewModel.conmutarModoEdicion() },
                                 modifier = Modifier.fillMaxWidth()
@@ -201,16 +203,16 @@ fun PerfilScreen(
                 }
             }
 
-            // Selector de avatar
+            /** Ventana emergente para seleccionar un avatar*/
             if (mostrarSelector) {
                 AlertDialog(
                     onDismissRequest = { mostrarSelector = false },
                     title = { Text(stringResource(R.string.txt_titulo_selector_avatar)) },
                     text = {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(espaciado.m), // antes: 12.dp
+                            horizontalArrangement = Arrangement.spacedBy(espaciado.m),
                             modifier = Modifier.fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()), // <- Esto activa el scroll horizontal
+                                .horizontalScroll(rememberScrollState()),
                                     verticalAlignment = Alignment.CenterVertically
                         ) {
                             viewModel.avatarOpciones.forEach { nombre ->
@@ -220,7 +222,7 @@ fun PerfilScreen(
                                         painter = painterResource(id = drawableId),
                                         contentDescription = nombre,
                                         modifier = Modifier
-                                            .size(tamanoAvatarSelector)        // antes: 60.dp fijo
+                                            .size(tamanoAvatarSelector)
                                             .clip(CircleShape)
                                             .border(
                                                 width = if (uiState.avatarSeleccionado == nombre) 3.dp else 0.dp,
@@ -250,7 +252,7 @@ fun PerfilScreen(
                 hostState = snackbarHostState,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = espaciado.l)            // antes: 16.dp
+                    .padding(top = espaciado.l)
                     .zIndex(1f)
             )
         }

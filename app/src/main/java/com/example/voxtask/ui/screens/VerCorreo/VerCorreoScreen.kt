@@ -27,7 +27,10 @@ import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.anchoMaximoContenido
 import kotlinx.coroutines.launch
-
+/**
+ * Permite eliminar las etiquetas HTML de una cadena de texto, quitar entidades
+ * especiales y formatea el resultado para obtener un texto plano
+ */
 private fun quitarHtml(texto: String): String =
     texto
         .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
@@ -43,7 +46,9 @@ private fun quitarHtml(texto: String): String =
         .dropWhile { it.isEmpty() }
         .joinToString("\n")
         .trim()
-
+/**
+ * Pantalla principal
+ */
 @Composable
 fun VerCorreoScreen(
     viewModelPlantilla: PlantillaBaseViewModel,
@@ -51,11 +56,11 @@ fun VerCorreoScreen(
     navController: NavController,
     correoId: String?
 ) {
+    /** Variables */
     val contexto  = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano    = LocalTamanioPantalla.current
     val uiState   by viewModel.uiState.collectAsState()
-
     val paddingContenido      = dimensionResource(R.dimen.ver_correo_padding)
     val paddingHorizontal     = dimensionResource(R.dimen.ver_correo_padding_horizontal)
     val paddingVerticalAsunto = dimensionResource(R.dimen.ver_correo_padding_vertical_asunto)
@@ -63,9 +68,9 @@ fun VerCorreoScreen(
     val tamanoAvatar          = dimensionResource(R.dimen.ver_correo_avatar)
     val espaciadoRemitente    = dimensionResource(R.dimen.ver_correo_espaciado_remitente)
     val anchoMaximo           = tamano.anchoMaximoContenido
-
     val snackbarHostState = remember { SnackbarHostState() }
 
+    /** Gestiona el SnackBar e inicia la carga de datos del correo cuando el ID está disponible*/
     LaunchedEffect(correoId) {
         launch {
             viewModel.errorFlow.collect { mensaje ->
@@ -105,11 +110,11 @@ fun VerCorreoScreen(
             }
 
             when (val estado = uiState) {
-
+                /** Pantalla a la hora de cargar el contenido del correo */
                 is VerCorreoUiState.Cargando -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-
+                /** Mensaje a la hora de que hubiera un error al cargar el correo */
                 is VerCorreoUiState.Error -> {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -139,7 +144,7 @@ fun VerCorreoScreen(
                     ) {
                         Column {
 
-                            // Asunto
+                            /** Asunto */
                             Column(
                                 modifier = Modifier.padding(
                                     horizontal = paddingHorizontal,
@@ -156,7 +161,6 @@ fun VerCorreoScreen(
 
                             HorizontalDivider(thickness = 0.5.dp)
 
-                            // Remitente
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -167,6 +171,7 @@ fun VerCorreoScreen(
                                 verticalAlignment     = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(espaciadoRemitente)
                             ) {
+                                /** Inicial del remitente */
                                 val inicial = correo.remitente
                                     .trim()
                                     .firstOrNull()
@@ -190,7 +195,7 @@ fun VerCorreoScreen(
                                         textAlign  = TextAlign.Center
                                     )
                                 }
-
+                                /** Remitente */
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text       = correo.remitente,
@@ -210,7 +215,7 @@ fun VerCorreoScreen(
 
                             HorizontalDivider(thickness = 0.5.dp)
 
-                            // Cuerpo
+                            /** Cuerpo */
                             Text(
                                 text       = cuerpoLimpio,
                                 style      = MaterialTheme.typography.bodyMedium,

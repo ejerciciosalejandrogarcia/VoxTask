@@ -44,13 +44,16 @@ import com.example.voxtask.utils.LocalTamanioPantalla
 import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
-
+/**
+ * Pantalla principal
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun RegistroUsuarioScreen(
     alRegistroExitoso: () -> Unit,
     viewModel: RegistroUsuarioViewModel = viewModel()
 ) {
+    /** Variables */
     val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
@@ -58,8 +61,6 @@ fun RegistroUsuarioScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-
-    // Valores adaptativos desde dimens.xml
     val paddingHorizontal    = dimensionResource(R.dimen.registro_padding_horizontal)
     val paddingCardH         = dimensionResource(R.dimen.registro_padding_card_horizontal)
     val paddingCardV         = dimensionResource(R.dimen.registro_padding_card_vertical)
@@ -71,11 +72,8 @@ fun RegistroUsuarioScreen(
     val circuloInferior      = dimensionResource(R.dimen.registro_circulo_inferior)
     val espaciadoCampos      = dimensionResource(R.dimen.registro_espaciado_campos)
     val anchoMaximo          = tamano.anchoMaximoContenido
-
-    // Detectar orientación
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
-
     val selectorFecha = remember {
         DatePickerDialog(
             contexto,
@@ -88,6 +86,7 @@ fun RegistroUsuarioScreen(
         )
     }
 
+    /** Gestiona el SnackBar y el estado */
     LaunchedEffect(estadoUi.mensajeError) {
         val prefijo = estadoUi.mensajeError?.let { contexto.getString(it) } ?: ""
         val detalle = estadoUi.detalleError?.let { contexto.getString(it) } ?: ""
@@ -101,6 +100,7 @@ fun RegistroUsuarioScreen(
             viewModel.limpiarError()
         }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -113,9 +113,8 @@ fun RegistroUsuarioScreen(
                 .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
-
+        /** Fondo de la aplicacion */
         if (esLandscape) {
-            // ── Landscape: solo círculo arriba-izquierda y abajo-derecha ─────
             Box(
                 modifier = Modifier
                     .size(circuloGrande)
@@ -132,7 +131,6 @@ fun RegistroUsuarioScreen(
                     .background(MaterialTheme.colorScheme.primary)
             )
         } else {
-            // ── Portrait: círculos originales ─────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(circuloGrande)
@@ -165,7 +163,6 @@ fun RegistroUsuarioScreen(
             )
         }
 
-        // Scroll para teclado abierto y pantallas pequeñas
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -174,7 +171,6 @@ fun RegistroUsuarioScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Limita el ancho en tabletas y plegables
             val modificadorCard = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier.widthIn(max = anchoMaximo).fillMaxWidth()
             } else {
@@ -193,7 +189,7 @@ fun RegistroUsuarioScreen(
                         .padding(horizontal = paddingCardH, vertical = paddingCardV),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
+                    /** Mensaje de confirmacion de que se creo exitosamente la cuenta */
                     if (estadoUi.registroUsuarioExitoso) {
 
                         var visible by remember { mutableStateOf(false) }
@@ -258,6 +254,7 @@ fun RegistroUsuarioScreen(
                         }
 
                     } else {
+                        /** Formulario de registro */
 
                         Spacer(modifier = Modifier.height(espaciado.s))
 
@@ -270,7 +267,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciado.xl))
 
-                        // Campo nombre de usuario
                         OutlinedTextField(
                             value = estadoUi.nombreUsuario,
                             onValueChange = { viewModel.alCambiarNombreUsuario(it) },
@@ -298,7 +294,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        // Campo nombre
                         OutlinedTextField(
                             value = estadoUi.nombre,
                             onValueChange = { viewModel.alCambiarNombre(it) },
@@ -326,7 +321,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        // Campo primer apellido
                         OutlinedTextField(
                             value = estadoUi.primer_apellido,
                             onValueChange = { viewModel.alCambiarPrimerApellido(it) },
@@ -354,7 +348,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        // Campo segundo apellido
                         OutlinedTextField(
                             value = estadoUi.segundo_apellido,
                             onValueChange = { viewModel.alCambiarSegundoApellido(it) },
@@ -382,7 +375,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        // Campo fecha nacimiento
                         OutlinedTextField(
                             value = estadoUi.fecha_nacimiento,
                             onValueChange = {},
@@ -410,7 +402,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        // Campo correo electrónico
                         OutlinedTextField(
                             value = estadoUi.correo_electronico,
                             onValueChange = { viewModel.alCambiarCorreoElectronico(it) },
@@ -438,7 +429,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        // Campo contraseña
                         OutlinedTextField(
                             value = estadoUi.contrasenia,
                             onValueChange = { viewModel.alCambiarContrasenia(it) },
@@ -469,7 +459,6 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciado.xl))
 
-                        // Botón crear cuenta
                         Button(
                             onClick = { viewModel.registrarUsuario() },
                             modifier = Modifier

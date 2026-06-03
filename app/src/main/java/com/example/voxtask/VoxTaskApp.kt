@@ -1,6 +1,5 @@
 package com.example.voxtask
 
-import androidx.navigation.navDeepLink
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -11,7 +10,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -53,6 +51,9 @@ import com.example.voxtask.utils.ProveedorAdaptativo
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 
+/**
+ * Define las rutas disponibles en la navegación de la aplicación
+ */
 enum class VoxTaskScreen {
     Inicio_sesion,
     Registro_Usuario,
@@ -71,6 +72,10 @@ enum class VoxTaskScreen {
     Clima
 }
 
+/**
+ * Esta funcion es el componente principal que coordina la navegación,
+ * los estados de autenticación y la adaptación de la aplicación.
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VoxTaskApp(
@@ -80,10 +85,14 @@ fun VoxTaskApp(
     deepLinkIntent: Intent? = null
 ) {
     ProveedorAdaptativo(tamanioPantalla = windowSize) {
-
+        /** Variables */
         val navController = rememberNavController()
         val contexto = LocalContext.current
+        val viewModelInicioSesion: InicioSesionViewModel = viewModel()
+        val viewModelRegistrar: RegistroUsuarioViewModel = viewModel()
+        val viewModelInicio: InicioViewModel = viewModel()
 
+        /** Procesa un enlace externo para la recuperación de contraseñas */
         LaunchedEffect(deepLinkIntent) {
             val data = deepLinkIntent?.data
             if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
@@ -91,15 +100,16 @@ fun VoxTaskApp(
                 navController.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")
             }
         }
-
+        /**
+         * Permite exponer el navController hacia el exterior una vez inicializado,
+         * permitiendo que componentes externos, puedan controlar la navegación de la aplicación
+         * */
         LaunchedEffect(navController) {
             onNavControllerReady(navController)
         }
 
-        val viewModelInicioSesion: InicioSesionViewModel = viewModel()
-        val viewModelRegistrar: RegistroUsuarioViewModel = viewModel()
-        val viewModelInicio: InicioViewModel = viewModel()
 
+        /** Define el manejador del resultado del inicio de sesión con Google */
         val lanzadorGoogle = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
         ) { resultado ->
@@ -122,7 +132,9 @@ fun VoxTaskApp(
                 Log.e("Google", "El usuario canceló o hubo un error")
             }
         }
-
+        /**
+         * Establece las rutas y las transiciones entre las distintas pantallas.
+         */
         NavHost(
             navController = navController,
             startDestination = VoxTaskScreen.Inicio_sesion.name
@@ -131,7 +143,7 @@ fun VoxTaskApp(
             composable(route = VoxTaskScreen.Inicio_sesion.name) {
                 InicioSesionScreen(
                     alIniciarSesionExitosamente = {
-                        navController.navigate(VoxTaskScreen.Inicio.name) {
+                        navController.navigate(VoxTaskScreen.Verificacion.name) {
                             popUpTo(VoxTaskScreen.Inicio_sesion.name) { inclusive = true }
                         }
                     },

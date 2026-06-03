@@ -15,76 +15,67 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import com.example.voxtask.databases.model.Evento
 
-
-// ──────────────────────────────────────────────────────────────────────────────
-// ViewModel
-// ──────────────────────────────────────────────────────────────────────────────
-
 @RequiresApi(Build.VERSION_CODES.O)
 class RecordatorioViewModel : ViewModel() {
 
-    // ── Estado observable ─────────────────────────────────────────────────────
-
-    val eventos = mutableStateListOf<Evento>()  // Ahora usa el modelo de BD
+    /** Variables */
+    val eventos = mutableStateListOf<Evento>()
     private val repository = EventoRepository()
     private val usuarioId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     var cargando: Boolean by mutableStateOf(false)
         private set
-
-    init {
-        cargarEventos()  // 👈 Carga al arrancar el ViewModel
-    }
-
     var diaSeleccionado: LocalDate? by mutableStateOf(null)
         private set
-
-    /** True mientras el flujo de creación de evento por voz está activo */
     var creandoEvento: Boolean by mutableStateOf(false)
         private set
-
-    /** Callback para hablar (se inyecta desde la Screen) */
     var onHablar: ((String) -> Unit)? = null
+    private var flujoActual = FlujoVoz.NINGUNO
+    private var diaPendiente: Int? = null
+    private var mesPendiente: Int? = null
+    private var anioPendiente: Int? = null
+    /** Carga los eventos de el usuario logueado */
+    init {
+        cargarEventos()
+    }
 
-    // ── Estado interno del flujo de voz ───────────────────────────────────────
 
+    /**
+     * Define las diferentes etapas del proceso de crear o eliminar un evento
+     */
     private enum class FlujoVoz {
         NINGUNO,
-        // Flujo CREAR - pasos
         CREAR_ESPERANDO_DIA,
         CREAR_ESPERANDO_MES,
         CREAR_ESPERANDO_ANIO,
         CREAR_ESPERANDO_ASUNTO,
-        // Flujo ELIMINAR
         ELIMINAR_ESPERANDO_DIA,
         ELIMINAR_ESPERANDO_MES,
         ELIMINAR_ESPERANDO_ANIO
     }
 
-    private var flujoActual = FlujoVoz.NINGUNO
 
-    /** Partes de fecha que vamos acumulando paso a paso */
-    private var diaPendiente: Int? = null
-    private var mesPendiente: Int? = null
-    private var anioPendiente: Int? = null
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // API pública
-    // ──────────────────────────────────────────────────────────────────────────
-
+    /**
+     * Permite guardar la fecha elegida por el usuario para mostrar sus eventos
+     */
     fun seleccionarDia(fecha: LocalDate) {
         diaSeleccionado = fecha
     }
 
+    /**
+     * Permite eliminar un evento de Firebase y de la lista en pantalla
+     */
     fun eliminarEvento(evento: Evento) {
         viewModelScope.launch {
             try {
-                repository.eliminar(usuarioId, evento.id)  // ✅ id existe
+                repository.eliminar(usuarioId, evento.id)
                 eventos.remove(evento)
             } catch (e: Exception) {
                 Log.e("VoxTask", "Error al eliminar: ${e.message}")
             }
         }
     }
+    /** Permite cargar los eventos del usuario  */
     fun cargarEventos() {
         viewModelScope.launch {
             cargando = true
@@ -99,12 +90,14 @@ class RecordatorioViewModel : ViewModel() {
             }
         }
     }
-    /** Punto de entrada para todo texto reconocido por voz */
-    fun onTextoRecibido(texto: String) {
+    /**
+     * Permite procesar la entrada de voz del usuario,
+     * gestionar la cancelación y reparte el procesamiento del texto según
+     * la etapa actual del flujo de conversación
+     */    fun onTextoRecibido(texto: String) {
         Log.d("VoxTask", "onTextoRecibido → texto='$texto' | flujo=$flujoActual")
         val textoNorm = texto.trim().lowercase()
 
-        // Cancelación global en cualquier momento
         if (esCancelacion(textoNorm) && flujoActual != FlujoVoz.NINGUNO) {
             resetFlujo()
             hablar(mensajeCancelado())
@@ -123,10 +116,9 @@ class RecordatorioViewModel : ViewModel() {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Procesamiento del comando inicial
-    // ──────────────────────────────────────────────────────────────────────────
-
+    /**
+     * Permite clasificar el comando inicial de voz del usuario y dirigir el flujo segun la creacion o eliminacion de eventos
+     */
     private fun procesarComandoInicial(texto: String) {
         Log.d("VoxTask", "procesarComandoInicial → texto='$texto'")
         Log.d("VoxTask", "  esCrear=${esComandoCrear(texto)} | esEliminar=${esComandoEliminar(texto)}")
@@ -136,23 +128,26 @@ class RecordatorioViewModel : ViewModel() {
             esComandoEliminar(texto) -> iniciarEliminacion()
         }
     }
-
+    /**
+     * Permite iniciar el proceso de creación de un evento
+     */
     private fun iniciarCreacion() {
         creandoEvento = true
         flujoActual = FlujoVoz.CREAR_ESPERANDO_DIA
         hablar(mensajePreguntaDia())
     }
-
+    /**
+     * Permite iniciar el proceso de eliminacion de un evento
+     */
     private fun iniciarEliminacion() {
         flujoActual = FlujoVoz.ELIMINAR_ESPERANDO_DIA
         hablar(mensajePreguntaDia())
     }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Pasos del flujo guiado
-    // ──────────────────────────────────────────────────────────────────────────
 
-    /** Paso 1: esperar el número de día */
+    /**
+     * Permite validar el día introducido por voz y avanzar al paso de solicitar el mes
+     */
     private fun procesarDia(texto: String, esCrear: Boolean) {
         val dia = extraerNumero(texto)
         Log.d("VoxTask", "procesarDia → texto='$texto' | extraído=$dia")
@@ -166,7 +161,9 @@ class RecordatorioViewModel : ViewModel() {
         hablar(mensajePreguntaMes())
     }
 
-    /** Paso 2: esperar el nombre o número del mes */
+    /**
+     * Permite validar el mes introducido por voz y avanzar al paso de solicitar el año
+     */
     private fun procesarMes(texto: String, esCrear: Boolean) {
         // Intentar por nombre primero, luego por número
         val mes = nombreMesANumero(texto) ?: extraerNumero(texto)
@@ -179,13 +176,13 @@ class RecordatorioViewModel : ViewModel() {
         hablar(mensajePreguntaAnio())
     }
 
-    /** Paso 3: esperar si es este año u otro */
+    /**
+     * Permite validar el año introducido por voz y avanzar al paso de solicitar el asunto
+     */
     private fun procesarAnio(texto: String, esCrear: Boolean) {
         val anioActual = LocalDate.now().year
         val anio: Int? = when {
-            // "este año", "this year", "cette année", "dieses jahr", "quest'anno", "este ano"
             esEsteAnio(texto) -> anioActual
-            // Número explícito de 4 dígitos
             else -> extraerAnio(texto)
         }
 
@@ -196,7 +193,6 @@ class RecordatorioViewModel : ViewModel() {
 
         anioPendiente = anio
 
-        // Validar que la fecha sea coherente
         val fecha = runCatching {
             LocalDate.of(anio, mesPendiente!!, diaPendiente!!)
         }.getOrNull()
@@ -213,12 +209,14 @@ class RecordatorioViewModel : ViewModel() {
             flujoActual = FlujoVoz.CREAR_ESPERANDO_ASUNTO
             hablar(mensajePreguntaAsunto(fecha))
         } else {
-            // Flujo eliminar: buscar y borrar
             procesarEliminacionConFecha(fecha)
         }
     }
 
-    /** Paso 4 (solo crear): recibir el asunto */
+    /**
+     * Permite validar los datos recolectados, comprueba si hay un duplicado y guarda el
+     * nuevo evento en Firebase, finalizando el flujo
+     */
     private fun procesarAsunto(asunto: String) {
         if (asunto.isBlank()) { hablar(mensajeNoEntendiAsunto()); return }
 
@@ -250,10 +248,10 @@ class RecordatorioViewModel : ViewModel() {
         }
         resetFlujo()
     }
-    // ──────────────────────────────────────────────────────────────────────────
-    // Flujo ELIMINAR con fecha ya construida
-    // ──────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Permiet eliminar todos los eventos registrados en una fecha determinada
+     */
     private fun procesarEliminacionConFecha(fecha: LocalDate) {
         val eventosDia = eventos.filter {
             it.dia == fecha.dayOfMonth &&
@@ -271,7 +269,7 @@ class RecordatorioViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 eventosDia.forEach { evento ->
-                    repository.eliminar(usuarioId, evento.id)  // ✅ id existe en el modelo de BD
+                    repository.eliminar(usuarioId, evento.id)
                 }
                 cargarEventos()
 
@@ -286,10 +284,11 @@ class RecordatorioViewModel : ViewModel() {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Detección de intención
-    // ──────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Permite detectar si el comando de voz del usuario solicita la
+     * creación de evento segun el idioma seleccionado.
+     */
     private fun esComandoCrear(texto: String): Boolean {
         val palabras = listOf(
             "añade evento", "añadir evento", "crea evento", "crear evento",
@@ -305,6 +304,11 @@ class RecordatorioViewModel : ViewModel() {
         return palabras.any { texto.contains(it) }
     }
 
+
+    /**
+     * Permite detectar si el comando de voz del usuario solicita la
+     * eliminacion de evento segun el idioma seleccionado.
+     */
     private fun esComandoEliminar(texto: String): Boolean {
         val palabras = listOf(
             "elimina evento", "eliminar evento", "borra evento", "borrar evento",
@@ -318,6 +322,10 @@ class RecordatorioViewModel : ViewModel() {
         return palabras.any { texto.contains(it) }
     }
 
+    /**
+     * Permite detectar si el usuario desea interrumpir el proceso actual
+     * mediante el comando de cancelacion dependiendo de el idioma seleccionado
+     */
     private fun esCancelacion(texto: String): Boolean {
         val palabras = listOf(
             "cancelar", "cancel", "annuler", "abbrechen", "annulla", "cancelar", "parar", "stop"
@@ -325,37 +333,29 @@ class RecordatorioViewModel : ViewModel() {
         return palabras.any { texto.contains(it) }
     }
 
+    /**
+     * Permite detectar si el usuario se refiere al año actual segun el idioma actual
+     */
     private fun esEsteAnio(texto: String): Boolean {
         val palabras = listOf(
-            // ES
             "este año", "este ano",
-            // EN
             "this year", "current year",
-            // FR
             "cette année", "cette annee",
-            // DE
             "dieses jahr",
-            // IT
             "quest'anno", "questo anno",
-            // PT
             "este ano"
         )
         return palabras.any { texto.contains(it) }
     }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Extracción de valores numéricos
-    // ──────────────────────────────────────────────────────────────────────────
 
-    /** Extrae el primer número entero encontrado en el texto */
-    /** Extrae un año de 4 dígitos (entre 2000 y 2100) */
+    /** Permite extraer el año de*/
     private fun extraerAnio(texto: String): Int? {
         return Regex("""\b(20\d{2}|21\d{2})\b""").find(texto)?.value?.toIntOrNull()
     }
 
-    /** Mapeo de nombres de mes en 6 idiomas → número de mes */
+    /** Permite el mapeo de nombres de mes en los idiomas disponibles */
     private fun nombreMesANumero(texto: String): Int? {
-        // Normalizar acentos para comparación
         val n = texto.lowercase()
             .replace("á", "a").replace("é", "e")
             .replace("í", "i").replace("ó", "o")
@@ -364,76 +364,74 @@ class RecordatorioViewModel : ViewModel() {
             .replace("â", "a").replace("ô", "o")
             .replace("î", "i")
 
-        // Mapa completo: todas las palabras clave de mes en 6 idiomas
         val mapaAbrevMes = mapOf(
-            // Enero / January / Janvier / Januar / Gennaio / Janeiro
             "enero" to 1, "ene" to 1,
             "january" to 1, "jan" to 1,
             "janvier" to 1,
             "januar" to 1,
             "gennaio" to 1, "gen" to 1,
             "janeiro" to 1,
-            // Febrero / February / Février / Februar / Febbraio / Fevereiro
+
             "febrero" to 2, "feb" to 2,
             "february" to 2,
             "fevrier" to 2, "fev" to 2,
             "februar" to 2,
             "febbraio" to 2,
             "fevereiro" to 2,
-            // Marzo / March / Mars / März / Marzo / Março
+
             "marzo" to 3, "mar" to 3,
             "march" to 3,
             "mars" to 3,
             "marz" to 3,
             "marco" to 3,
-            // Abril / April / Avril / April / Aprile / Abril
+
             "abril" to 4, "abr" to 4,
             "april" to 4, "apr" to 4,
             "avril" to 4,
             "aprile" to 4,
-            // Mayo / May / Mai / Mai / Maggio / Maio
+
             "mayo" to 5,
             "may" to 5,
             "mai" to 5,
             "maggio" to 5, "mag" to 5,
             "maio" to 5,
-            // Junio / June / Juin / Juni / Giugno / Junho
+
             "junio" to 6, "jun" to 6,
             "june" to 6,
             "juin" to 6,
             "juni" to 6,
             "giugno" to 6, "giu" to 6,
             "junho" to 6,
-            // Julio / July / Juillet / Juli / Luglio / Julho
+
             "julio" to 7, "jul" to 7,
             "july" to 7,
             "juillet" to 7,
             "juli" to 7,
             "luglio" to 7, "lug" to 7,
             "julho" to 7,
-            // Agosto / August / Août / August / Agosto / Agosto
+
             "agosto" to 8, "ago" to 8,
             "august" to 8, "aug" to 8,
             "aout" to 8,
-            // Septiembre / September / Septembre / September / Settembre / Setembro
+
             "septiembre" to 9, "sep" to 9, "sept" to 9,
             "september" to 9,
             "septembre" to 9,
             "settembre" to 9, "set" to 9,
             "setembro" to 9,
-            // Octubre / October / Octobre / Oktober / Ottobre / Outubro
+
             "octubre" to 10, "oct" to 10,
             "october" to 10,
             "octobre" to 10,
             "oktober" to 10, "okt" to 10,
             "ottobre" to 10, "ott" to 10,
             "outubro" to 10,
-            // Noviembre / November / Novembre / November / Novembre / Novembro
+
             "noviembre" to 11, "nov" to 11,
             "november" to 11,
             "novembre" to 11,
             "novembro" to 11,
-            // Diciembre / December / Décembre / Dezember / Dicembre / Dezembro
+
             "diciembre" to 12, "dic" to 12,
             "december" to 12, "dec" to 12,
             "decembre" to 12,
@@ -442,26 +440,30 @@ class RecordatorioViewModel : ViewModel() {
             "dezembro" to 12
         )
 
-        // Buscar coincidencia exacta de palabra completa en el texto normalizado
+
         val palabras = n.split(Regex("""\s+"""))
         for (palabra in palabras) {
             mapaAbrevMes[palabra]?.let { return it }
         }
-        // También buscar si el texto completo normalizado contiene el nombre
+
         for ((nombre, numero) in mapaAbrevMes) {
             if (n.contains(nombre)) return numero
         }
         return null
     }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Mensajes TTS multiidioma
-    // ──────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Permite obtener el código de idioma configurado en el motor de voz.
+     */
     private fun idioma(): String = try {
         com.example.voxtask.utils.TextoAVoz.localeActual.language
     } catch (e: Exception) { "es" }
 
+    /**
+     * Permite devolver el mensaje de solicitud del día segun el idioma
+     * seleccionado
+     */
     private fun mensajePreguntaDia(): String = when (idioma()) {
         "en" -> "What day? Say a number."
         "fr" -> "Quel jour ? Dites un numéro."
@@ -471,6 +473,10 @@ class RecordatorioViewModel : ViewModel() {
         else -> "¿Qué día? Di un número."
     }
 
+    /**
+     * Permite devolver el mensaje de solicitud del mes segun el idioma
+     * seleccionado
+     */
     private fun mensajePreguntaMes(): String = when (idioma()) {
         "en" -> "What month?"
         "fr" -> "Quel mois ?"
@@ -479,7 +485,10 @@ class RecordatorioViewModel : ViewModel() {
         "pt" -> "Que mês?"
         else -> "¿Qué mes?"
     }
-
+    /**
+     * Permite devolver el mensaje de solicitud del año segun el idioma
+     * seleccionado
+     */
     private fun mensajePreguntaAnio(): String = when (idioma()) {
         "en" -> "This year, or which year?"
         "fr" -> "Cette année, ou quelle année ?"
@@ -488,7 +497,10 @@ class RecordatorioViewModel : ViewModel() {
         "pt" -> "Este ano ou qual ano?"
         else -> "¿Este año o qué año?"
     }
-
+    /**
+     * Permite devolver el mensaje de solicitud del asunto segun el idioma
+     * seleccionado
+     */
     private fun mensajePreguntaAsunto(fecha: LocalDate): String {
         val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
         return when (idioma()) {
@@ -501,6 +513,9 @@ class RecordatorioViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando la creación del evento
+     */
     private fun mensajeEventoCreado(evento: Evento): String {
         val d = evento.dia; val m = evento.mes; val a = evento.anio
         return when (idioma()) {
@@ -513,6 +528,9 @@ class RecordatorioViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando la eliminacion del evento
+     */
     private fun mensajeEventoEliminado(evento: Evento): String {
         val d = evento.dia; val m = evento.mes; val a = evento.anio
         return when (idioma()) {
@@ -524,6 +542,9 @@ class RecordatorioViewModel : ViewModel() {
             else -> "Evento '${evento.asunto}' del $d/$m/$a eliminado."
         }
     }
+    /**
+     * Permite generar un mensaje de voz confirmando la eliminacion de varios eventos
+     */
     private fun mensajeTodosEliminados(fecha: LocalDate, cantidad: Int): String {
         val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
         return when (idioma()) {
@@ -535,7 +556,9 @@ class RecordatorioViewModel : ViewModel() {
             else -> "Se han eliminado $cantidad eventos del $d/$m/$a."
         }
     }
-
+    /**
+     * Permite generar un mensaje de voz confirmando de que no se encontro un evento en especifico
+     */
     private fun mensajeSinEventos(fecha: LocalDate): String {
         val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
         return when (idioma()) {
@@ -548,6 +571,9 @@ class RecordatorioViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando de que no se entendio el dia
+     */
     private fun mensajeNoEntendiDia(): String = when (idioma()) {
         "en" -> "I didn't understand the day. Please say a number between 1 and 31."
         "fr" -> "Je n'ai pas compris le jour. Dites un numéro entre 1 et 31."
@@ -557,82 +583,59 @@ class RecordatorioViewModel : ViewModel() {
         else -> "No entendí el día. Di un número entre 1 y 31."
     }
 
-    /** Extrae el primer número entero encontrado en el texto.
-     *  Acepta tanto cifras ("8") como palabras numéricas en 6 idiomas
-     *  ("eight", "huit", "acht", "otto", "oito", "ocho"). */
+    /**
+     * Permite extraer un valor entero a partir de una cadena de texto
+     */
     private fun extraerNumero(texto: String): Int? {
-        // ── 1. Normalizar acentos ──────────────────────────────────────────────
         val norm = texto.lowercase()
             .replace("á","a").replace("é","e").replace("í","i")
             .replace("ó","o").replace("ú","u").replace("ü","u")
             .replace("è","e").replace("ê","e").replace("â","a")
             .replace("ô","o").replace("î","i").replace("ñ","n")
 
-        // ── 2. Mapa de palabras → número (ES / EN / FR / DE / IT / PT) ─────────
         val palabrasNumericas = mapOf(
-            // 0
+
             "cero" to 0, "zero" to 0, "zéro" to 0, "null" to 0,
-            // 1
             "uno" to 1, "un" to 1, "uma" to 1, "one" to 1,
             "un" to 1, "une" to 1, "ein" to 1, "eins" to 1,
             "uno" to 1, "um" to 1,
-            // 2
             "dos" to 2, "two" to 2, "deux" to 2, "zwei" to 2,
             "due" to 2, "dois" to 2,
-            // 3
             "tres" to 3, "three" to 3, "trois" to 3, "drei" to 3,
             "tre" to 3,
-            // 4
             "cuatro" to 4, "four" to 4, "quatre" to 4, "vier" to 4,
             "quattro" to 4, "quatro" to 4,
-            // 5
             "cinco" to 5, "five" to 5, "cinq" to 5, "funf" to 5,
             "cinque" to 5,
-            // 6
             "seis" to 6, "six" to 6, "sechs" to 6, "sei" to 6,
-            // 7
             "siete" to 7, "seven" to 7, "sept" to 7, "sieben" to 7,
             "sette" to 7, "sete" to 7,
-            // 8
             "ocho" to 8, "eight" to 8, "huit" to 8, "acht" to 8,
             "otto" to 8, "oito" to 8,
-            // 9
             "nueve" to 9, "nine" to 9, "neuf" to 9, "neun" to 9,
             "nove" to 9,
-            // 10
             "diez" to 10, "ten" to 10, "dix" to 10, "zehn" to 10,
             "dieci" to 10, "dez" to 10,
-            // 11
             "once" to 11, "eleven" to 11, "onze" to 11, "elf" to 11,
             "undici" to 11, "onze" to 11,
-            // 12
             "doce" to 12, "twelve" to 12, "douze" to 12, "zwolf" to 12,
             "dodici" to 12, "doze" to 12,
-            // 13
             "trece" to 13, "thirteen" to 13, "treize" to 13,
             "dreizehn" to 13, "tredici" to 13, "treze" to 13,
-            // 14
             "catorce" to 14, "fourteen" to 14, "quatorze" to 14,
             "vierzehn" to 14, "quattordici" to 14, "quatorze" to 14,
-            // 15
             "quince" to 15, "fifteen" to 15, "quinze" to 15,
             "funfzehn" to 15, "quindici" to 15,
-            // 16
             "dieciseis" to 16, "sixteen" to 16, "seize" to 16,
             "sechzehn" to 16, "sedici" to 16, "dezasseis" to 16,
-            // 17
             "diecisiete" to 17, "seventeen" to 17, "dix-sept" to 17,
             "siebzehn" to 17, "diciassette" to 17, "dezassete" to 17,
-            // 18
             "dieciocho" to 18, "eighteen" to 18, "dix-huit" to 18,
             "achtzehn" to 18, "diciotto" to 18, "dezoito" to 18,
-            // 19
             "diecinueve" to 19, "nineteen" to 19, "dix-neuf" to 19,
             "neunzehn" to 19, "diciannove" to 19, "dezanove" to 19,
-            // 20
             "veinte" to 20, "twenty" to 20, "vingt" to 20,
             "zwanzig" to 20, "venti" to 20, "vinte" to 20,
-            // 21-31 (días de calendario más usados por voz)
             "veintiuno" to 21, "twenty one" to 21, "twenty-one" to 21,
             "vingt et un" to 21, "einundzwanzig" to 21,
             "ventuno" to 21, "vinte e um" to 21,
@@ -667,22 +670,21 @@ class RecordatorioViewModel : ViewModel() {
             "trentuno" to 31, "trinta e um" to 31
         )
 
-        // ── 3. Buscar frases compuestas primero (más específicas) ───────────────
-        //       Ordenar por longitud descendente para que "twenty-one" gane a "one"
         val candidatoFrase = palabrasNumericas.entries
             .sortedByDescending { it.key.length }
             .firstOrNull { norm.contains(it.key) }
         if (candidatoFrase != null) return candidatoFrase.value
 
-        // ── 4. Buscar palabra suelta con límites de palabra ─────────────────────
         val palabras = norm.split(Regex("""\s+"""))
         for (p in palabras) {
             palabrasNumericas[p]?.let { return it }
         }
 
-        // ── 5. Fallback: primer dígito en el texto original ─────────────────────
         return Regex("""\d+""").find(texto)?.value?.toIntOrNull()
     }
+    /**
+     * Permite generar un mensaje de voz confirmando de que no se entendio el mes
+     */
     private fun mensajeNoEntendiMes(): String = when (idioma()) {
         "en" -> "I didn't understand the month. Please say the month name or a number."
         "fr" -> "Je n'ai pas compris le mois. Dites le nom du mois ou un numéro."
@@ -692,6 +694,9 @@ class RecordatorioViewModel : ViewModel() {
         else -> "No entendí el mes. Di el nombre del mes o un número."
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando de que no se entendio el año
+     */
     private fun mensajeNoEntendiAnio(): String = when (idioma()) {
         "en" -> "I didn't understand the year. Say 'this year' or a four-digit year like 2026."
         "fr" -> "Je n'ai pas compris l'année. Dites 'cette année' ou une année comme 2026."
@@ -701,6 +706,9 @@ class RecordatorioViewModel : ViewModel() {
         else -> "No entendí el año. Di 'este año' o un año como 2026."
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando de que no se entendio el asunto
+     */
     private fun mensajeNoEntendiAsunto(): String = when (idioma()) {
         "en" -> "I didn't catch the subject. Please say it again."
         "fr" -> "Je n'ai pas saisi le sujet. Veuillez répéter."
@@ -710,6 +718,9 @@ class RecordatorioViewModel : ViewModel() {
         else -> "No entendí el asunto. Por favor repite."
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando de que la fecha es invalida
+     */
     private fun mensajeFechaInvalida(): String = when (idioma()) {
         "en" -> "That date is not valid. Please try again."
         "fr" -> "Cette date n'est pas valide. Veuillez réessayer."
@@ -719,6 +730,9 @@ class RecordatorioViewModel : ViewModel() {
         else -> "Esa fecha no es válida. Por favor inténtalo de nuevo."
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando de cancelar el proceso
+     */
     private fun mensajeCancelado(): String = when (idioma()) {
         "en" -> "Cancelled."
         "fr" -> "Annulé."
@@ -728,6 +742,9 @@ class RecordatorioViewModel : ViewModel() {
         else -> "Cancelado."
     }
 
+    /**
+     * Permite generar un mensaje de voz confirmando de que hay un asunto duplicado
+     */
     private fun mensajeAsuntoDuplicado(asunto: String): String = when (idioma()) {
         "en" -> "The event '$asunto' already exists on that date. Please say a different subject."
         "fr" -> "L'événement '$asunto' existe déjà à cette date. Veuillez dire un autre sujet."
@@ -737,14 +754,15 @@ class RecordatorioViewModel : ViewModel() {
         else -> "Ya existe un evento '$asunto' en esa fecha. Di otro asunto para el evento."
     }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Utilidades internas
-    // ──────────────────────────────────────────────────────────────────────────
-
+    /**
+     * Permite envía el mensaje de texto al motor de voz mediante
+     */
     private fun hablar(mensaje: String) {
         onHablar?.invoke(mensaje)
     }
-
+    /**
+     * Permite resetear el flujo de voz y limpia los datos,
+     */
     private fun resetFlujo() {
         flujoActual    = FlujoVoz.NINGUNO
         diaPendiente   = null
