@@ -142,6 +142,7 @@ fun EnviarCorreoScreen(
             ) {
                 Text(
                     text     = stringResource(R.string.txt_enviarcorreo_paso_uno, viewModel.paso.ordinal + 1),
+                    fontSize = tamano.textoTitulo*1.1f,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = espaciado.s),

@@ -13,6 +13,7 @@ import com.example.voxtask.databases.dao.UsuarioDao
 import kotlinx.coroutines.launch
 import com.example.voxtask.databases.network.BienvenidaRequest
 import com.example.voxtask.databases.network.N8nClient
+
 data class RegistrarUsuarioUiState(
     val nombreUsuario: String = "",
     val nombre: String = "",
@@ -22,7 +23,8 @@ data class RegistrarUsuarioUiState(
     val correo_electronico: String = "",
     val contrasenia: String = "",
     val registroUsuarioExitoso: Boolean = false,
-    val mensajeError: Int? = null
+    val mensajeError: Int? = null,
+    val detalleError: Int? = null
 )
 
 class RegistroUsuarioViewModel(
@@ -54,21 +56,26 @@ class RegistroUsuarioViewModel(
         _estadoUi.value = _estadoUi.value.copy(contrasenia = valor)
     }
 
-
-
+    private fun setError(detalle: Int) {
+        _estadoUi.value = _estadoUi.value.copy(
+            mensajeError = R.string.txt_error,
+            detalleError = detalle
+        )
+    }
 
     fun registrarUsuario() {
-        val nombreUsuario = _estadoUi.value.nombreUsuario.trim()
-        val nombre = _estadoUi.value.nombre.trim()
-        val primerApellido = _estadoUi.value.primer_apellido.trim()
-        val segundoApellido = _estadoUi.value.segundo_apellido.trim()
-        val fechaNacimiento = _estadoUi.value.fecha_nacimiento.trim()
-        val correoElectronico = _estadoUi.value.correo_electronico.trim()
-        val contrasenia = _estadoUi.value.contrasenia.trim()
-        val regexNombre = Regex("^[a-záéíóúàèìòùäëïöüñçâêîôûãõ]+$", RegexOption.IGNORE_CASE)
-        val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
-        val regexNombreUsuario = Regex("^[a-zA-Z0-9]+$")
-        //Control de errores
+        val nombreUsuario       = _estadoUi.value.nombreUsuario.trim()
+        val nombre              = _estadoUi.value.nombre.trim()
+        val primerApellido      = _estadoUi.value.primer_apellido.trim()
+        val segundoApellido     = _estadoUi.value.segundo_apellido.trim()
+        val fechaNacimiento     = _estadoUi.value.fecha_nacimiento.trim()
+        val correoElectronico   = _estadoUi.value.correo_electronico.trim()
+        val contrasenia         = _estadoUi.value.contrasenia.trim()
+
+        val regexNombre         = Regex("^[a-záéíóúàèìòùäëïöüñçâêîôûãõ]+$", RegexOption.IGNORE_CASE)
+        val regexContrasenia    = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
+        val regexNombreUsuario  = Regex("^[a-zA-Z0-9]+$")
+
         when {
             nombreUsuario.isBlank() ||
                     nombre.isBlank() ||
@@ -77,51 +84,45 @@ class RegistroUsuarioViewModel(
                     fechaNacimiento.isBlank() ||
                     correoElectronico.isBlank() ||
                     contrasenia.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_campos_vacios_registro)
+                setError(R.string.error_campos_vacios_registro)
                 return
             }
-
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_nombre_usuario_invalido_registro)
+                setError(R.string.error_nombre_usuario_invalido_registro)
                 return
             }
             !regexNombre.matches(nombre) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_nombre_invalido_registro)
+                setError(R.string.error_nombre_invalido_registro)
                 return
             }
-
             !regexNombre.matches(primerApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_primer_apellido_invalido_registro)
+                setError(R.string.error_primer_apellido_invalido_registro)
                 return
             }
-
             !regexNombre.matches(segundoApellido) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_segundo_apellido_invalido_registro)
+                setError(R.string.error_segundo_apellido_invalido_registro)
                 return
             }
-
             !Patterns.EMAIL_ADDRESS.matcher(correoElectronico).matches() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_correo_invalido)
+                setError(R.string.error_correo_invalido)
                 return
             }
-
             !regexContrasenia.matches(contrasenia) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_contrasenia_debil_registro)
+                setError(R.string.error_contrasenia_debil_registro)
                 return
             }
-
             else -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = null, detalleError = null)
 
                 viewModelScope.launch {
                     val usuario = Usuario(
-                        nombre_usuario     = nombreUsuario,
-                        nombre             = nombre,
-                        primer_apellido    = primerApellido,
-                        segundo_apellido   = segundoApellido,
-                        fecha_nacimiento   = fechaNacimiento,
-                        correo_electronico = correoElectronico,
-                        contrasenia        = contrasenia
+                        nombre_usuario      = nombreUsuario,
+                        nombre              = nombre,
+                        primer_apellido     = primerApellido,
+                        segundo_apellido    = segundoApellido,
+                        fecha_nacimiento    = fechaNacimiento,
+                        correo_electronico  = correoElectronico,
+                        contrasenia         = contrasenia
                     )
                     val resultado = repositorio.registrarUsuario(usuario)
 
@@ -129,8 +130,7 @@ class RegistroUsuarioViewModel(
                         enviarCorreoBienvenida(correoElectronico)
                         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
                     } else {
-                        val msg = resultado.exceptionOrNull()?.message ?: "Error desconocido"
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.error_registro_fallido)
+                        setError(R.string.error_registro_fallido)
                     }
                 }
             }
@@ -139,24 +139,21 @@ class RegistroUsuarioViewModel(
 
     suspend fun enviarCorreoBienvenida(email: String) {
         try {
-
-            val response = N8nClient.api.enviarCorreoBienvenida(
-                BienvenidaRequest(email)
-            )
-
+            val response = N8nClient.api.enviarCorreoBienvenida(BienvenidaRequest(email))
             if (response.isSuccessful) {
                 println("Correo de bienvenida enviado")
             } else {
                 println("Error enviando correo")
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
     fun limpiarError() {
-        _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = null, detalleError = null)
     }
+
     fun limpiarEstadoRegistro() {
         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = false)
     }

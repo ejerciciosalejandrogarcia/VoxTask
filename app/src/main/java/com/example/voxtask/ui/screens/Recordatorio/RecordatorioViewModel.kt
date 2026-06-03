@@ -8,18 +8,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.voxtask.databases.repository.EventoRepository
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import java.time.LocalDate
+import com.example.voxtask.databases.model.Evento
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Modelo de datos
-// ──────────────────────────────────────────────────────────────────────────────
-
-data class Evento(
-    val dia: Int,
-    val mes: Int,
-    val anio: Int,
-    val asunto: String
-)
 
 // ──────────────────────────────────────────────────────────────────────────────
 // ViewModel
@@ -30,7 +25,15 @@ class RecordatorioViewModel : ViewModel() {
 
     // ── Estado observable ─────────────────────────────────────────────────────
 
-    val eventos = mutableStateListOf<Evento>()
+    val eventos = mutableStateListOf<Evento>()  // Ahora usa el modelo de BD
+    private val repository = EventoRepository()
+    private val usuarioId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    var cargando: Boolean by mutableStateOf(false)
+        private set
+
+    init {
+        cargarEventos()  // 👈 Carga al arrancar el ViewModel
+    }
 
     var diaSeleccionado: LocalDate? by mutableStateOf(null)
         private set
@@ -73,9 +76,29 @@ class RecordatorioViewModel : ViewModel() {
     }
 
     fun eliminarEvento(evento: Evento) {
-        eventos.remove(evento)
+        viewModelScope.launch {
+            try {
+                repository.eliminar(usuarioId, evento.id)  // ✅ id existe
+                eventos.remove(evento)
+            } catch (e: Exception) {
+                Log.e("VoxTask", "Error al eliminar: ${e.message}")
+            }
+        }
     }
-
+    fun cargarEventos() {
+        viewModelScope.launch {
+            cargando = true
+            try {
+                val lista = repository.obtenerTodos(usuarioId)
+                eventos.clear()
+                eventos.addAll(lista)
+            } catch (e: Exception) {
+                Log.e("VoxTask", "Error al cargar eventos: ${e.message}")
+            } finally {
+                cargando = false
+            }
+        }
+    }
     /** Punto de entrada para todo texto reconocido por voz */
     fun onTextoRecibido(texto: String) {
         Log.d("VoxTask", "onTextoRecibido → texto='$texto' | flujo=$flujoActual")
@@ -197,36 +220,36 @@ class RecordatorioViewModel : ViewModel() {
 
     /** Paso 4 (solo crear): recibir el asunto */
     private fun procesarAsunto(asunto: String) {
-        if (asunto.isBlank()) {
-            hablar(mensajeNoEntendiAsunto())
-            return
-        }
+        if (asunto.isBlank()) { hablar(mensajeNoEntendiAsunto()); return }
 
         val dia  = diaPendiente  ?: run { resetFlujo(); return }
         val mes  = mesPendiente  ?: run { resetFlujo(); return }
         val anio = anioPendiente ?: run { resetFlujo(); return }
 
-        // ── Comprobar si ya existe un evento con el mismo asunto ese día ────────
         val asuntoNorm = asunto.trim().lowercase()
         val duplicado = eventos.any {
-            it.dia == dia &&
-                    it.mes == mes &&
-                    it.anio == anio &&
+            it.dia == dia && it.mes == mes && it.anio == anio &&
                     it.asunto.trim().lowercase() == asuntoNorm
         }
 
         if (duplicado) {
-            // No reseteamos el flujo: el usuario puede decir otro asunto
             hablar(mensajeAsuntoDuplicado(asunto))
             return
         }
 
-        val evento = Evento(dia = dia, mes = mes, anio = anio, asunto = asunto)
-        eventos.add(evento)
-        resetFlujo()
-        hablar(mensajeEventoCreado(evento))
-    }
+        val evento = Evento(asunto = asunto, dia = dia, mes = mes, anio = anio)
 
+        viewModelScope.launch {
+            try {
+                repository.agregar(usuarioId, evento)
+                cargarEventos()
+                hablar(mensajeEventoCreado(evento))
+            } catch (e: Exception) {
+                Log.e("VoxTask", "Error al guardar: ${e.message}")
+            }
+        }
+        resetFlujo()
+    }
     // ──────────────────────────────────────────────────────────────────────────
     // Flujo ELIMINAR con fecha ya construida
     // ──────────────────────────────────────────────────────────────────────────
@@ -245,15 +268,22 @@ class RecordatorioViewModel : ViewModel() {
             return
         }
 
-        if (eventosDia.size == 1) {
-            eventos.remove(eventosDia.first())
-            hablar(mensajeEventoEliminado(eventosDia.first()))
-            return
-        }
+        viewModelScope.launch {
+            try {
+                eventosDia.forEach { evento ->
+                    repository.eliminar(usuarioId, evento.id)  // ✅ id existe en el modelo de BD
+                }
+                cargarEventos()
 
-        // Varios eventos: eliminar todos e informar
-        eventosDia.forEach { eventos.remove(it) }
-        hablar(mensajeTodosEliminados(fecha, eventosDia.size))
+                if (eventosDia.size == 1)
+                    hablar(mensajeEventoEliminado(eventosDia.first()))
+                else
+                    hablar(mensajeTodosEliminados(fecha, eventosDia.size))
+
+            } catch (e: Exception) {
+                Log.e("VoxTask", "Error al eliminar: ${e.message}")
+            }
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -494,7 +524,6 @@ class RecordatorioViewModel : ViewModel() {
             else -> "Evento '${evento.asunto}' del $d/$m/$a eliminado."
         }
     }
-
     private fun mensajeTodosEliminados(fecha: LocalDate, cantidad: Int): String {
         val d = fecha.dayOfMonth; val m = fecha.monthValue; val a = fecha.year
         return when (idioma()) {

@@ -3,7 +3,9 @@ package com.example.voxtask.databases.model
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+/**
+ * Modelo que representa un usuario
+ */
 data class Usuario(
     val id: String = "",
     val nombre_usuario: String = "",

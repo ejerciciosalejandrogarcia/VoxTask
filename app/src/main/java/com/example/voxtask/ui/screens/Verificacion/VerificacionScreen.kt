@@ -220,10 +220,9 @@ fun VerificacionScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.app_name),
-                        fontSize = tamano.textoTitulo,
+                        fontSize = tamano.textoTitulo*1.9f,
                         fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        letterSpacing = (-0.5).sp
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(espaciado.s))

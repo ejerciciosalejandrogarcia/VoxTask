@@ -344,36 +344,36 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
                 verticalArrangement = Arrangement.spacedBy(espaciado.xs)
             ) {
                 eventosDia.forEach { evento ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                            .padding(horizontal = paddingFilaEvento, vertical = espaciado.s),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .size(tamanoIndicadorEvento)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                        )
-                        Spacer(modifier = Modifier.width(espaciado.s))
-                        Text(
-                            text = evento.asunto.replaceFirstChar { it.uppercase() },
-                            fontSize = tamanoTextoEvento,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = { viewModel.eliminarEvento(evento) }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.icono_eliminar_evento),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(tamanoIconoEliminar)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .padding(horizontal = paddingFilaEvento, vertical = espaciado.s),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(tamanoIndicadorEvento)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
                             )
+                            Spacer(modifier = Modifier.width(espaciado.s))
+                            Text(
+                                text = evento.asunto.replaceFirstChar { it.uppercase() },
+                                fontSize = tamanoTextoEvento,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = { viewModel.eliminarEvento(evento) }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.icono_eliminar_evento),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(tamanoIconoEliminar)
+                                )
+                            }
                         }
                     }
-                }
             }
         }
     }

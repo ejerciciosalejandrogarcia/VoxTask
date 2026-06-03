@@ -1,6 +1,8 @@
 package com.example.voxtask.ui.screens.Inicio_Sesion
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +43,7 @@ import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.textoTitulo
 
+@RequiresApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun InicioSesionScreen(
@@ -174,10 +177,9 @@ fun InicioSesionScreen(
 
                     Text(
                         text = stringResource(R.string.app_name),
-                        fontSize = tamano.textoTitulo,
+                        fontSize = tamano.textoTitulo*1.9f,
                         fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        letterSpacing = (-0.5).sp
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(espaciado.xl))

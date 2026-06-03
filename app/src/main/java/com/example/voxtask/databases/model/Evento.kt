@@ -1,5 +1,7 @@
 package com.example.voxtask.databases.model
-
+/**
+ * Modelo que representa un evento
+ */
 data class Evento(
     val id: String = "",
     val asunto: String = "",

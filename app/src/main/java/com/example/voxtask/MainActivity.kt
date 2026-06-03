@@ -28,6 +28,9 @@ class MainActivity : ComponentActivity() {
     private val plantillaBaseViewModel: PlantillaBaseViewModel by viewModels()
     private lateinit var themeManager: ThemeManager
 
+    // 👇 Guardamos el intent pendiente hasta que el NavController esté listo
+    private var intentPendiente: Intent? = null
+
     override fun attachBaseContext(newBase: Context) {
         val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idioma = prefs.getString("idioma", "es") ?: "es"
@@ -52,6 +55,12 @@ class MainActivity : ComponentActivity() {
         pedirPermiso.launch(Manifest.permission.RECORD_AUDIO)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
+
+        // 👇 Guardar el intent solo en la primera creación real
+        if (savedInstanceState == null) {
+            intentPendiente = intent
+        }
+
         setContent {
             VoxTaskTheme(themeManager = themeManager) {
                 Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
@@ -59,11 +68,15 @@ class MainActivity : ComponentActivity() {
                     VoxTaskApp(
                         windowSize             = windowSize.widthSizeClass,
                         plantillaBaseViewModel = plantillaBaseViewModel,
-                        onNavControllerReady   = {
-                            navController = it
-                            manejarIntent(intent)
+                        onNavControllerReady   = { nc ->
+                            navController = nc
+                            // 👇 Ahora sí tenemos NavController: procesar el intent pendiente
+                            intentPendiente?.let {
+                                manejarIntent(it)
+                                intentPendiente = null  // Limpiar para no reprocesar
+                            }
                         },
-                        deepLinkIntent         = intent
+                        deepLinkIntent = intent
                     )
                 }
             }
@@ -73,7 +86,13 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        manejarIntent(intent)
+        // Si el NavController ya está listo, procesar ahora
+        // Si no, guardarlo como pendiente
+        if (navController != null) {
+            manejarIntent(intent)
+        } else {
+            intentPendiente = intent
+        }
     }
 
     private fun manejarIntent(intent: Intent?) {
@@ -81,12 +100,15 @@ class MainActivity : ComponentActivity() {
             navController?.navigate(VoxTaskScreen.Contador.name) {
                 launchSingleTop = true
             }
+            setIntent(Intent())
             return
         }
+
         val data = intent?.data
         if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
             val oobCode = data.getQueryParameter("oobCode") ?: ""
             navController?.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")
+            setIntent(Intent())
         }
     }
 }

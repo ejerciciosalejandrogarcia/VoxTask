@@ -128,9 +128,8 @@ fun ListaCompraScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                                     .padding(
                                         horizontal = paddingFilaHorizontal,  // antes: 16.dp fijo
                                         vertical = paddingFilaVertical       // antes: 12.dp fijo
@@ -142,13 +141,13 @@ fun ListaCompraScreen(
                                     text = item.nombre.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium,
-                                    fontSize = tamano.textoBody              // nuevo: texto adaptativo
+                                    fontSize = tamano.textoBody
                                 )
                                 IconButton(onClick = { itemAEliminar = item }) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = stringResource(R.string.icono_eliminar_producto),
-                                        tint = Color.Red.copy(alpha = 0.7f)
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }

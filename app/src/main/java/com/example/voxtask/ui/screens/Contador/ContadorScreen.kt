@@ -172,14 +172,14 @@ fun ContadorScreen(
                         modifier         = Modifier
                             .size(tamanoCirculo)
                             .clip(CircleShape)
-                            .background(VerdePrimario.copy(alpha = 0.1f))
-                            .border(3.dp, VerdePrimario, CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
                     ) {
                         Text(
                             text       = viewModel.tiempoFormato,
                             style      = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Bold,
-                            color      = VerdePrimario
+                            color      = MaterialTheme.colorScheme.primary
                         )
                     }
 
