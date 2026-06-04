@@ -22,15 +22,15 @@ data class PerfilUiState(
     val cargando: Boolean = false,
     val mensajeError: Int? = null,
     val modoEdicion: Boolean = false,
-    val operacionExitosa:Boolean = false
+    val operacionExitosa: Boolean = false
 )
 /**
  * Permite mapear el nombre de un avatar a su foto,
  * devuelve null si el nombre proporcionado no tiene una imagen asociada
  */
 fun nombreAvatar(nombre: String): Int? = when (nombre) {
-    "tigre"   -> R.drawable.tigre
-    "leon"      -> R.drawable.leon
+    "tigre"      -> R.drawable.tigre
+    "leon"       -> R.drawable.leon
     "zorro"      -> R.drawable.zorro
     "astronauta" -> R.drawable.astronauta
     else         -> null
@@ -97,11 +97,11 @@ class PerfilViewModel : ViewModel() {
 
     /** Permite gestionar los posibles errores a la hora de guardar los datos y si es exitoso mostrara un mensaje de que se ha guardado los nuevos datos */
     fun guardarPerfil() {
-        val uiState = _estadoUi.value
-        val nombre = uiState.nombre.trim()
-        val nombreUsuario = uiState.nombreUsuario.trim()
-        val primerApellido = uiState.primerApellido.trim()
-        val segundoApellido = uiState.segundoApellido.trim()
+        val estadoActual = _estadoUi.value
+        val nombre = estadoActual.nombre.trim()
+        val nombreUsuario = estadoActual.nombreUsuario.trim()
+        val primerApellido = estadoActual.primerApellido.trim()
+        val segundoApellido = estadoActual.segundoApellido.trim()
 
         val regexNombre = Regex("^[a-záéíóúàèìòùäëïöüñçâêîôûãõ]+$", RegexOption.IGNORE_CASE)
         val regexNombreUsuario = Regex("^[a-zA-Z0-9]+$")
@@ -140,7 +140,7 @@ class PerfilViewModel : ViewModel() {
                                 "nombre_usuario" to nombreUsuario,
                                 "primer_apellido" to primerApellido,
                                 "segundo_apellido" to segundoApellido,
-                                "avatar" to uiState.avatarSeleccionado
+                                "avatar" to estadoActual.avatarSeleccionado
                             )
                         ).await()
 

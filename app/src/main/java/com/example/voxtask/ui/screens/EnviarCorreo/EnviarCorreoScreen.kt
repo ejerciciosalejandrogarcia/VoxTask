@@ -41,8 +41,8 @@ import com.google.android.gms.common.api.ApiException
  */
 @Composable
 private fun esHorizontal(): Boolean {
-    val config = LocalConfiguration.current
-    return config.screenWidthDp > config.screenHeightDp
+    val configuracion = LocalConfiguration.current
+    return configuracion.screenWidthDp > configuracion.screenHeightDp
 }
 @Composable
 private fun paddingVerticalAdaptativo(horizontal: Boolean): Dp {
@@ -67,7 +67,7 @@ fun EnviarCorreoScreen(
     val espaciado         = LocalEspaciado.current
     val tamano            = LocalTamanioPantalla.current
     val horizontal        = esHorizontal()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar    = remember { SnackbarHostState() }
     val paddingHorizontal = dimensionResource(R.dimen.enviar_correo_padding_horizontal)
     val paddingVertical   = paddingVerticalAdaptativo(horizontal)
     val anchoMax          = tamano.anchoMaximoContenido
@@ -98,7 +98,7 @@ fun EnviarCorreoScreen(
     /** Snackbar */
     LaunchedEffect(Unit) {
         viewModel.errorFlow.collect { mensajeError ->
-            snackbarHostState.showSnackbar(
+            estadoSnackbar.showSnackbar(
                 message  = mensajeError,
                 duration = SnackbarDuration.Short
             )
@@ -109,17 +109,17 @@ fun EnviarCorreoScreen(
         viewModel     = viewModelPlantilla,
         navController = navController,
         onTextoReconocido = { texto -> viewModel.procesarVoz(texto, contexto) }
-    ) { padding ->
+    ) { valoresPadding ->
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(valoresPadding)
                 .padding(horizontal = paddingHorizontal, vertical = paddingVertical)
         ) {
 
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = estadoSnackbar,
                 modifier  = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = espaciado.xl)
@@ -147,7 +147,7 @@ fun EnviarCorreoScreen(
                 )
             }
 
-            val modContenido = if (anchoMax != Dp.Unspecified) {
+            val modificadorContenido = if (anchoMax != Dp.Unspecified) {
                 Modifier
                     .widthIn(max = anchoMax)
                     .fillMaxSize()
@@ -157,7 +157,7 @@ fun EnviarCorreoScreen(
             }
 
             Column(
-                modifier            = modContenido.verticalScroll(rememberScrollState()),
+                modifier            = modificadorContenido.verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -495,7 +495,7 @@ fun FilaConfirmacion(
 ) {
     val espaciado = LocalEspaciado.current
     val tamano    = LocalTamanioPantalla.current
-    var textoTemp by remember(valor) { mutableStateOf(valor) }
+    var textoTemporal by remember(valor) { mutableStateOf(valor) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -508,15 +508,15 @@ fun FilaConfirmacion(
 
         if (editando) {
             OutlinedTextField(
-                value         = textoTemp,
-                onValueChange = { textoTemp = it },
+                value         = textoTemporal,
+                onValueChange = { textoTemporal = it },
                 modifier      = Modifier.fillMaxWidth()
             )
             Row(
                 modifier              = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(onClick = { onGuardar(textoTemp) }) {
+                Button(onClick = { onGuardar(textoTemporal) }) {
                     Text(stringResource(R.string.txt_enviarcorreo_btn_guardar))
                 }
             }

@@ -17,8 +17,8 @@ import kotlinx.coroutines.*
 class ContadorService : Service() {
 
     /** Variables */
-    private val scope = CoroutineScope(Dispatchers.Default + Job())
-    private var contadorJob: Job? = null
+    private val ambito = CoroutineScope(Dispatchers.Default + Job())
+    private var trabajoContador: Job? = null
 
     /** Configuracion del contador */
     companion object {
@@ -39,13 +39,13 @@ class ContadorService : Service() {
     /**
      * Permite gestionar las siguientes peticiones: iniciar, pausar, reanudar o cancelar
      */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intento: Intent?, flags: Int, startId: Int): Int {
         crearCanales()
 
-        when (intent?.action) {
+        when (intento?.action) {
 
             ACCION_INICIAR -> {
-                val totalSegundos = intent.getIntExtra(EXTRA_SEGUNDOS, 0)
+                val totalSegundos = intento.getIntExtra(EXTRA_SEGUNDOS, 0)
                 estaPausado = false
 
                 startForeground(
@@ -60,7 +60,7 @@ class ContadorService : Service() {
             }
 
             ACCION_PARAR -> {
-                contadorJob?.cancel()
+                trabajoContador?.cancel()
                 estaActivo  = false
                 estaPausado = true
                 actualizarNotificacion(
@@ -85,7 +85,7 @@ class ContadorService : Service() {
             }
 
             ACCION_CANCELAR -> {
-                contadorJob?.cancel()
+                trabajoContador?.cancel()
                 estaActivo        = false
                 estaPausado       = false
                 segundosRestantes = 0
@@ -100,9 +100,9 @@ class ContadorService : Service() {
     /** Inicia la cuenta atrás del contador actualizando el estado y las notificaciones al usuario */
     private fun iniciarContador(totalSegundos: Int) {
         estaActivo = true
-        contadorJob?.cancel()
+        trabajoContador?.cancel()
 
-        contadorJob = scope.launch {
+        trabajoContador = ambito.launch {
             var restantes = totalSegundos
 
             while (restantes >= 0) {
@@ -137,33 +137,33 @@ class ContadorService : Service() {
 
     /**  Convierte el tiempo en el siguiente formato:'HH:MM:SS'    */
     private fun formatearTiempo(segundos: Int): String {
-        val h = segundos / 3600
-        val m = (segundos % 3600) / 60
-        val s = segundos % 60
-        return String.format("%02d:%02d:%02d", h, m, s)
+        val horas   = segundos / 3600
+        val minutos = (segundos % 3600) / 60
+        val segs    = segundos % 60
+        return String.format("%02d:%02d:%02d", horas, minutos, segs)
     }
 
     /** Permite el acceso para volver a la app al pulsar la notificación */
-    private fun crearPendingIntent(): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java).apply {
+    private fun crearIntentoApertura(): PendingIntent {
+        val intento = Intent(this, MainActivity::class.java).apply {
             action = "ABRIR_CONTADOR"
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }
         return PendingIntent.getActivity(
-            this, 0, intent,
+            this, 0, intento,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 
-    /** Permite crear un botón de accion para interactuar servicio desde la notificación */
-    private fun pendingIntentAccion(action: String): PendingIntent {
-        val intent = Intent(this, ContadorService::class.java).apply {
-            this.action = action
+    /** Permite crear un botón de accion para interactuar con el servicio desde la notificación */
+    private fun crearIntentoAccion(accion: String): PendingIntent {
+        val intento = Intent(this, ContadorService::class.java).apply {
+            this.action = accion
         }
         return PendingIntent.getService(
-            this, action.hashCode(), intent,
+            this, accion.hashCode(), intento,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
@@ -174,7 +174,7 @@ class ContadorService : Service() {
      */
     private fun crearCanales() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = getSystemService(NotificationManager::class.java)
+            val gestorNotificaciones = getSystemService(NotificationManager::class.java)
 
             val canalSilencioso = NotificationChannel(
                 CHANNEL_ID,
@@ -203,44 +203,44 @@ class ContadorService : Service() {
                 vibrationPattern = longArrayOf(0, 400, 200, 400)
             }
 
-            nm.createNotificationChannel(canalSilencioso)
-            nm.createNotificationChannel(canalFinalizado)
+            gestorNotificaciones.createNotificationChannel(canalSilencioso)
+            gestorNotificaciones.createNotificationChannel(canalFinalizado)
         }
     }
 
     /**
      * Permite crear la estructura de la notificacion
      */
-    private fun crearNotificacion(titulo: String,contenido: String,pausado: Boolean,finalizado: Boolean = false): NotificationCompat.Builder {
+    private fun crearNotificacion(titulo: String, contenido: String, pausado: Boolean, finalizado: Boolean = false): NotificationCompat.Builder {
         val canalId = if (finalizado) CHANNEL_ID_FINALIZADO else CHANNEL_ID
-        val builder = NotificationCompat.Builder(this, canalId)
+        val constructor = NotificationCompat.Builder(this, canalId)
             .setContentTitle(titulo)
             .setContentText(contenido)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(!finalizado)
             .setSilent(!finalizado)
-            .setContentIntent(crearPendingIntent())
+            .setContentIntent(crearIntentoApertura())
         if (!finalizado) {
             if (pausado) {
-                builder.addAction(
+                constructor.addAction(
                     android.R.drawable.ic_media_play,
                     getString(R.string.txt_title_reanudar),
-                    pendingIntentAccion(ACCION_REANUDAR)
+                    crearIntentoAccion(ACCION_REANUDAR)
                 )
             } else {
-                builder.addAction(
+                constructor.addAction(
                     android.R.drawable.ic_media_pause,
                     getString(R.string.txt_title_pausar),
-                    pendingIntentAccion(ACCION_PARAR)
+                    crearIntentoAccion(ACCION_PARAR)
                 )
             }
-            builder.addAction(
+            constructor.addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
                 getString(R.string.txt_title_cancelar),
-                pendingIntentAccion(ACCION_CANCELAR)
+                crearIntentoAccion(ACCION_CANCELAR)
             )
         }
-        return builder
+        return constructor
     }
 
     /**
@@ -259,12 +259,13 @@ class ContadorService : Service() {
     /**
      * Indica que el servicio no permite la vinculación (binding) con componentes de la interfaz
      */
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intento: Intent?): IBinder? = null
+
     /**
      * Permite destruir la notificacion
      */
     override fun onDestroy() {
         super.onDestroy()
-        scope.cancel()
+        ambito.cancel()
     }
 }

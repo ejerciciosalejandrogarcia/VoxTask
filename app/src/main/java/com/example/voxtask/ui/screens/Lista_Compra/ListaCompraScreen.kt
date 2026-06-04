@@ -43,28 +43,28 @@ fun ListaCompraScreen(
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-    var itemAEliminar by remember { mutableStateOf<Producto?>(null) }
+    var elementoAEliminar by remember { mutableStateOf<Producto?>(null) }
     val paddingContenido = dimensionResource(R.dimen.lista_compra_padding_contenido)
     val paddingFilaHorizontal = dimensionResource(R.dimen.lista_compra_padding_fila_horizontal)
     val paddingFilaVertical = dimensionResource(R.dimen.lista_compra_padding_fila_vertical)
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
     /** Ventana emergente de la opcion 'eliminar producto' */
-    itemAEliminar?.let { producto ->
+    elementoAEliminar?.let { producto ->
         AlertDialog(
-            onDismissRequest = { itemAEliminar = null },
+            onDismissRequest = { elementoAEliminar = null },
             title = { Text(stringResource(R.string.txt_titulo_mensaje_confirmacion_producto)) },
             text = { Text(stringResource(R.string.txt_mensaje_confirmacion_producto, producto.nombre)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.eliminarProducto(producto)
-                    itemAEliminar = null
+                    elementoAEliminar = null
                 }) {
                     Text(stringResource(R.string.btn_eliminar_producto), color = Color.Red)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { itemAEliminar = null }) {
+                TextButton(onClick = { elementoAEliminar = null }) {
                     Text(stringResource(R.string.btn_cancelar_producto))
                 }
             }
@@ -92,11 +92,11 @@ fun ListaCompraScreen(
         textoInformacion = stringResource(R.string.txt_info_lista_compra),
         navController = navController,
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
-    ) { paddingValues ->
+    ) { valoresPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(valoresPadding)
                 .padding(paddingContenido),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -109,7 +109,7 @@ fun ListaCompraScreen(
             }
 
             Column(modifier = modificadorContenido) {
-                 /** Pantalla cuando no hay ningun producto registrado */
+                /** Pantalla cuando no hay ningun producto registrado */
                 if (viewModel.productos.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -127,7 +127,7 @@ fun ListaCompraScreen(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(espaciado.s)
                     ) {
-                        items(viewModel.productos) { item ->
+                        items(viewModel.productos) { elemento ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -141,12 +141,12 @@ fun ListaCompraScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = item.nombre.replaceFirstChar { it.uppercase() },
+                                    text = elemento.nombre.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = tamano.textoBody
                                 )
-                                IconButton(onClick = { itemAEliminar = item }) {
+                                IconButton(onClick = { elementoAEliminar = elemento }) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = stringResource(R.string.icono_eliminar_producto),

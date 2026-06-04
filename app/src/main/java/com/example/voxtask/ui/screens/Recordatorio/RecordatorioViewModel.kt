@@ -94,25 +94,26 @@ class RecordatorioViewModel : ViewModel() {
      * Permite procesar la entrada de voz del usuario,
      * gestionar la cancelación y reparte el procesamiento del texto según
      * la etapa actual del flujo de conversación
-     */    fun onTextoRecibido(texto: String) {
+     */
+    fun onTextoRecibido(texto: String) {
         Log.d("VoxTask", "onTextoRecibido → texto='$texto' | flujo=$flujoActual")
-        val textoNorm = texto.trim().lowercase()
+        val textoNormalizado = texto.trim().lowercase()
 
-        if (esCancelacion(textoNorm) && flujoActual != FlujoVoz.NINGUNO) {
+        if (esCancelacion(textoNormalizado) && flujoActual != FlujoVoz.NINGUNO) {
             resetFlujo()
             hablar(mensajeCancelado())
             return
         }
 
         when (flujoActual) {
-            FlujoVoz.NINGUNO                  -> procesarComandoInicial(textoNorm)
-            FlujoVoz.CREAR_ESPERANDO_DIA      -> procesarDia(textoNorm, esCrear = true)
-            FlujoVoz.CREAR_ESPERANDO_MES      -> procesarMes(textoNorm, esCrear = true)
-            FlujoVoz.CREAR_ESPERANDO_ANIO     -> procesarAnio(textoNorm, esCrear = true)
-            FlujoVoz.CREAR_ESPERANDO_ASUNTO   -> procesarAsunto(textoNorm)
-            FlujoVoz.ELIMINAR_ESPERANDO_DIA   -> procesarDia(textoNorm, esCrear = false)
-            FlujoVoz.ELIMINAR_ESPERANDO_MES   -> procesarMes(textoNorm, esCrear = false)
-            FlujoVoz.ELIMINAR_ESPERANDO_ANIO  -> procesarAnio(textoNorm, esCrear = false)
+            FlujoVoz.NINGUNO                  -> procesarComandoInicial(textoNormalizado)
+            FlujoVoz.CREAR_ESPERANDO_DIA      -> procesarDia(textoNormalizado, esCrear = true)
+            FlujoVoz.CREAR_ESPERANDO_MES      -> procesarMes(textoNormalizado, esCrear = true)
+            FlujoVoz.CREAR_ESPERANDO_ANIO     -> procesarAnio(textoNormalizado, esCrear = true)
+            FlujoVoz.CREAR_ESPERANDO_ASUNTO   -> procesarAsunto(textoNormalizado)
+            FlujoVoz.ELIMINAR_ESPERANDO_DIA   -> procesarDia(textoNormalizado, esCrear = false)
+            FlujoVoz.ELIMINAR_ESPERANDO_MES   -> procesarMes(textoNormalizado, esCrear = false)
+            FlujoVoz.ELIMINAR_ESPERANDO_ANIO  -> procesarAnio(textoNormalizado, esCrear = false)
         }
     }
 
@@ -224,10 +225,10 @@ class RecordatorioViewModel : ViewModel() {
         val mes  = mesPendiente  ?: run { resetFlujo(); return }
         val anio = anioPendiente ?: run { resetFlujo(); return }
 
-        val asuntoNorm = asunto.trim().lowercase()
+        val asuntoNormalizado = asunto.trim().lowercase()
         val duplicado = eventos.any {
             it.dia == dia && it.mes == mes && it.anio == anio &&
-                    it.asunto.trim().lowercase() == asuntoNorm
+                    it.asunto.trim().lowercase() == asuntoNormalizado
         }
 
         if (duplicado) {
@@ -356,7 +357,7 @@ class RecordatorioViewModel : ViewModel() {
 
     /** Permite el mapeo de nombres de mes en los idiomas disponibles */
     private fun nombreMesANumero(texto: String): Int? {
-        val n = texto.lowercase()
+        val textoNormalizado = texto.lowercase()
             .replace("á", "a").replace("é", "e")
             .replace("í", "i").replace("ó", "o")
             .replace("ú", "u").replace("ü", "u")
@@ -440,14 +441,13 @@ class RecordatorioViewModel : ViewModel() {
             "dezembro" to 12
         )
 
-
-        val palabras = n.split(Regex("""\s+"""))
+        val palabras = textoNormalizado.split(Regex("""\s+"""))
         for (palabra in palabras) {
             mapaAbrevMes[palabra]?.let { return it }
         }
 
         for ((nombre, numero) in mapaAbrevMes) {
-            if (n.contains(nombre)) return numero
+            if (textoNormalizado.contains(nombre)) return numero
         }
         return null
     }
@@ -587,14 +587,13 @@ class RecordatorioViewModel : ViewModel() {
      * Permite extraer un valor entero a partir de una cadena de texto
      */
     private fun extraerNumero(texto: String): Int? {
-        val norm = texto.lowercase()
+        val textoNormalizado = texto.lowercase()
             .replace("á","a").replace("é","e").replace("í","i")
             .replace("ó","o").replace("ú","u").replace("ü","u")
             .replace("è","e").replace("ê","e").replace("â","a")
             .replace("ô","o").replace("î","i").replace("ñ","n")
 
         val palabrasNumericas = mapOf(
-
             "cero" to 0, "zero" to 0, "zéro" to 0, "null" to 0,
             "uno" to 1, "un" to 1, "uma" to 1, "one" to 1,
             "un" to 1, "une" to 1, "ein" to 1, "eins" to 1,
@@ -672,10 +671,10 @@ class RecordatorioViewModel : ViewModel() {
 
         val candidatoFrase = palabrasNumericas.entries
             .sortedByDescending { it.key.length }
-            .firstOrNull { norm.contains(it.key) }
+            .firstOrNull { textoNormalizado.contains(it.key) }
         if (candidatoFrase != null) return candidatoFrase.value
 
-        val palabras = norm.split(Regex("""\s+"""))
+        val palabras = textoNormalizado.split(Regex("""\s+"""))
         for (p in palabras) {
             palabrasNumericas[p]?.let { return it }
         }

@@ -15,7 +15,7 @@ import kotlinx.coroutines.tasks.await
  * Representa el estado de la UI para la pantalla de la recuperación de contraseña
  */
 data class CambiarContrasenaUiState(
-    val email: String = "",
+    val correo: String = "",
     val cargando: Boolean = false,
     val correoEnviado: Boolean = false,
     val mensajeError: Int = 0
@@ -35,15 +35,15 @@ data class NuevaContraseniaUiState(
 class CambiarContraseniaViewModel : ViewModel() {
 
     /** Variables */
-    private val auth = FirebaseAuth.getInstance()
+    private val autenticacion = FirebaseAuth.getInstance()
     private val _estadoUi = MutableStateFlow(CambiarContrasenaUiState())
     val estadoUi: StateFlow<CambiarContrasenaUiState> = _estadoUi.asStateFlow()
     private val _estadoNueva = MutableStateFlow(NuevaContraseniaUiState())
     val estadoNueva: StateFlow<NuevaContraseniaUiState> = _estadoNueva.asStateFlow()
 
     /** Actualiza el correo electrónico en el estado y limpia cualquier mensaje de error */
-    fun alCambiarEmail(nuevoEmail: String) {
-        _estadoUi.value = _estadoUi.value.copy(email = nuevoEmail, mensajeError = 0)
+    fun alCambiarCorreo(nuevoCorreo: String) {
+        _estadoUi.value = _estadoUi.value.copy(correo = nuevoCorreo, mensajeError = 0)
     }
     /** Actualiza la nueva contraseña en el estado y limpia cualquier mensaje de error */
     fun alCambiarNuevaContrasena(valor: String) {
@@ -58,19 +58,19 @@ class CambiarContraseniaViewModel : ViewModel() {
      * Permite envíar un enlace de recuperación de contraseña al correo electrónico del usuario y redirecciona al usuario a la pantalla 'Nueva Contraseña'
      */
     fun enviarCorreoRecuperacion() {
-        val email = _estadoUi.value.email.trim()
+        val correo = _estadoUi.value.correo.trim()
 
-        if (email.isEmpty()) {
+        if (correo.isEmpty()) {
             _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_email_vacio)
             return
         }
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
             _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_email_invalido)
             return
         }
 
-        val actionCodeSettings = ActionCodeSettings.newBuilder()
+        val configuracionAccion = ActionCodeSettings.newBuilder()
             .setUrl("https://voxtask-de969.web.app")
             .setHandleCodeInApp(true)
             .setAndroidPackageName("com.example.voxtask", true, null)
@@ -79,7 +79,7 @@ class CambiarContraseniaViewModel : ViewModel() {
         viewModelScope.launch {
             _estadoUi.value = _estadoUi.value.copy(cargando = true, mensajeError = 0)
             try {
-                auth.sendPasswordResetEmail(email, actionCodeSettings).await()
+                autenticacion.sendPasswordResetEmail(correo, configuracionAccion).await()
                 _estadoUi.value = _estadoUi.value.copy(cargando = false, correoEnviado = true)
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(
@@ -90,43 +90,43 @@ class CambiarContraseniaViewModel : ViewModel() {
         }
     }
 
-        /**
-         * Permite validar la nueva contraseña y la guarda en Firebase
-         */
-        fun guardarNuevaContrasena(oobCode: String) {
-            val nueva = _estadoNueva.value.nuevaContrasena
-            val confirmar = _estadoNueva.value.confirmarContrasena
-            val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
+    /**
+     * Permite validar la nueva contraseña y la guarda en Firebase
+     */
+    fun guardarNuevaContrasena(codigoOob: String) {
+        val nueva = _estadoNueva.value.nuevaContrasena
+        val confirmar = _estadoNueva.value.confirmarContrasena
+        val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
 
-            when {
-                nueva.isBlank() || confirmar.isBlank() -> {
-                    _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_campos_vacios)
-                    return
-                }
-                !regexContrasenia.matches(nueva) -> {
-                    _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_contrasena_debil)
-                    return
-                }
-                nueva != confirmar -> {
-                    _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_contrasenas_no_coinciden)
-                    return
-                }
-                else -> {
-                    viewModelScope.launch {
-                        _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = null)
-                        try {
-                            auth.confirmPasswordReset(oobCode, nueva).await()
-                            _estadoNueva.value = _estadoNueva.value.copy(cargando = false, cambioExitoso = true)
-                        } catch (e: Exception) {
-                            _estadoNueva.value = _estadoNueva.value.copy(
-                                cargando = false,
-                                mensajeError = R.string.txt_error+R.string.error_cambio_contrasena
-                            )
-                        }
+        when {
+            nueva.isBlank() || confirmar.isBlank() -> {
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_campos_vacios)
+                return
+            }
+            !regexContrasenia.matches(nueva) -> {
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_contrasena_debil)
+                return
+            }
+            nueva != confirmar -> {
+                _estadoNueva.value = _estadoNueva.value.copy(mensajeError = R.string.error_contrasenas_no_coinciden)
+                return
+            }
+            else -> {
+                viewModelScope.launch {
+                    _estadoNueva.value = _estadoNueva.value.copy(cargando = true, mensajeError = null)
+                    try {
+                        autenticacion.confirmPasswordReset(codigoOob, nueva).await()
+                        _estadoNueva.value = _estadoNueva.value.copy(cargando = false, cambioExitoso = true)
+                    } catch (e: Exception) {
+                        _estadoNueva.value = _estadoNueva.value.copy(
+                            cargando = false,
+                            mensajeError = R.string.txt_error+R.string.error_cambio_contrasena
+                        )
                     }
                 }
             }
         }
+    }
 
     /**
      * Permite reiniciar el estado de la UI de la pantalla 'Cambiar contraseña'

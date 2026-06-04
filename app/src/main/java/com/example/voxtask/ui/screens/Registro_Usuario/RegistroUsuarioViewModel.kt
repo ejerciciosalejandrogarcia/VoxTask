@@ -12,7 +12,7 @@ import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.databases.dao.UsuarioDao
 import kotlinx.coroutines.launch
 import com.example.voxtask.databases.network.BienvenidaRequest
-import com.example.voxtask.databases.network.N8nClient
+import com.example.voxtask.databases.network.ClienteN8n
 
 /**
  * Representa el estado de la UI para la pantalla de la recuperación de contraseña
@@ -69,7 +69,7 @@ class RegistroUsuarioViewModel(
     /**
      * Actualiza el estado de la interfaz para mostrar un mensaje de error
      */
-    private fun setError(detalle: Int) {
+    private fun establecerError(detalle: Int) {
         _estadoUi.value = _estadoUi.value.copy(
             mensajeError = R.string.txt_error,
             detalleError = detalle
@@ -98,31 +98,31 @@ class RegistroUsuarioViewModel(
                     fechaNacimiento.isBlank() ||
                     correoElectronico.isBlank() ||
                     contrasenia.isBlank() -> {
-                setError(R.string.error_campos_vacios_registro)
+                establecerError(R.string.error_campos_vacios_registro)
                 return
             }
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                setError(R.string.error_nombre_usuario_invalido_registro)
+                establecerError(R.string.error_nombre_usuario_invalido_registro)
                 return
             }
             !regexNombre.matches(nombre) -> {
-                setError(R.string.error_nombre_invalido_registro)
+                establecerError(R.string.error_nombre_invalido_registro)
                 return
             }
             !regexNombre.matches(primerApellido) -> {
-                setError(R.string.error_primer_apellido_invalido_registro)
+                establecerError(R.string.error_primer_apellido_invalido_registro)
                 return
             }
             !regexNombre.matches(segundoApellido) -> {
-                setError(R.string.error_segundo_apellido_invalido_registro)
+                establecerError(R.string.error_segundo_apellido_invalido_registro)
                 return
             }
             !Patterns.EMAIL_ADDRESS.matcher(correoElectronico).matches() -> {
-                setError(R.string.error_correo_invalido)
+                establecerError(R.string.error_correo_invalido)
                 return
             }
             !regexContrasenia.matches(contrasenia) -> {
-                setError(R.string.error_contrasenia_debil_registro)
+                establecerError(R.string.error_contrasenia_debil_registro)
                 return
             }
             else -> {
@@ -144,7 +144,7 @@ class RegistroUsuarioViewModel(
                         enviarCorreoBienvenida(correoElectronico)
                         _estadoUi.value = _estadoUi.value.copy(registroUsuarioExitoso = true)
                     } else {
-                        setError(R.string.error_registro_fallido)
+                        establecerError(R.string.error_registro_fallido)
                     }
                 }
             }
@@ -155,10 +155,10 @@ class RegistroUsuarioViewModel(
      * Permite envíar una solicitud a la API de n8n para disparar el flujo de
      * correo de bienvenida al usuario registrado
      */
-    suspend fun enviarCorreoBienvenida(email: String) {
+    suspend fun enviarCorreoBienvenida(correo: String) {
         try {
-            val response = N8nClient.api.enviarCorreoBienvenida(BienvenidaRequest(email))
-            if (response.isSuccessful) {
+            val respuesta = ClienteN8n.api.enviarCorreoBienvenida(BienvenidaRequest(correo))
+            if (respuesta.isSuccessful) {
                 println("Correo de bienvenida enviado")
             } else {
                 println("Error enviando correo")

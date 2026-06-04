@@ -24,19 +24,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ContadorViewModel(application: Application) : AndroidViewModel(application) {
+class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) {
 
     /** Variables */
     private val _textoReconocido = MutableStateFlow("")
-    val textoReconocido: StateFlow<String> = _textoReconocido
     var tiempoFormato   by mutableStateOf("00:00:00")
     var mostrarContador by mutableStateOf(false)
     var corriendo       by mutableStateOf(false)
         private set
     var terminado       by mutableStateOf(false)
         private set
-    private var countdownJob: Job? = null
-    private var mediaPlayer: android.media.MediaPlayer? = null
+    private var trabajoCuentaAtras: Job? = null
+    private var reproductorAudio: android.media.MediaPlayer? = null
 
     /**
      * Permite recuperar el estado del contador desde el servicio al volver a la pantalla
@@ -48,10 +47,10 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
                 if (!corriendo) iniciarContador(ContadorService.segundosRestantes)
             } else if (ContadorService.estaPausado) {
                 corriendo = false
-                val h = ContadorService.segundosRestantes / 3600
-                val m = (ContadorService.segundosRestantes % 3600) / 60
-                val s = ContadorService.segundosRestantes % 60
-                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                val horas   = ContadorService.segundosRestantes / 3600
+                val minutos = (ContadorService.segundosRestantes % 3600) / 60
+                val segs    = ContadorService.segundosRestantes % 60
+                tiempoFormato = String.format("%02d:%02d:%02d", horas, minutos, segs)
             }
         }
     }
@@ -78,11 +77,11 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         val partes = textoNormalizado.split("\\s+".toRegex())
         var totalSegundos = 0
 
-        partes.forEachIndexed { index, parte ->
+        partes.forEachIndexed { indice, parte ->
             val numero = parte.toIntOrNull()
             if (numero != null) {
-                val sig1   = partes.getOrNull(index + 1)?.lowercase() ?: ""
-                val sig2   = partes.getOrNull(index + 2)?.lowercase() ?: ""
+                val sig1   = partes.getOrNull(indice + 1)?.lowercase() ?: ""
+                val sig2   = partes.getOrNull(indice + 2)?.lowercase() ?: ""
                 val unidad = if (sig1.toIntOrNull() != null) sig2 else sig1
 
                 when {
@@ -108,16 +107,16 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /** *
+    /**
      * Permite iniciar el servicio de contador en primer plano pasando los segundos calculados
      */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun iniciarContadorConServicio(contexto: Context, totalSegundos: Int) {
-        val intent = Intent(contexto, ContadorService::class.java).apply {
+        val intento = Intent(contexto, ContadorService::class.java).apply {
             action = ContadorService.ACCION_INICIAR
             putExtra(ContadorService.EXTRA_SEGUNDOS, totalSegundos)
         }
-        contexto.startForegroundService(intent)
+        contexto.startForegroundService(intento)
     }
 
     /**
@@ -130,7 +129,7 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
             try {
                 val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                     ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val mp = android.media.MediaPlayer().apply {
+                val reproductor = android.media.MediaPlayer().apply {
                     setAudioAttributes(
                         android.media.AudioAttributes.Builder()
                             .setUsage(android.media.AudioAttributes.USAGE_ALARM)
@@ -141,9 +140,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
                     isLooping = false
                     prepare()
                 }
-                mp.setOnCompletionListener { it.release(); mediaPlayer = null }
-                mp.start()
-                mediaPlayer = mp
+                reproductor.setOnCompletionListener { it.release(); reproductorAudio = null }
+                reproductor.start()
+                reproductorAudio = reproductor
                 android.util.Log.d("CONTADOR", "Sonido reproducido correctamente")
             } catch (e: Exception) {
                 android.util.Log.e("CONTADOR", "Error al reproducir sonido: ${e.message}")
@@ -152,18 +151,18 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
             try {
                 val patron = longArrayOf(0, 400, 200, 400)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    val vm = contexto.getSystemService(VibratorManager::class.java)
-                    vm?.defaultVibrator?.vibrate(
+                    val gestorVibracion = contexto.getSystemService(VibratorManager::class.java)
+                    gestorVibracion?.defaultVibrator?.vibrate(
                         VibrationEffect.createWaveform(patron, -1)
                     )
                 } else {
                     @Suppress("DEPRECATION")
-                    val vibrator = contexto.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                    val vibrador = contexto.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vibrator?.vibrate(VibrationEffect.createWaveform(patron, -1))
+                        vibrador?.vibrate(VibrationEffect.createWaveform(patron, -1))
                     } else {
                         @Suppress("DEPRECATION")
-                        vibrator?.vibrate(patron, -1)
+                        vibrador?.vibrate(patron, -1)
                     }
                 }
                 android.util.Log.d("CONTADOR", "Vibración ejecutada correctamente")
@@ -181,15 +180,15 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         mostrarContador = true
         corriendo       = true
         terminado       = false
-        countdownJob?.cancel()
-        countdownJob = viewModelScope.launch {
+        trabajoCuentaAtras?.cancel()
+        trabajoCuentaAtras = viewModelScope.launch {
             var restantes = totalSegundos
             while (restantes >= 0) {
                 withContext(Dispatchers.Main) {
-                    val h = restantes / 3600
-                    val m = (restantes % 3600) / 60
-                    val s = restantes % 60
-                    tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                    val horas   = restantes / 3600
+                    val minutos = (restantes % 3600) / 60
+                    val segs    = restantes % 60
+                    tiempoFormato = String.format("%02d:%02d:%02d", horas, minutos, segs)
                 }
                 if (restantes == 0) {
                     withContext(Dispatchers.Main) {
@@ -214,22 +213,22 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         val restantes = partes[0].toInt() * 3600 + partes[1].toInt() * 60 + partes[2].toInt()
         if (restantes <= 0) return
 
-        val intent = Intent(contexto, ContadorService::class.java).apply {
+        val intento = Intent(contexto, ContadorService::class.java).apply {
             action = ContadorService.ACCION_REANUDAR
         }
-        contexto.startService(intent)
+        contexto.startService(intento)
 
         corriendo = true
         terminado = false
-        countdownJob?.cancel()
-        countdownJob = viewModelScope.launch {
+        trabajoCuentaAtras?.cancel()
+        trabajoCuentaAtras = viewModelScope.launch {
             var r = restantes
             while (r >= 0) {
                 withContext(Dispatchers.Main) {
-                    val h = r / 3600
-                    val m = (r % 3600) / 60
-                    val s = r % 60
-                    tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                    val horas   = r / 3600
+                    val minutos = (r % 3600) / 60
+                    val segs    = r % 60
+                    tiempoFormato = String.format("%02d:%02d:%02d", horas, minutos, segs)
                 }
                 if (r == 0) {
                     withContext(Dispatchers.Main) {
@@ -251,11 +250,11 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
      */
     fun parar(contexto: Context) {
         corriendo = false
-        countdownJob?.cancel()
-        val intent = Intent(contexto, ContadorService::class.java).apply {
+        trabajoCuentaAtras?.cancel()
+        val intento = Intent(contexto, ContadorService::class.java).apply {
             action = ContadorService.ACCION_PARAR
         }
-        contexto.startService(intent)
+        contexto.startService(intento)
     }
 
     /**
@@ -265,17 +264,17 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
         corriendo       = false
         mostrarContador = false
         terminado       = false
-        countdownJob?.cancel()
+        trabajoCuentaAtras?.cancel()
         tiempoFormato   = "00:00:00"
 
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        reproductorAudio?.stop()
+        reproductorAudio?.release()
+        reproductorAudio = null
 
-        val intent = Intent(contexto, ContadorService::class.java).apply {
+        val intento = Intent(contexto, ContadorService::class.java).apply {
             action = ContadorService.ACCION_CANCELAR
         }
-        contexto.startService(intent)
+        contexto.startService(intento)
     }
 
     /**
@@ -283,9 +282,9 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
      */
     override fun onCleared() {
         super.onCleared()
-        countdownJob?.cancel()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        trabajoCuentaAtras?.cancel()
+        reproductorAudio?.release()
+        reproductorAudio = null
     }
 
     /**
@@ -299,12 +298,12 @@ class ContadorViewModel(application: Application) : AndroidViewModel(application
                         ContadorService.estaPausado && corriendo -> {
                             withContext(Dispatchers.Main) {
                                 corriendo = false
-                                countdownJob?.cancel()
-                                val r = ContadorService.segundosRestantes
-                                val h = r / 3600
-                                val m = (r % 3600) / 60
-                                val s = r % 60
-                                tiempoFormato = String.format("%02d:%02d:%02d", h, m, s)
+                                trabajoCuentaAtras?.cancel()
+                                val r       = ContadorService.segundosRestantes
+                                val horas   = r / 3600
+                                val minutos = (r % 3600) / 60
+                                val segs    = r % 60
+                                tiempoFormato = String.format("%02d:%02d:%02d", horas, minutos, segs)
                             }
                         }
                         ContadorService.estaActivo && !corriendo && mostrarContador -> {

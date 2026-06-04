@@ -21,7 +21,7 @@ import java.util.Locale
 class PlantillaBaseViewModel : ViewModel() {
 
     /** Variables */
-    private val auth = FirebaseAuth.getInstance()
+    private val autenticacion = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     var fondoPersonalizadoUri by mutableStateOf<Uri?>(null)
     private val _fondoUri = MutableStateFlow<Uri?>(null)
@@ -38,7 +38,7 @@ class PlantillaBaseViewModel : ViewModel() {
         actividad: Activity,
         alCerrar: () -> Unit
     ) {
-        val uid = auth.currentUser?.uid
+        val uid = autenticacion.currentUser?.uid
 
         if (uid != null) {
             firestore.collection("usuarios")
@@ -52,22 +52,22 @@ class PlantillaBaseViewModel : ViewModel() {
         )
 
         clienteGoogle.signOut().addOnCompleteListener {
-            auth.signOut()
+            autenticacion.signOut()
             resetearIdiomaEspanol(contexto)
-            val themeManager = ThemeManager(contexto)
-            themeManager.resetearColores()
+            val gestorTema = ThemeManager(contexto)
+            gestorTema.resetearColores()
             alCerrar()
             actividad.finishAffinity()
         }
     }
     /** Permite que resetee el idioma seleccionado y que pase a español */
     fun resetearIdiomaEspanol(contexto: Context) {
-        val locale = Locale("es")
-        Locale.setDefault(locale)
+        val configuracionRegional = Locale("es")
+        Locale.setDefault(configuracionRegional)
 
-        val config = Configuration(contexto.resources.configuration)
-        config.setLocale(locale)
-        contexto.resources.updateConfiguration(config, contexto.resources.displayMetrics)
+        val configuracion = Configuration(contexto.resources.configuration)
+        configuracion.setLocale(configuracionRegional)
+        contexto.resources.updateConfiguration(configuracion, contexto.resources.displayMetrics)
 
         contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
             .edit()

@@ -101,11 +101,11 @@ fun RecordatorioScreen(
         navController = navController,
         textoInformacion = stringResource(R.string.instrucciones_evento),
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto) }
-    ) { paddingValues ->
+    ) { valoresPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(valoresPadding)
                 .padding(paddingContenido),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -276,8 +276,8 @@ fun CalendarioGrid(viewModel: RecordatorioViewModel) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventosDia(viewModel: RecordatorioViewModel) {
-    val espaciado         = LocalEspaciado.current
-    val tamano            = LocalTamanioPantalla.current
+    val espaciado             = LocalEspaciado.current
+    val tamano                = LocalTamanioPantalla.current
 
     val tamanoTituloMes       = tamano.textoTitulo
     val tamanoTextoEvento     = tamano.textoBody
@@ -338,50 +338,37 @@ fun EventosDia(viewModel: RecordatorioViewModel) {
                 verticalArrangement = Arrangement.spacedBy(espaciado.xs)
             ) {
                 eventosDia.forEach { evento ->
-                        Row(
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(horizontal = paddingFilaEvento, vertical = espaciado.s),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                                .padding(horizontal = paddingFilaEvento, vertical = espaciado.s),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(tamanoIndicadorEvento)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
+                                .size(tamanoIndicadorEvento)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                        )
+                        Spacer(modifier = Modifier.width(espaciado.s))
+                        Text(
+                            text = evento.asunto.replaceFirstChar { it.uppercase() },
+                            fontSize = tamanoTextoEvento,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = { viewModel.eliminarEvento(evento) }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.icono_eliminar_evento),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(tamanoIconoEliminar)
                             )
-                            Spacer(modifier = Modifier.width(espaciado.s))
-                            Text(
-                                text = evento.asunto.replaceFirstChar { it.uppercase() },
-                                fontSize = tamanoTextoEvento,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(onClick = { viewModel.eliminarEvento(evento) }) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = stringResource(R.string.icono_eliminar_evento),
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(tamanoIconoEliminar)
-                                )
-                            }
                         }
                     }
+                }
             }
         }
-    }
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// (Mantenido por compatibilidad)
-// ──────────────────────────────────────────────────────────────────────────────
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun Calendario(viewModel: RecordatorioViewModel) {
-    Column {
-        CalendarioGrid(viewModel = viewModel)
-        EventosDia(viewModel = viewModel)
     }
 }

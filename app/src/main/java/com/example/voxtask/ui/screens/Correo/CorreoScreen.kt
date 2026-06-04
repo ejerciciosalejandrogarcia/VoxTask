@@ -48,7 +48,7 @@ fun CorreoScreen(
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-    val uiState by viewModel.uiState.collectAsState()
+    val estadoUi by viewModel.uiState.collectAsState()
     val paddingContenido = dimensionResource(R.dimen.correo_padding_contenido)
     val tamanoBotonCrear = dimensionResource(R.dimen.correo_boton_crear)
     val tamanoIconoCrear = dimensionResource(R.dimen.correo_icono_crear)
@@ -65,15 +65,14 @@ fun CorreoScreen(
             } catch (e: ApiException) { }
         }
     }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val estadoSnackbar = remember { SnackbarHostState() }
 
     /** SnackBar */
     LaunchedEffect(Unit) {
         launch {
             viewModel.errorFlow.collect { mensaje ->
                 android.util.Log.d("SNACKBAR_TEST", "Error recibido: $mensaje")
-                snackbarHostState.showSnackbar(
+                estadoSnackbar.showSnackbar(
                     message = mensaje,
                     duration = SnackbarDuration.Short
                 )
@@ -82,19 +81,17 @@ fun CorreoScreen(
         viewModel.iniciar(contexto)
     }
 
-
-
-    PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { padding ->
+    PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { valoresPadding ->
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(valoresPadding)
                 .padding(paddingContenido)
         ) {
 
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = estadoSnackbar,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = espaciado.xl)
@@ -114,7 +111,7 @@ fun CorreoScreen(
                 modifier = modificadorContenido,
                 contentAlignment = Alignment.Center
             ) {
-                when (val estado = uiState) {
+                when (val estado = estadoUi) {
                     /** Pantalla a la hora de cargar el correo */
                     is CorreoUiState.Cargando -> {
                         CircularProgressIndicator()
@@ -133,8 +130,8 @@ fun CorreoScreen(
                             )
                             Button(
                                 onClick = {
-                                    val cliente = viewModel.obtenerClienteGoogle(contexto)
-                                    lanzadorGoogle.launch(cliente.signInIntent)
+                                    val clienteGoogle = viewModel.obtenerClienteGoogle(contexto)
+                                    lanzadorGoogle.launch(clienteGoogle.signInIntent)
                                 }
                             ) {
                                 Text(stringResource(R.string.txt_btn_conectar_gmail))

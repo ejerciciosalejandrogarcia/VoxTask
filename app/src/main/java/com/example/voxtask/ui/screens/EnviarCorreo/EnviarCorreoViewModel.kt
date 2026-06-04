@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.R
 import com.example.voxtask.databases.network.EnviarCorreoRequest
-import com.example.voxtask.databases.network.N8nClient
+import com.example.voxtask.databases.network.ClienteN8n
 import com.example.voxtask.utils.TextoAVoz
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -35,7 +35,7 @@ class EnviarCorreoViewModel : ViewModel() {
      * Permite autenticar la aplicación ante los servicios de Google Cloud Platform.
      */
     companion object {
-        const val WEB_CLIENT_ID = "820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com"
+        const val ID_CLIENTE_WEB = "820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com"
     }
     /** Variables */
     var paso          by mutableStateOf(PasoEnvio.DESTINATARIO)
@@ -43,12 +43,12 @@ class EnviarCorreoViewModel : ViewModel() {
     var asunto        by mutableStateOf("")
     var modo          by mutableStateOf("manual")
     var mensaje       by mutableStateOf("")
-    var accessToken   by mutableStateOf("")
+    var tokenAcceso   by mutableStateOf("")
     var necesitaVincularGoogle by mutableStateOf(false)
     var cargandoToken by mutableStateOf(false)
 
-    private val _errorChannel = Channel<String>(Channel.BUFFERED)
-    val errorFlow = _errorChannel.receiveAsFlow()
+    private val _canalError = Channel<String>(Channel.BUFFERED)
+    val flujoError = _canalError.receiveAsFlow()
 
     /**
      * Permite devolver el cliente de inicio de sesión configurado para leer y enviar
@@ -58,7 +58,7 @@ class EnviarCorreoViewModel : ViewModel() {
         return GoogleSignIn.getClient(
             contexto,
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(WEB_CLIENT_ID)
+                .requestIdToken(ID_CLIENTE_WEB)
                 .requestEmail()
                 .requestScopes(Scope("https://www.googleapis.com/auth/gmail.send"))
                 .build()
@@ -89,12 +89,12 @@ class EnviarCorreoViewModel : ViewModel() {
      * vinculación comience desde 0 y el usuario pueda seleccionar
      * su cuenta sin problemas
      */
-    fun vincularGoogle(contexto: Context, onListo: () -> Unit) {
+    fun vincularGoogle(contexto: Context, alTerminar: () -> Unit) {
         viewModelScope.launch {
             try {
                 obtenerClienteGoogle(contexto).signOut().await()
             } catch (e: Exception) { }
-            onListo()
+            alTerminar()
         }
     }
 
@@ -108,7 +108,7 @@ class EnviarCorreoViewModel : ViewModel() {
             cargandoToken = true
             obtenerToken(contexto)
             cargandoToken = false
-            if (accessToken.isNotEmpty()) {
+            if (tokenAcceso.isNotEmpty()) {
                 TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_vincular_cuenta_exito))
             }
         }
@@ -117,33 +117,33 @@ class EnviarCorreoViewModel : ViewModel() {
     /**
      * Permite obtener un token de acceso fresco para la API de Gmail.
      */
-        private suspend fun obtenerToken(contexto: Context) {
-            try {
-                val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
-                if (cuentaGoogle?.account != null) {
-                    accessToken = withContext(Dispatchers.IO) {
-                        val scope = "oauth2:https://www.googleapis.com/auth/gmail.send"
-                        try {
-                            val tokenViejo = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
-                            GoogleAuthUtil.clearToken(contexto, tokenViejo)
-                        } catch (e: Exception) { }
-                        GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, scope)
-                    }
-                } else {
-                    necesitaVincularGoogle = true
+    private suspend fun obtenerToken(contexto: Context) {
+        try {
+            val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
+            if (cuentaGoogle?.account != null) {
+                tokenAcceso = withContext(Dispatchers.IO) {
+                    val alcance = "oauth2:https://www.googleapis.com/auth/gmail.send"
+                    try {
+                        val tokenViejo = GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, alcance)
+                        GoogleAuthUtil.clearToken(contexto, tokenViejo)
+                    } catch (e: Exception) { }
+                    GoogleAuthUtil.getToken(contexto, cuentaGoogle.account!!, alcance)
                 }
-            } catch (e: Exception) {
-                if (e.message?.contains("consent") == true ||
-                    e.message?.contains("remote") == true ||
-                    e.javaClass.simpleName == "UserRecoverableAuthException"
-                ) {
-                    necesitaVincularGoogle = true
-                } else {
-                    _errorChannel.send(contexto.getString(R.string.txt_enviarcorreo_error_token, e.message))
-                    paso = PasoEnvio.ERROR
-                }
+            } else {
+                necesitaVincularGoogle = true
+            }
+        } catch (e: Exception) {
+            if (e.message?.contains("consent") == true ||
+                e.message?.contains("remote") == true ||
+                e.javaClass.simpleName == "UserRecoverableAuthException"
+            ) {
+                necesitaVincularGoogle = true
+            } else {
+                _canalError.send(contexto.getString(R.string.txt_enviarcorreo_error_token, e.message))
+                paso = PasoEnvio.ERROR
             }
         }
+    }
 
     /**
      * Permite procesar la entrada de voz del usuario para la configuracion del nuevo correo
@@ -223,40 +223,40 @@ class EnviarCorreoViewModel : ViewModel() {
             obtenerToken(contexto)
 
             if (paso == PasoEnvio.ERROR || necesitaVincularGoogle) return@launch
-            if (accessToken.isEmpty()) {
-                _errorChannel.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío"))
+            if (tokenAcceso.isEmpty()) {
+                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío"))
                 paso = PasoEnvio.ERROR
                 return@launch
             }
 
             try {
-                android.util.Log.d("TOKEN_ENVIO", "Token a enviar: ${accessToken.take(30)}")
+                android.util.Log.d("TOKEN_ENVIO", "Token a enviar: ${tokenAcceso.take(30)}")
                 android.util.Log.d("TOKEN_ENVIO", "Para: $destinatario")
 
                 val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
                 val idiomaActual = prefs.getString("idioma", "es") ?: "es"
 
-                val request = EnviarCorreoRequest(
-                    token  = accessToken,
+                val peticion = EnviarCorreoRequest(
+                    token  = tokenAcceso,
                     para   = destinatario,
                     asunto = asunto,
                     mensaje = mensaje,
                     modo   = modo,
                     idioma = idiomaActual
                 )
-                val response = N8nClient.api.enviarCorreo(request)
-                if (response.isSuccessful) {
+                val respuesta = ClienteN8n.api.enviarCorreo(peticion)
+                if (respuesta.isSuccessful) {
                     paso = PasoEnvio.ENVIADO
                     TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_exito))
                 } else {
                     val mensajeError = contexto.getString(R.string.txt_enviarcorreo_error_generico)
-                    _errorChannel.send(contexto.getString(R.string.txt_error)+mensajeError)
+                    _canalError.send(contexto.getString(R.string.txt_error)+mensajeError)
                     paso = PasoEnvio.ERROR
                     TextoAVoz.hablar(contexto, mensajeError)
                 }
             } catch (e: Exception) {
                 val mensajeError = e.message ?: contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_generico)
-                _errorChannel.send(mensajeError)
+                _canalError.send(mensajeError)
                 paso = PasoEnvio.ERROR
                 TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_error_generico))
             }
@@ -275,8 +275,4 @@ class EnviarCorreoViewModel : ViewModel() {
             TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_paso_destinatario_pregunta))
         }
     }
-
-
-
-
 }

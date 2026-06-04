@@ -11,19 +11,19 @@ import kotlinx.coroutines.tasks.await
 class UsuarioRepository : UsuarioDao {
 
     /** Variables */
-    private val auth = FirebaseAuth.getInstance()
-    private  val db = FirebaseFirestore.getInstance()
-    private val coleccion = db.collection("usuarios")
+    private val autenticacion = FirebaseAuth.getInstance()
+    private  val bd = FirebaseFirestore.getInstance()
+    private val coleccion = bd.collection("usuarios")
 
     /**
      * Registra un nuevo usuario en Firebase Authentication y persiste su información en Firestore
      */
     override suspend fun registrarUsuario(usuario: Usuario): Result<Usuario> {
         return try {
-            val authResult = auth
+            val resultadoAutenticacion = autenticacion
                 .createUserWithEmailAndPassword(usuario.correo_electronico, usuario.contrasenia)
                 .await()
-            val uid = authResult.user?.uid
+            val uid = resultadoAutenticacion.user?.uid
                 ?: return Result.failure(Exception("No se pudo obtener el UID"))
             val usuarioConId = usuario.copy(id = uid, contrasenia = "")
             coleccion.document(uid).set(usuarioConId).await()
@@ -65,10 +65,10 @@ class UsuarioRepository : UsuarioDao {
             val usuario = documento.toObject(Usuario::class.java)
                 ?: return Result.failure(Exception("Error al obtener usuario"))
             val email = usuario.correo_electronico
-            val authResult = auth
+            val resultadoAutenticacion = autenticacion
                 .signInWithEmailAndPassword(email, contrasena)
                 .await()
-            if (authResult.user == null) {
+            if (resultadoAutenticacion.user == null) {
                 return Result.failure(Exception("Error en autenticación"))
             }
             Result.success(usuario)
@@ -105,8 +105,8 @@ class UsuarioRepository : UsuarioDao {
      */
     override suspend fun correoEstaRegistrado(email: String): Boolean {
         return try {
-            val result = auth.fetchSignInMethodsForEmail(email).await()
-            !result.signInMethods.isNullOrEmpty()
+            val resultado = autenticacion.fetchSignInMethodsForEmail(email).await()
+            !resultado.signInMethods.isNullOrEmpty()
         } catch (e: Exception) {
             false
         }

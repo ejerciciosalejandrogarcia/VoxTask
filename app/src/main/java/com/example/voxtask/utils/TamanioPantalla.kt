@@ -64,12 +64,6 @@ val TamanioPantalla.textoTitulo: TextUnit get() = when (this) {
     TamanioPantalla.EXPANDIDO -> 28.sp
 }
 
-val TamanioPantalla.columnas: Int get() = when (this) {
-    TamanioPantalla.COMPACTO  -> 1
-    TamanioPantalla.MEDIO     -> 2
-    TamanioPantalla.EXPANDIDO -> 3
-}
-
 val TamanioPantalla.anchoMaximoContenido: Dp get() = when (this) {
     TamanioPantalla.COMPACTO  -> Dp.Unspecified
     TamanioPantalla.MEDIO     -> 600.dp

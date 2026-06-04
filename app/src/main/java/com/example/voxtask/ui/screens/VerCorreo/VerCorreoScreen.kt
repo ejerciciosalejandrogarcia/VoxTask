@@ -60,7 +60,7 @@ fun VerCorreoScreen(
     val contexto  = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano    = LocalTamanioPantalla.current
-    val uiState   by viewModel.uiState.collectAsState()
+    val estadoUi  by viewModel.uiState.collectAsState()
     val paddingContenido      = dimensionResource(R.dimen.ver_correo_padding)
     val paddingHorizontal     = dimensionResource(R.dimen.ver_correo_padding_horizontal)
     val paddingVerticalAsunto = dimensionResource(R.dimen.ver_correo_padding_vertical_asunto)
@@ -68,13 +68,13 @@ fun VerCorreoScreen(
     val tamanoAvatar          = dimensionResource(R.dimen.ver_correo_avatar)
     val espaciadoRemitente    = dimensionResource(R.dimen.ver_correo_espaciado_remitente)
     val anchoMaximo           = tamano.anchoMaximoContenido
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
 
     /** Gestiona el SnackBar e inicia la carga de datos del correo cuando el ID está disponible*/
     LaunchedEffect(correoId) {
         launch {
             viewModel.errorFlow.collect { mensaje ->
-                snackbarHostState.showSnackbar(
+                estadoSnackbar.showSnackbar(
                     message  = mensaje,
                     duration = SnackbarDuration.Short
                 )
@@ -83,17 +83,17 @@ fun VerCorreoScreen(
         correoId?.let { viewModel.obtenerTokenYCorreo(it, contexto) }
     }
 
-    PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { padding ->
+    PlantillaBase(viewModel = viewModelPlantilla, navController = navController) { relleno ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(padding)
+                .padding(relleno)
                 .padding(paddingContenido)
         ) {
 
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = estadoSnackbar,
                 modifier  = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = espaciado.xl)
@@ -109,7 +109,7 @@ fun VerCorreoScreen(
                 Modifier.fillMaxWidth()
             }
 
-            when (val estado = uiState) {
+            when (val estado = estadoUi) {
                 /** Pantalla a la hora de cargar el contenido del correo */
                 is VerCorreoUiState.Cargando -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

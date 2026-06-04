@@ -74,8 +74,8 @@ fun InicioScreen(
                     .document(uid)
                     .get()
                     .await()
-                val usuarioObj = doc.toObject(Usuario::class.java)
-                usuarioObj?.nombre ?: nombreUsuarioGenerico
+                val objetoUsuario = doc.toObject(Usuario::class.java)
+                objetoUsuario?.nombre ?: nombreUsuarioGenerico
             } catch (e: Exception) {
                 nombreUsuarioGenerico
             }
@@ -122,11 +122,11 @@ fun InicioScreen(
         onTextoReconocido = { textoRecibido ->
             viewModel.onTextoRecibido(textoRecibido)
         }
-    ) { paddingValues ->
+    ) { valoresPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(valoresPadding),
             contentAlignment = Alignment.Center
         ) {
             Column(

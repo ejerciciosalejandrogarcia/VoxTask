@@ -87,7 +87,7 @@ class InicioSesionViewModel(
      * Permite autenticar al usuario en Firebase utilizando las credenciales de Google y actualiza
      * el usuario, marcando el estado de inicio de sesión como exitoso
      */
-    fun autenticarConGoogle(tokenGoogle: String, serverAuthCode: String? = null) {
+    fun autenticarConGoogle(tokenGoogle: String, codigoAutorizacion: String? = null) {
         val credencial = GoogleAuthProvider.getCredential(tokenGoogle, null)
 
         auth.signInWithCredential(credencial)
@@ -95,10 +95,10 @@ class InicioSesionViewModel(
                 if (tarea.isSuccessful) {
                     val usuarioFirebase = auth.currentUser ?: return@addOnCompleteListener
 
-                    if (serverAuthCode != null) {
+                    if (codigoAutorizacion != null) {
                         firestore.collection("usuarios")
                             .document(usuarioFirebase.uid)
-                            .update("gmailAuthCode", serverAuthCode)
+                            .update("gmailAuthCode", codigoAutorizacion)
                     }
 
                     guardarOActualizarUsuarioEnFirestore(usuarioFirebase.uid) {
@@ -114,9 +114,9 @@ class InicioSesionViewModel(
      */
     private fun guardarOActualizarUsuarioEnFirestore(uid: String, alTerminar: () -> Unit) {
         val usuarioFirebase = auth.currentUser ?: return
-        val ref = firestore.collection("usuarios").document(uid)
+        val referencia = firestore.collection("usuarios").document(uid)
 
-        ref.get().addOnSuccessListener { documento ->
+        referencia.get().addOnSuccessListener { documento ->
             if (documento.exists()) {
                 alTerminar()
             } else {
@@ -132,9 +132,9 @@ class InicioSesionViewModel(
                     correo_electronico = usuarioFirebase.email ?: ""
                 )
 
-                ref.set(nuevoUsuario)
+                referencia.set(nuevoUsuario)
                     .addOnSuccessListener { alTerminar() }
-                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError =  R.string.txt_error+R.string.err_firestore) }
+                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_firestore) }
             }
         }.addOnFailureListener {
             _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_conexion)
@@ -164,4 +164,3 @@ class InicioSesionViewModel(
         return GoogleSignIn.getClient(contexto, opciones)
     }
 }
-

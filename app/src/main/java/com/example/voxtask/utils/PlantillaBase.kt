@@ -39,20 +39,20 @@ fun PlantillaBase(
     mostrarBotonHome: Boolean = true,
     textoInformacion: String? = null,
     onTextoReconocido: (String) -> Unit = {},
-    content: @Composable (PaddingValues) -> Unit
+    contenido: @Composable (PaddingValues) -> Unit
 ) {
     /** Variables */
     val contexto = LocalContext.current
     val actividad = contexto as Activity
-    val coroutineScope = rememberCoroutineScope()
-    val (vozState, iniciarEscucha) = rememberVozATexto()
+    val alcanceCorrutina = rememberCoroutineScope()
+    val (estadoVoz, iniciarEscucha) = rememberVozATexto()
 
     /**
      * Permite observar el texto reconocido por voz
      */
-    LaunchedEffect(vozState.textoReconocido) {
-        if (vozState.textoReconocido.isNotEmpty()) {
-            onTextoReconocido(vozState.textoReconocido)
+    LaunchedEffect(estadoVoz.textoReconocido) {
+        if (estadoVoz.textoReconocido.isNotEmpty()) {
+            onTextoReconocido(estadoVoz.textoReconocido)
         }
     }
 
@@ -89,7 +89,7 @@ fun PlantillaBase(
                     actions = {
                         if (mostrarBotonInfo && !textoInformacion.isNullOrEmpty()) {
                             IconButton(onClick = {
-                                coroutineScope.launch {
+                                alcanceCorrutina.launch {
                                     TextoAVoz.hablar(contexto, textoInformacion!!)
                                 }
                             }) {
@@ -158,12 +158,12 @@ fun PlantillaBase(
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(CircleShape)
-                                    .background(if (vozState.isListening) Color.Red else Color.White),
+                                    .background(if (estadoVoz.escuchando) Color.Red else Color.White),
                                 contentAlignment = Alignment.Center
                             ) {
                                 IconButton(
                                     onClick = { iniciarEscucha() },
-                                    enabled = !vozState.isListening
+                                    enabled = !estadoVoz.escuchando
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Mic,
@@ -176,7 +176,7 @@ fun PlantillaBase(
                         },
                         selected = false,
                         onClick = { iniciarEscucha() },
-                        enabled = !vozState.isListening
+                        enabled = !estadoVoz.escuchando
                     )
 
                     if (mostrarBotonHome) {
@@ -209,12 +209,12 @@ fun PlantillaBase(
                     }
                 }
             }
-        ) { paddingValues ->
+        ) { valoresPadding ->
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = Color.Transparent
             ) {
-                content(paddingValues)
+                contenido(valoresPadding)
             }
         }
     }

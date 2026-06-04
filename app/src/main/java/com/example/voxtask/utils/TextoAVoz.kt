@@ -10,25 +10,25 @@ import kotlin.coroutines.resume
 
 object TextoAVoz {
     /** Variables */
-    private var tts: TextToSpeech? = null
+    private var motorVoz: TextToSpeech? = null
     var vozElegida: String? = null
     var localeActual: Locale = Locale("es", "MX")
 
     /** Permite devolver la lista de voces que tiene instaladas el movil */
     fun obtenerVoces(): List<Voice> {
-        return tts?.voices?.toList() ?: emptyList()
+        return motorVoz?.voices?.toList() ?: emptyList()
     }
 
     /** Permite cambiar la voz por la que el usuario ha elegido */
     fun cambiarVoz(nombreVoz: String) {
         vozElegida = nombreVoz
-        val voz = tts?.voices?.find { it.name == nombreVoz }
-        if (voz != null) tts?.voice = voz
+        val voz = motorVoz?.voices?.find { it.name == nombreVoz }
+        if (voz != null) motorVoz?.voice = voz
     }
     /** Permite cambiar el idioma por la que el usuario ha elegido */
     fun cambiarIdioma(locale: Locale) {
         localeActual = locale
-        tts?.language = locale
+        motorVoz?.language = locale
         vozElegida = null
     }
 
@@ -36,41 +36,41 @@ object TextoAVoz {
      * Permite convertir texto a voz de forma asíncrona,
      * inicializa el motor TTS y suspende la ejecución,hasta que la lectura del texto haya terminado.
      */
-        suspend fun hablar(context: Context, texto: String) {
-            if (tts == null) {
-                suspendCancellableCoroutine<Unit> { continuation ->
-                    tts = TextToSpeech(context) { status ->
-                        if (status == TextToSpeech.SUCCESS) {
-                            tts?.language = localeActual
-                            tts?.setSpeechRate(0.95f)
-                            tts?.setPitch(1.0f)
+    suspend fun hablar(contexto: Context, texto: String) {
+        if (motorVoz == null) {
+            suspendCancellableCoroutine<Unit> { continuacion ->
+                motorVoz = TextToSpeech(contexto) { estado ->
+                    if (estado == TextToSpeech.SUCCESS) {
+                        motorVoz?.language = localeActual
+                        motorVoz?.setSpeechRate(0.95f)
+                        motorVoz?.setPitch(1.0f)
 
-                            vozElegida?.let { nombre ->
-                                val voz = tts?.voices?.find { it.name == nombre }
-                                if (voz != null) tts?.voice = voz
-                            }
+                        vozElegida?.let { nombre ->
+                            val voz = motorVoz?.voices?.find { it.name == nombre }
+                            if (voz != null) motorVoz?.voice = voz
                         }
-                        continuation.resume(Unit)
                     }
+                    continuacion.resume(Unit)
                 }
             }
-
-            suspendCancellableCoroutine<Unit> { continuation ->
-                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) { continuation.resume(Unit) }
-                    override fun onError(utteranceId: String?) { continuation.resume(Unit) }
-                })
-                tts?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "id")
-            }
         }
+
+        suspendCancellableCoroutine<Unit> { continuacion ->
+            motorVoz?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {}
+                override fun onDone(utteranceId: String?) { continuacion.resume(Unit) }
+                override fun onError(utteranceId: String?) { continuacion.resume(Unit) }
+            })
+            motorVoz?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "id")
+        }
+    }
 
     /**
      * Permite liberar los recursos del motor TTS y limpia la memoria
      */
-        fun liberar() {
-            tts?.stop()
-            tts?.shutdown()
-            tts = null
-        }
+    fun liberar() {
+        motorVoz?.stop()
+        motorVoz?.shutdown()
+        motorVoz = null
+    }
 }

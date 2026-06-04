@@ -44,11 +44,11 @@ fun CambiarContrasenaScreen(
     viewModel: CambiarContraseniaViewModel = viewModel()
 ) {
     /** Variables */
-    val context = LocalContext.current
+    val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val estadoUi by viewModel.estadoUi.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
     val paddingHorizontalCard = dimensionResource(R.dimen.cambiar_contrasena_padding_card_horizontal)
     val paddingVerticalCard = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
     val alturaBoton = dimensionResource(R.dimen.cambiar_contrasena_altura_boton)
@@ -58,13 +58,13 @@ fun CambiarContrasenaScreen(
     val tamanoCirculoPequeno = dimensionResource(R.dimen.cambiar_contrasena_circulo_pequeno)
     val anchoMaximoCard = tamano.anchoMaximoContenido
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
-    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
+    val esApaisado = configuracion.screenWidthDp > configuracion.screenHeightDp
 
     /** SnackBar */
     LaunchedEffect(estadoUi.mensajeError) {
         if (estadoUi.mensajeError != 0) {
-            snackbarHostState.showSnackbar(
-                message = context.getString(estadoUi.mensajeError),
+            estadoSnackbar.showSnackbar(
+                message = contexto.getString(estadoUi.mensajeError),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()
@@ -82,7 +82,7 @@ fun CambiarContrasenaScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         SnackbarHost(
-            hostState = snackbarHostState,
+            hostState = estadoSnackbar,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = espaciado.xl)
@@ -90,7 +90,7 @@ fun CambiarContrasenaScreen(
         )
 
         /** Fondo de la pantalla */
-        if (esLandscape) {
+        if (esApaisado) {
             Box(
                 modifier = Modifier
                     .size(tamanoCirculoGrande)
@@ -189,7 +189,7 @@ fun CambiarContrasenaScreen(
                         Text(
                             text = stringResource(
                                 id = R.string.instrucciones_restablecer_email_dos,
-                                estadoUi.email
+                                estadoUi.correo
                             ),
                             fontSize = tamano.textoBody,
                             color = Color.Gray,
@@ -208,7 +208,7 @@ fun CambiarContrasenaScreen(
                         }
 
                     } else {
-                        /** Formulario para introducir el corre electronico para cambiar la contraseña */
+                        /** Formulario para introducir el correo electronico para cambiar la contraseña */
                         Text(
                             text = stringResource(R.string.txt_titulo_recuperar_contrasenia),
                             fontSize = tamano.textoTitulo,
@@ -228,13 +228,13 @@ fun CambiarContrasenaScreen(
                         Spacer(modifier = Modifier.height(espaciado.xl))
 
                         OutlinedTextField(
-                            value = estadoUi.email,
-                            onValueChange = { viewModel.alCambiarEmail(it) },
+                            value = estadoUi.correo,
+                            onValueChange = { viewModel.alCambiarCorreo(it) },
                             label = { Text(stringResource(R.string.txt_placeholder_recuperar_contrasenia)) },
                             singleLine = true,
                             trailingIcon = {
-                                if (estadoUi.email.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.alCambiarEmail("") }) {
+                                if (estadoUi.correo.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.alCambiarCorreo("") }) {
                                         Icon(
                                             Icons.Default.Clear,
                                             contentDescription = stringResource(R.string.txt_limpiar),

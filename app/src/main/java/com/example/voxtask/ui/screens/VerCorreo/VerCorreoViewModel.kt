@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.R
 import com.example.voxtask.databases.model.Correo
-import com.example.voxtask.databases.network.N8nClient
+import com.example.voxtask.databases.network.ClienteN8n
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.firebase.auth.FirebaseAuth
@@ -29,12 +29,12 @@ sealed class VerCorreoUiState {
 
 class VerCorreoViewModel : ViewModel() {
     /** Variables */
-    private val auth = FirebaseAuth.getInstance()
+    private val autenticacion = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-    private val _uiState = MutableStateFlow<VerCorreoUiState>(VerCorreoUiState.Cargando)
-    val uiState: StateFlow<VerCorreoUiState> = _uiState
-    private val _errorChannel = Channel<String>(Channel.BUFFERED)
-    val errorFlow = _errorChannel.receiveAsFlow()
+    private val _estadoUi = MutableStateFlow<VerCorreoUiState>(VerCorreoUiState.Cargando)
+    val uiState: StateFlow<VerCorreoUiState> = _estadoUi
+    private val _canalError = Channel<String>(Channel.BUFFERED)
+    val errorFlow = _canalError.receiveAsFlow()
     private var correoId: String? = null
     /**
      * Permite validar la sesión del usuario, refrescar el token de acceso de Google
@@ -43,27 +43,27 @@ class VerCorreoViewModel : ViewModel() {
     fun obtenerTokenYCorreo(id: String, contexto: Context) {
         correoId = id
         viewModelScope.launch {
-            _uiState.value = VerCorreoUiState.Cargando
+            _estadoUi.value = VerCorreoUiState.Cargando
 
-            val uid = auth.currentUser?.uid
+            val uid = autenticacion.currentUser?.uid
             if (uid == null) {
-                _errorChannel.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_sin_sesion))
+                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_sin_sesion))
                 return@launch
             }
 
             try {
                 val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
-                val emailFirebase = auth.currentUser?.email ?: ""
+                val correoFirebase = autenticacion.currentUser?.email ?: ""
 
-                if (cuentaGoogle?.account == null || cuentaGoogle.email != emailFirebase) {
-                    _uiState.value = VerCorreoUiState.Error(
+                if (cuentaGoogle?.account == null || cuentaGoogle.email != correoFirebase) {
+                    _estadoUi.value = VerCorreoUiState.Error(
                         mensaje = R.string.error_general,
                         esErrorDeCarga = false
                     )
                     return@launch
                 }
 
-                val accessToken = try {
+                val tokenAcceso = try {
                     withContext(Dispatchers.IO) {
                         val tokenActual = GoogleAuthUtil.getToken(
                             contexto,
@@ -79,23 +79,23 @@ class VerCorreoViewModel : ViewModel() {
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("VerCorreo", "Error obteniendo token: ${e.message}")
-                    _errorChannel.send(contexto.getString(R.string.error_general))
+                    _canalError.send(contexto.getString(R.string.error_general))
                     return@launch
                 }
 
                 firestore.collection("usuarios")
                     .document(uid)
                     .set(
-                        mapOf("gmailAccessToken" to accessToken),
+                        mapOf("gmailAccessToken" to tokenAcceso),
                         com.google.firebase.firestore.SetOptions.merge()
                     )
                     .await()
 
-                cargarCorreo(id, accessToken, contexto)
+                cargarCorreo(id, tokenAcceso, contexto)
 
             } catch (e: Exception) {
                 android.util.Log.e("VerCorreo", "Exception general: ${e.message}")
-                _errorChannel.send(contexto.getString(R.string.error_general))
+                _canalError.send(contexto.getString(R.string.error_general))
             }
         }
     }
@@ -106,12 +106,12 @@ class VerCorreoViewModel : ViewModel() {
     private suspend fun cargarCorreo(id: String, token: String, contexto: Context) {
         try {
             android.util.Log.d("VerCorreo", "Llamando con id: $id")
-            val correo = N8nClient.api.obtenerCorreoPorId(id, token)
-            _uiState.value = VerCorreoUiState.Exito(correo)
+            val correo = ClienteN8n.api.obtenerCorreoPorId(id, token)
+            _estadoUi.value = VerCorreoUiState.Exito(correo)
         } catch (e: Exception) {
             android.util.Log.e("VerCorreo", "Error cargando correo: ${e.message}")
-            _errorChannel.send(contexto.getString(R.string.error_cargar_correo))
-            _uiState.value = VerCorreoUiState.Error(
+            _canalError.send(contexto.getString(R.string.error_cargar_correo))
+            _estadoUi.value = VerCorreoUiState.Error(
                 mensaje = R.string.error_cargar_correo,
                 esErrorDeCarga = true
             )

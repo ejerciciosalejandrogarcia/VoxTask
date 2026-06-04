@@ -56,7 +56,7 @@ fun NuevaContraseniaScreen(
     val estado by viewModel.estadoNueva.collectAsState()
     var verNueva by remember { mutableStateOf(false) }
     var verConfirmar by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
     val estadoNueva by viewModel.estadoNueva.collectAsState()
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
@@ -75,9 +75,9 @@ fun NuevaContraseniaScreen(
 
     /** SnackBar */
     LaunchedEffect(estadoNueva.mensajeError) {
-        estadoNueva.mensajeError?.let { resId ->
-            snackbarHostState.showSnackbar(
-                message = contexto.getString(resId),
+        estadoNueva.mensajeError?.let { idRecurso ->
+            estadoSnackbar.showSnackbar(
+                message = contexto.getString(idRecurso),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarErrorNueva()
@@ -90,7 +90,7 @@ fun NuevaContraseniaScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         SnackbarHost(
-            hostState = snackbarHostState,
+            hostState = estadoSnackbar,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = espaciado.xl)

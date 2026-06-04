@@ -6,7 +6,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -54,11 +53,6 @@ data class VerificacionRequest(
     val uid: String
 )
 
-/** Cuerpo de la petición para iniciar la recuperación de contraseña */
-data class RecuperarContraseniaRequest(
-    val email: String
-)
-
 /** Cuerpo de la petición para enviar el correo de bienvenida al registrarse */
 data class BienvenidaRequest(
     val email: String
@@ -75,7 +69,7 @@ data class VerificacionResponse(
 /**
  * Interfaz que define los endpoints del servidor n8n de la aplicación
  */
-interface N8nApiService {
+interface ServicioN8n {
     /** Obtiene la lista de correos asociado al token de la cuenta */
     @GET("webhook/obtener-emails")
     suspend fun obtenerCorreos(
@@ -119,21 +113,21 @@ interface N8nApiService {
  * Configura el cliente de red para comunicarse con n8n,
  * gestionando tiempos de espera y la conversión de datos JSON.
  */
-object N8nClient {
-    const val BASE_URL = "http://192.168.1.49:5678/"
+object ClienteN8n {
+    const val URL = "http://192.168.1.49:5678/"
 
-    val api: N8nApiService by lazy {
-        val okHttpClient = OkHttpClient.Builder()
+    val api: ServicioN8n by lazy {
+        val clienteHTTP = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
 
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
+            .baseUrl(URL)
+            .client(clienteHTTP)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(N8nApiService::class.java)
+            .create(ServicioN8n::class.java)
     }
 }

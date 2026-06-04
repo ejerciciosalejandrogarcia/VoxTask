@@ -10,13 +10,13 @@ import kotlinx.coroutines.tasks.await
 class ProductoRepository : ProductoDao {
 
     /** Variables */
-    private val db = FirebaseFirestore.getInstance()
+    private val bd = FirebaseFirestore.getInstance()
 
     /**
      * Agrega un nuevo producto al subcoleccion 'lista_compra' de un usuario en especifico
      */
     override suspend fun agregar(usuarioId: String, producto: Producto) {
-        db.collection("usuarios")
+        bd.collection("usuarios")
             .document(usuarioId)
             .collection("lista_compra")
             .document(producto.id)
@@ -27,7 +27,7 @@ class ProductoRepository : ProductoDao {
      * Elimina un producto al subcoleccion 'lista_compra' de un usuario en especifico
      */
     override suspend fun eliminar(usuarioId: String, productoId: String) {
-        db.collection("usuarios")
+        bd.collection("usuarios")
             .document(usuarioId)
             .collection("lista_compra")
             .document(productoId)
@@ -39,7 +39,7 @@ class ProductoRepository : ProductoDao {
      * Obtiene una lista de productos de un usuario en especifico
      */
     override suspend fun obtenerPorUsuario(usuarioId: String): List<Producto> {
-        return db.collection("usuarios")
+        return bd.collection("usuarios")
             .document(usuarioId)
             .collection("lista_compra")
             .get()

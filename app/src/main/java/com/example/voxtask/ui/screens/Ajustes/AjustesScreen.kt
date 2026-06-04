@@ -90,12 +90,12 @@ fun AjustesScreen(
     val actividad = contexto as Activity
     val fondoUri by plantillaBaseViewModel.fondoUri.collectAsState()
     val anchoMaximo = tamano.anchoMaximoContenido
-    val imageLauncher = rememberLauncherForActivityResult(
+    val selectorImagen = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> uri?.let { plantillaBaseViewModel.actualizarFondo(it) } }
     val permisos = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted -> if (isGranted) imageLauncher.launch("image/*") }
+    ) { tienePermiso -> if (tienePermiso) selectorImagen.launch("image/*") }
     val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_IMAGES
     } else {
@@ -108,7 +108,7 @@ fun AjustesScreen(
         viewModel = plantillaBaseViewModel,
         mostrarBotonInfo = false,
         navController = navController
-    ) { paddingValues ->
+        ) { valoresPadding  ->
 
         /** Ventana emergente de la opcion 'Color de la interfaz' */
         if (viewModel.mostrarSelectorColor) {
@@ -210,7 +210,7 @@ fun AjustesScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(valoresPadding ),
             contentAlignment = Alignment.TopCenter
         ) {
             val modificadorLista = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
@@ -319,7 +319,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
         TamanioPantalla.EXPANDIDO -> 56.dp
     }
 
-    val coloresPorFila = (ColoresClaros.size + 1) / 2
+    val coloresClarosPorFila = (ColoresClaros.size + 1) / 2
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -345,8 +345,8 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.padding(bottom = espaciado.s)
                 )
 
-                val configLocal = LocalConfiguration.current
-                val esHorizontal = configLocal.screenWidthDp > configLocal.screenHeightDp
+                val configuracionLocal = LocalConfiguration.current
+                val esHorizontal = configuracionLocal.screenWidthDp > configuracionLocal.screenHeightDp
 
                 if (esHorizontal) {
                     Row(
@@ -366,7 +366,7 @@ fun ColorInterfazDialog(onDismiss: () -> Unit) {
                         }
                     }
                 } else {
-                    ColoresClaros.chunked(coloresPorFila).forEach { fila ->
+                    ColoresClaros.chunked(coloresClarosPorFila).forEach { fila ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voxtask.R
 import com.example.voxtask.databases.network.ClimaResponse
-import com.example.voxtask.databases.network.N8nClient
+import com.example.voxtask.databases.network.ClienteN8n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +27,7 @@ class ClimaViewModel : ViewModel() {
     val uiState: StateFlow<ClimaUiState> = _uiState.asStateFlow()
 
     /** Permite obtener la informacion del clima dependiendo de la ubicacion del usuario */
-    fun cargarClima(lat: Double, lon: Double) {
+    fun cargarClima(latitud: Double, longitud: Double) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 estaCargando = true,
@@ -37,7 +37,7 @@ class ClimaViewModel : ViewModel() {
             )
 
             try {
-                val respuesta = N8nClient.api.obtenerClima(lat, lon)
+                val respuesta = ClienteN8n.api.obtenerClima(latitud, longitud)
                 _uiState.value = _uiState.value.copy(
                     datos = respuesta,
                     estaCargando = false

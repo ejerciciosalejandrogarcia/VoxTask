@@ -46,11 +46,11 @@ fun PerfilScreen(
     navController: NavController
 ) {
     /** Variables */
-    val uiState by viewModel.estadoUi.collectAsStateWithLifecycle()
+    val estadoUi by viewModel.estadoUi.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
     var mostrarSelector by remember { mutableStateOf(false) }
     val paddingContenido = dimensionResource(R.dimen.perfil_padding_contenido)
     val tamanoAvatar = dimensionResource(R.dimen.perfil_tamano_avatar)
@@ -58,10 +58,10 @@ fun PerfilScreen(
     val anchoMaximoContenido = tamano.anchoMaximoContenido
 
     /** Gestion del SnackBar */
-    LaunchedEffect(uiState.mensajeError) {
-        uiState.mensajeError?.let { resId ->
-            snackbarHostState.showSnackbar(
-                message = contexto.getString(resId),
+    LaunchedEffect(estadoUi.mensajeError) {
+        estadoUi.mensajeError?.let { idRecurso ->
+            estadoSnackbar.showSnackbar(
+                message = contexto.getString(idRecurso),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()
@@ -71,11 +71,11 @@ fun PerfilScreen(
     PlantillaBase(
         viewModel = viewModelPlantilla,
         navController = navController
-    ) { paddingValues ->
+    ) { valoresPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(valoresPadding)
         ) {
             Column(
                 modifier = Modifier
@@ -103,7 +103,7 @@ fun PerfilScreen(
                             .clickable { mostrarSelector = true },
                         contentAlignment = Alignment.Center
                     ) {
-                        val drawableId = nombreAvatar(uiState.avatarSeleccionado)
+                        val drawableId = nombreAvatar(estadoUi.avatarSeleccionado)
                         if (drawableId != null) {
                             Image(
                                 painter = painterResource(id = drawableId),
@@ -123,15 +123,15 @@ fun PerfilScreen(
 
                     Spacer(modifier = Modifier.height(espaciado.s))
                     /** Pantalla cargando los datos */
-                    if (uiState.cargando) {
+                    if (estadoUi.cargando) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         /** Pantalla con los datos del usuario */
                     } else {
                         OutlinedTextField(
-                            value = uiState.nombreUsuario,
+                            value = estadoUi.nombreUsuario,
                             onValueChange = { viewModel.alCambiarNombreUsuario(it) },
                             label = { Text(stringResource(R.string.hint_nombre_usuario)) },
-                            enabled = uiState.modoEdicion,
+                            enabled = estadoUi.modoEdicion,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp)
                         )
@@ -139,10 +139,10 @@ fun PerfilScreen(
                         Spacer(modifier = Modifier.height(espaciado.s))
 
                         OutlinedTextField(
-                            value = uiState.nombre,
+                            value = estadoUi.nombre,
                             onValueChange = { viewModel.alCambiarNombre(it) },
                             label = { Text(stringResource(R.string.hint_nombre)) },
-                            enabled = uiState.modoEdicion,
+                            enabled = estadoUi.modoEdicion,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp)
                         )
@@ -150,10 +150,10 @@ fun PerfilScreen(
                         Spacer(modifier = Modifier.height(espaciado.s))
 
                         OutlinedTextField(
-                            value = uiState.primerApellido,
+                            value = estadoUi.primerApellido,
                             onValueChange = { viewModel.alCambiarPrimerApellido(it) },
                             label = { Text(stringResource(R.string.hint_primer_apellido)) },
-                            enabled = uiState.modoEdicion,
+                            enabled = estadoUi.modoEdicion,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp)
                         )
@@ -161,10 +161,10 @@ fun PerfilScreen(
                         Spacer(modifier = Modifier.height(espaciado.s))
 
                         OutlinedTextField(
-                            value = uiState.segundoApellido,
+                            value = estadoUi.segundoApellido,
                             onValueChange = { viewModel.alCambiarSegundoApellido(it) },
                             label = { Text(stringResource(R.string.hint_segundo_apellido)) },
-                            enabled = uiState.modoEdicion,
+                            enabled = estadoUi.modoEdicion,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp)
                         )
@@ -174,7 +174,7 @@ fun PerfilScreen(
                         /** Botones para editar y guardar los cambios dependiendo si esta en modo edicion o no*/
                         Button(
                             onClick = {
-                                if (uiState.modoEdicion) {
+                                if (estadoUi.modoEdicion) {
                                     viewModel.guardarPerfil()
                                 } else {
                                     viewModel.conmutarModoEdicion()
@@ -183,14 +183,14 @@ fun PerfilScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                if (uiState.modoEdicion)
+                                if (estadoUi.modoEdicion)
                                     stringResource(R.string.btn_guardar_cambios)
                                 else
                                     stringResource(R.string.btn_editar_perfil)
                             )
                         }
 
-                        if (uiState.modoEdicion) {
+                        if (estadoUi.modoEdicion) {
                             Spacer(modifier = Modifier.height(espaciado.s))
                             TextButton(
                                 onClick = { viewModel.conmutarModoEdicion() },
@@ -213,7 +213,7 @@ fun PerfilScreen(
                             horizontalArrangement = Arrangement.spacedBy(espaciado.m),
                             modifier = Modifier.fillMaxWidth()
                                 .horizontalScroll(rememberScrollState()),
-                                    verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             viewModel.avatarOpciones.forEach { nombre ->
                                 val drawableId = nombreAvatar(nombre)
@@ -225,7 +225,7 @@ fun PerfilScreen(
                                             .size(tamanoAvatarSelector)
                                             .clip(CircleShape)
                                             .border(
-                                                width = if (uiState.avatarSeleccionado == nombre) 3.dp else 0.dp,
+                                                width = if (estadoUi.avatarSeleccionado == nombre) 3.dp else 0.dp,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 shape = CircleShape
                                             )
@@ -249,7 +249,7 @@ fun PerfilScreen(
             }
 
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = estadoSnackbar,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = espaciado.l)

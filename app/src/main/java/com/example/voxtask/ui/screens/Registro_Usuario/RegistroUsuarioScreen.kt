@@ -58,7 +58,7 @@ fun RegistroUsuarioScreen(
     var contrasenaVisible by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val calendario = Calendar.getInstance()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
     val paddingHorizontal    = dimensionResource(R.dimen.registro_padding_horizontal)
@@ -73,12 +73,12 @@ fun RegistroUsuarioScreen(
     val espaciadoCampos      = dimensionResource(R.dimen.registro_espaciado_campos)
     val anchoMaximo          = tamano.anchoMaximoContenido
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
-    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
+    val esApaisado = configuracion.screenWidthDp > configuracion.screenHeightDp
     val selectorFecha = remember {
         DatePickerDialog(
             contexto,
-            { _, year, month, dayOfMonth ->
-                viewModel.alCambiarFechaNacimiento("$dayOfMonth/${month + 1}/$year")
+            { _, anio, mes, diaMes ->
+                viewModel.alCambiarFechaNacimiento("$diaMes/${mes + 1}/$anio")
             },
             calendario.get(Calendar.YEAR),
             calendario.get(Calendar.MONTH),
@@ -93,7 +93,7 @@ fun RegistroUsuarioScreen(
         val mensaje = "$prefijo $detalle".trim()
 
         if (mensaje.isNotEmpty()) {
-            snackbarHostState.showSnackbar(
+            estadoSnackbar.showSnackbar(
                 message = mensaje,
                 duration = SnackbarDuration.Short
             )
@@ -107,14 +107,14 @@ fun RegistroUsuarioScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         SnackbarHost(
-            hostState = snackbarHostState,
+            hostState = estadoSnackbar,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = espaciado.xl)
                 .zIndex(10f)
         )
         /** Fondo de la aplicacion */
-        if (esLandscape) {
+        if (esApaisado) {
             Box(
                 modifier = Modifier
                     .size(circuloGrande)

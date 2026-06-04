@@ -54,26 +54,26 @@ fun ClimaScreen(
     navController: NavController
 ) {
     /** Variables */
-    val context = LocalContext.current
+    val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
-    val uiState by viewModel.uiState.collectAsState()
-    val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val estadoUi by viewModel.uiState.collectAsState()
+    val clienteUbicacion = remember { LocationServices.getFusedLocationProviderClient(contexto) }
     val anchoMaximoContenido = tamano.anchoMaximoContenido
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
     val paddingHorizontalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_horizontal)
     val paddingVerticalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
     val tamanoIconoClimaPrincipal = dimensionResource(R.dimen.cambiar_contrasena_icono_email)
     val colorArribaPorDefecto = MaterialTheme.colorScheme.surface
     val colorAbajoPorDefecto = MaterialTheme.colorScheme.surfaceVariant
-    val (colorArriba, colorAbajo, iconoClima) = if (uiState.datos != null) {
-        val datos = uiState.datos!!
-        val c = datos.codigo
+    val (colorArriba, colorAbajo, iconoClima) = if (estadoUi.datos != null) {
+        val datos = estadoUi.datos!!
+        val codigo = datos.codigo
         when {
             !datos.es_de_dia -> Triple(Color(0xFF0F172A), Color(0xFF1E293B), Icons.Default.NightsStay)
-            c == 1063 || c in 1180..1246 || c in 1273..1282 -> Triple(Color(0xFF475569), Color(0xFF64748B), Icons.Default.WaterDrop)
-            c == 1030 || c == 1135 || c == 1147 -> Triple(Color(0xFF64748B), Color(0xFF94A3B8), Icons.Default.BlurOn)
-            datos.temperatura < 12.0 || c == 1066 || c in 1210..1258 -> Triple(Color(0xFF1E3A8A), Color(0xFF3B82F6), Icons.Default.AcUnit)
+            codigo == 1063 || codigo in 1180..1246 || codigo in 1273..1282 -> Triple(Color(0xFF475569), Color(0xFF64748B), Icons.Default.WaterDrop)
+            codigo == 1030 || codigo == 1135 || codigo == 1147 -> Triple(Color(0xFF64748B), Color(0xFF94A3B8), Icons.Default.BlurOn)
+            datos.temperatura < 12.0 || codigo == 1066 || codigo in 1210..1258 -> Triple(Color(0xFF1E3A8A), Color(0xFF3B82F6), Icons.Default.AcUnit)
             datos.temperatura >= 30.0 -> Triple(Color(0xFFEA580C), Color(0xFFFBBF24), Icons.Default.WbSunny)
             else -> Triple(Color(0xFF0284C7), Color(0xFF38BDF8), Icons.Default.CloudQueue)
         }
@@ -82,7 +82,7 @@ fun ClimaScreen(
     }
     val animadoArriba by animateColorAsState(targetValue = colorArriba, animationSpec = tween(1000), label = "animArriba")
     val animadoAbajo by animateColorAsState(targetValue = colorAbajo, animationSpec = tween(1000), label = "animAbajo")
-    val colorDeContenido = if (uiState.datos != null) Color.White else MaterialTheme.colorScheme.onSurface
+    val colorDeContenido = if (estadoUi.datos != null) Color.White else MaterialTheme.colorScheme.onSurface
 
     /**
      * Permite obtener la ubicacion del usuario y cargar el clima
@@ -92,10 +92,10 @@ fun ClimaScreen(
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .build()
 
-        fusedClient.getCurrentLocation(solicitud, null)
-            .addOnSuccessListener { loc ->
-                if (loc != null) {
-                    viewModel.cargarClima(loc.latitude, loc.longitude)
+        clienteUbicacion.getCurrentLocation(solicitud, null)
+            .addOnSuccessListener { ubicacion ->
+                if (ubicacion != null) {
+                    viewModel.cargarClima(ubicacion.latitude, ubicacion.longitude)
                 } else {
                     viewModel.establecerSinUbicacion()
                 }
@@ -105,7 +105,7 @@ fun ClimaScreen(
             }
     }
     /** Gestiona el acceso a la ubicación del usuario */
-    val launcher = rememberLauncherForActivityResult(
+    val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
         if (concedido) {
@@ -114,27 +114,27 @@ fun ClimaScreen(
             viewModel.establecerSinUbicacion()
         }
     }
-    /** * Comprueba el estado del permiso de ubicación al iniciar la pantalla */
+    /** Comprueba el estado del permiso de ubicación al iniciar la pantalla */
     LaunchedEffect(Unit) {
         val permiso = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
+            contexto, Manifest.permission.ACCESS_FINE_LOCATION
         )
         if (permiso == PackageManager.PERMISSION_GRANTED) {
             obtenerUbicacionYCargar()
         } else {
-            launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            lanzador.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
     /** Snackbar */
-    LaunchedEffect(uiState.mensajeErrorResId, uiState.errorMensajeDinamico) {
-        if (uiState.mensajeErrorResId != null) {
-            val mensajeFinal = if (uiState.errorMensajeDinamico != null) {
-                context.getString(uiState.mensajeErrorResId!!, uiState.errorMensajeDinamico)
+    LaunchedEffect(estadoUi.mensajeErrorResId, estadoUi.errorMensajeDinamico) {
+        if (estadoUi.mensajeErrorResId != null) {
+            val mensajeFinal = if (estadoUi.errorMensajeDinamico != null) {
+                contexto.getString(estadoUi.mensajeErrorResId!!, estadoUi.errorMensajeDinamico)
             } else {
-                context.getString(uiState.mensajeErrorResId!!)
+                contexto.getString(estadoUi.mensajeErrorResId!!)
             }
-            snackbarHostState.showSnackbar(
+            estadoSnackbar.showSnackbar(
                 message = mensajeFinal,
                 duration = SnackbarDuration.Short
             )
@@ -148,7 +148,7 @@ fun ClimaScreen(
             viewModel = viewModelPlantilla,
             navController = navController,
             onTextoReconocido = {}
-        ) { paddingValues ->
+        ) { valoresPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -158,7 +158,7 @@ fun ClimaScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(paddingValues)
+                        .padding(valoresPadding)
                         .padding(horizontal = paddingHorizontalPantalla, vertical = paddingVerticalPantalla),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -178,7 +178,7 @@ fun ClimaScreen(
                     ) {
                         when {
                             /** Pantalla al intentar obtener el clima del usuario */
-                            uiState.estaCargando && uiState.datos == null -> {
+                            estadoUi.estaCargando && estadoUi.datos == null -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                     Spacer(Modifier.height(espaciado.m))
@@ -190,7 +190,7 @@ fun ClimaScreen(
                                 }
                             }
                             /** Pantalla cuando la aplicacion tiene desactivado la ubicacion del usuario */
-                            uiState.sinUbicacion && uiState.datos == null -> {
+                            estadoUi.sinUbicacion && estadoUi.datos == null -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Icon(
                                         imageVector = Icons.Default.LocationOff,
@@ -207,7 +207,7 @@ fun ClimaScreen(
                                     )
                                     Spacer(Modifier.height(espaciado.m))
                                     Button(
-                                        onClick = { launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
+                                        onClick = { lanzador.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
                                         shape = RoundedCornerShape(14.dp)
                                     ) {
                                         Text(text = stringResource(R.string.clima_btn_permitir), fontSize = tamano.textoBody)
@@ -215,17 +215,17 @@ fun ClimaScreen(
                                 }
                             }
                             /** Pantalla cuando la aplicacion tiene acceso a la ubicacion del usuario */
-                            uiState.datos != null -> {
+                            estadoUi.datos != null -> {
                                 Box(contentAlignment = Alignment.TopEnd) {
                                     TarjetaClimaContenido(
-                                        datos = uiState.datos!!,
+                                        datos = estadoUi.datos!!,
                                         colorTexto = colorDeContenido,
                                         iconoClima = iconoClima,
                                         tamano = tamano,
                                         espaciado = espaciado,
                                         tamanoIconoClima = tamanoIconoClimaPrincipal
                                     )
-                                    if (uiState.estaCargando) {
+                                    if (estadoUi.estaCargando) {
                                         CircularProgressIndicator(
                                             modifier = Modifier
                                                 .size(20.dp)
@@ -261,7 +261,7 @@ fun ClimaScreen(
         }
 
         SnackbarHost(
-            hostState = snackbarHostState,
+            hostState = estadoSnackbar,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
@@ -347,7 +347,6 @@ private fun TarjetaClimaContenido(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             DatoClimaItem(
                 icono = Icons.Default.Thermostat,
                 valor = "${datos.sensacion_termica}°C",

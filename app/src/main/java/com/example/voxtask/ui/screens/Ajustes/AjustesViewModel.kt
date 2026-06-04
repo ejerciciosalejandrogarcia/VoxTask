@@ -42,22 +42,22 @@ class AjustesViewModel : ViewModel() {
 
     /** Permite cargar las voces disponibles */
     fun cargarVoces(contexto: android.content.Context) {
-        val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
-        val idiomaActualCodigo = prefs.getString("idioma", "es") ?: "es"
+        val preferencias = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+        val codigoIdiomaActual = preferencias.getString("idioma", "es") ?: "es"
 
         val filtrarVoces: (List<Voice>) -> List<Voice> = { voces ->
             voces
                 .filter {
                     !it.isNetworkConnectionRequired &&
-                            it.locale.language == idiomaActualCodigo
+                            it.locale.language == codigoIdiomaActual
                 }
                 .distinctBy { it.locale.country }
                 .sortedBy { it.locale.getDisplayName(java.util.Locale("es", "ES")) }
         }
 
         if (TextoAVoz.obtenerVoces().isEmpty()) {
-            android.speech.tts.TextToSpeech(contexto) { status ->
-                if (status == android.speech.tts.TextToSpeech.SUCCESS) {
+            android.speech.tts.TextToSpeech(contexto) { estado ->
+                if (estado == android.speech.tts.TextToSpeech.SUCCESS) {
                     vocesDisponibles = filtrarVoces(TextoAVoz.obtenerVoces())
                 }
             }
@@ -68,23 +68,23 @@ class AjustesViewModel : ViewModel() {
 
     /** Permite cargar los idiomas disponibles */
     fun cargarIdiomas(contexto: Context, idioma: String, onListo: () -> Unit) {
-        val locale = Locale(idioma)
-        Locale.setDefault(locale)
+        val configuracionRegional = Locale(idioma)
+        Locale.setDefault(configuracionRegional)
 
-        val config = Configuration(contexto.resources.configuration)
-        config.setLocale(locale)
-        config.setLayoutDirection(locale)
+        val configuracion = Configuration(contexto.resources.configuration)
+        configuracion.setLocale(configuracionRegional)
+        configuracion.setLayoutDirection(configuracionRegional)
 
         @Suppress("DEPRECATION")
-        contexto.resources.updateConfiguration(config, contexto.resources.displayMetrics)
+        contexto.resources.updateConfiguration(configuracion, contexto.resources.displayMetrics)
 
-        val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
-        prefs.edit().putString("idioma", idioma).commit()
+        val preferencias = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+        preferencias.edit().putString("idioma", idioma).commit()
 
         idiomaActual = idiomasDisponibles.find { it.first == idioma }?.second ?: idioma
 
         viewModelScope.launch {
-            TextoAVoz.cambiarIdioma(locale)
+            TextoAVoz.cambiarIdioma(configuracionRegional)
             val mensajePrueba = when (idioma) {
                 "en" -> "Language changed to English"
                 "fr" -> "Langue changée en français"
@@ -98,10 +98,11 @@ class AjustesViewModel : ViewModel() {
 
         onListo()
     }
+
     /** Permite que la aplicación mantenga el idioma seleccionado */
     fun inicializarIdioma(contexto: Context) {
-        val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
-        val idioma = prefs.getString("idioma", "es") ?: "es"
+        val preferencias = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+        val idioma = preferencias.getString("idioma", "es") ?: "es"
         idiomaActual = idiomasDisponibles.find { it.first == idioma }?.second ?: "Español"
     }
 
@@ -133,9 +134,9 @@ class AjustesViewModel : ViewModel() {
                 val archivos = contexto.assets.list("")
                 Log.d("ASSETS", "Archivos disponibles: ${archivos?.joinToString()}")
 
-                contexto.assets.open("VoxTask.apk").use { input ->
-                    apkCompartido.outputStream().use { output ->
-                        input.copyTo(output)
+                contexto.assets.open("VoxTask.apk").use { entrada ->
+                    apkCompartido.outputStream().use { salida ->
+                        entrada.copyTo(salida)
                     }
                 }
                 apkCompartido.setReadable(true, false)
@@ -146,7 +147,7 @@ class AjustesViewModel : ViewModel() {
                     apkCompartido
                 )
 
-                val intent = Intent(Intent.ACTION_SEND).apply {
+                val intento = Intent(Intent.ACTION_SEND).apply {
                     type = "application/vnd.android.package-archive"
                     putExtra(Intent.EXTRA_STREAM, uri)
                     putExtra(Intent.EXTRA_TEXT, "Te comparto VoxTask, ¡instálala!")
@@ -156,7 +157,7 @@ class AjustesViewModel : ViewModel() {
 
                 withContext(Dispatchers.Main) {
                     contexto.startActivity(
-                        Intent.createChooser(intent, "Compartir VoxTask")
+                        Intent.createChooser(intento, "Compartir VoxTask")
                     )
                 }
             } catch (e: Exception) {

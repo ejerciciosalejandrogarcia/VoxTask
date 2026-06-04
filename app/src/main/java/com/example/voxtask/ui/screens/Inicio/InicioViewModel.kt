@@ -1,6 +1,5 @@
 package com.example.voxtask.ui.screens.Inicio
 
-
 import androidx.lifecycle.ViewModel
 import com.example.voxtask.utils.TextoAVoz
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,14 +24,14 @@ class InicioViewModel : ViewModel() {
 
     /** Permite procesar el texto mediante la voz y ejecutar las acciones programadas dependiendo del idioma seleccionado */
     private fun procesarComando(texto: String) {
-        val textoLower = texto.lowercase()
+        val textoMinusculas = texto.lowercase()
         val idioma = TextoAVoz.localeActual.language
 
-        val comandoContador    = when (idioma) { "en" -> "timer"; "fr" -> "compteur"; "de" -> "zähler"; "it" -> "contatore"; "pt" -> "contador"; else -> "contador" }
-        val comandoCorreo      = when (idioma) { "en" -> "email";   "fr" -> "courriel"; "de" -> "mail";   "it" -> "posta";     "pt" -> "correio";  else -> "correo" }
+        val comandoContador     = when (idioma) { "en" -> "timer"; "fr" -> "compteur"; "de" -> "zähler"; "it" -> "contatore"; "pt" -> "contador"; else -> "contador" }
+        val comandoCorreo       = when (idioma) { "en" -> "email"; "fr" -> "courriel"; "de" -> "mail";   "it" -> "posta";     "pt" -> "correio";  else -> "correo" }
         val comandoRecordatorio = when (idioma) { "en" -> "reminder"; "fr" -> "rappel"; "de" -> "erinnerung"; "it" -> "promemoria"; "pt" -> "lembrete"; else -> "recordatorio" }
-        val comandoLista       = when (idioma) { "en" -> "list";    "fr" -> "liste";    "de" -> "liste";  "it" -> "lista";     "pt" -> "lista";    else -> "lista" }
-        val comandoClima = when (idioma) {
+        val comandoLista        = when (idioma) { "en" -> "list";  "fr" -> "liste";    "de" -> "liste";  "it" -> "lista";     "pt" -> "lista";    else -> "lista" }
+        val comandoClima        = when (idioma) {
             "en" -> "weather"
             "fr" -> "météo"
             "de" -> "wetter"
@@ -41,11 +40,11 @@ class InicioViewModel : ViewModel() {
             else -> "clima"
         }
         when {
-            textoLower.contains(comandoContador)     -> abrirContador()
-            textoLower.contains(comandoCorreo)       -> abrirCorreo()
-            textoLower.contains(comandoRecordatorio) -> abrirRecordatorio()
-            textoLower.contains(comandoLista)        -> abrirListaCompra()
-            textoLower.contains(comandoClima)        -> abrirClima()
+            textoMinusculas.contains(comandoContador)     -> abrirContador()
+            textoMinusculas.contains(comandoCorreo)       -> abrirCorreo()
+            textoMinusculas.contains(comandoRecordatorio) -> abrirRecordatorio()
+            textoMinusculas.contains(comandoLista)        -> abrirListaCompra()
+            textoMinusculas.contains(comandoClima)        -> abrirClima()
         }
     }
 }

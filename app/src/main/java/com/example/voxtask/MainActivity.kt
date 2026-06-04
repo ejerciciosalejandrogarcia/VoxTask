@@ -26,20 +26,20 @@ class MainActivity : ComponentActivity() {
     /** Variables */
     var navController: NavController? = null
     private val plantillaBaseViewModel: PlantillaBaseViewModel by viewModels()
-    private lateinit var themeManager: ThemeManager
-    private var intentPendiente: Intent? = null
+    private lateinit var gestorTema: ThemeManager
+    private var intencionPendiente: Intent? = null
 
     /**
      * Permite asegurar que el idioma seleccionado por el usuario se aplique desde el inicio
      * */
-    override fun attachBaseContext(newBase: Context) {
-        val prefs = newBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
-        val idioma = prefs.getString("idioma", "es") ?: "es"
-        val locale = java.util.Locale(idioma)
-        TextoAVoz.localeActual = locale
-        val config = Configuration()
-        config.setLocale(locale)
-        super.attachBaseContext(newBase.createConfigurationContext(config))
+    override fun attachBaseContext(nuevaBase: Context) {
+        val preferencias = nuevaBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+        val idioma = preferencias.getString("idioma", "es") ?: "es"
+        val configuracionRegional = java.util.Locale(idioma)
+        TextoAVoz.localeActual = configuracionRegional
+        val configuracion = Configuration()
+        configuracion.setLocale(configuracionRegional)
+        super.attachBaseContext(nuevaBase.createConfigurationContext(configuracion))
     }
 
     /**
@@ -58,29 +58,29 @@ class MainActivity : ComponentActivity() {
      * Inicializa los servicios básicos, solicita permisos de audio,
      * configura la navegación y renderiza la interfaz principal
      */
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        themeManager = ThemeManager(applicationContext)
+    override fun onCreate(estadoGuardado: Bundle?) {
+        super.onCreate(estadoGuardado)
+        gestorTema = ThemeManager(applicationContext)
         pedirPermiso.launch(Manifest.permission.RECORD_AUDIO)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
 
-        if (savedInstanceState == null) {
-            intentPendiente = intent
+        if (estadoGuardado == null) {
+            intencionPendiente = intent
         }
 
         setContent {
-            VoxTaskTheme(themeManager = themeManager) {
+            VoxTaskTheme(themeManager = gestorTema) {
                 Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-                    val windowSize = calculateWindowSizeClass(this)
+                    val tamanioPantalla = calculateWindowSizeClass(this)
                     VoxTaskApp(
-                        windowSize             = windowSize.widthSizeClass,
+                        windowSize             = tamanioPantalla.widthSizeClass,
                         plantillaBaseViewModel = plantillaBaseViewModel,
                         onNavControllerReady   = { nc ->
                             navController = nc
-                            intentPendiente?.let {
+                            intencionPendiente?.let {
                                 manejarIntent(it)
-                                intentPendiente = null
+                                intencionPendiente = null
                             }
                         },
                         deepLinkIntent = intent
@@ -93,13 +93,13 @@ class MainActivity : ComponentActivity() {
      * Permite garantizar que la aplicación no pierda ni ignore ninguna instrucción externa,
      * como enlaces o notificaciones
      */
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
+    override fun onNewIntent(intencion: Intent) {
+        super.onNewIntent(intencion)
+        setIntent(intencion)
         if (navController != null) {
-            manejarIntent(intent)
+            manejarIntent(intencion)
         } else {
-            intentPendiente = intent
+            intencionPendiente = intencion
         }
     }
 
@@ -107,8 +107,8 @@ class MainActivity : ComponentActivity() {
      * Permite analizar y procesa los comandos de navegación recibidos,
      * redirigiendo al usuario a la pantalla correspondiente según la acción o enlace.
      */
-    private fun manejarIntent(intent: Intent?) {
-        if (intent?.action == "ABRIR_CONTADOR") {
+    private fun manejarIntent(intencion: Intent?) {
+        if (intencion?.action == "ABRIR_CONTADOR") {
             navController?.navigate(VoxTaskScreen.Contador.name) {
                 launchSingleTop = true
             }
@@ -116,10 +116,10 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        val data = intent?.data
-        if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
-            val oobCode = data.getQueryParameter("oobCode") ?: ""
-            navController?.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")
+        val datos = intencion?.data
+        if (datos?.scheme == "voxtask" && datos.host == "nuevacontrasena") {
+            val codigoOob = datos.getQueryParameter("oobCode") ?: ""
+            navController?.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$codigoOob")
             setIntent(Intent())
         }
     }

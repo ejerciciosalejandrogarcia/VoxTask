@@ -94,10 +94,10 @@ fun VoxTaskApp(
 
         /** Procesa un enlace externo para la recuperación de contraseñas */
         LaunchedEffect(deepLinkIntent) {
-            val data = deepLinkIntent?.data
-            if (data?.scheme == "voxtask" && data.host == "nuevacontrasena") {
-                val oobCode = data.getQueryParameter("oobCode") ?: ""
-                navController.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$oobCode")
+            val datos = deepLinkIntent?.data
+            if (datos?.scheme == "voxtask" && datos.host == "nuevacontrasena") {
+                val codigoOob = datos.getQueryParameter("oobCode") ?: ""
+                navController.navigate("${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode=$codigoOob")
             }
         }
         /**
@@ -107,7 +107,6 @@ fun VoxTaskApp(
         LaunchedEffect(navController) {
             onNavControllerReady(navController)
         }
-
 
         /** Define el manejador del resultado del inicio de sesión con Google */
         val lanzadorGoogle = rememberLauncherForActivityResult(
@@ -123,7 +122,7 @@ fun VoxTaskApp(
                     Log.d("Google", "ServerAuthCode: ${cuenta.serverAuthCode}")
                     viewModelInicioSesion.autenticarConGoogle(
                         tokenGoogle = cuenta.idToken!!,
-                        serverAuthCode = cuenta.serverAuthCode
+                        codigoAutorizacion = cuenta.serverAuthCode
                     )
                 } catch (e: ApiException) {
                     Log.e("Google", "ApiException: ${e.statusCode} - ${e.message}")
@@ -246,9 +245,9 @@ fun VoxTaskApp(
                 )
             }
 
-            composable("${VoxTaskScreen.VerCorreo.name}/{correoId}") { backStackEntry ->
+            composable("${VoxTaskScreen.VerCorreo.name}/{correoId}") { entradaPila ->
                 val viewModelVerCorreo: VerCorreoViewModel = viewModel()
-                val correoId = backStackEntry.arguments?.getString("correoId")
+                val correoId = entradaPila.arguments?.getString("correoId")
                 VerCorreoScreen(
                     viewModelPlantilla = plantillaBaseViewModel,
                     viewModel = viewModelVerCorreo,
@@ -283,20 +282,19 @@ fun VoxTaskApp(
                 )
             }
 
-            composable(VoxTaskScreen.CambiarContrasenia.name) { backStackEntry ->
-                val viewModel: CambiarContraseniaViewModel = viewModel(backStackEntry)
+            composable(VoxTaskScreen.CambiarContrasenia.name) { entradaPila ->
+                val viewModel: CambiarContraseniaViewModel = viewModel(entradaPila)
                 CambiarContrasenaScreen(navController, viewModel)
             }
 
             composable(
                 route = "${VoxTaskScreen.RegistrarNuevaContrasenia.name}?oobCode={oobCode}",
                 arguments = listOf(navArgument("oobCode") { defaultValue = "" })
-            ) { backStackEntry ->
-                val oobCode = backStackEntry.arguments?.getString("oobCode") ?: ""
+            ) { entradaPila ->
+                val codigoOob = entradaPila.arguments?.getString("oobCode") ?: ""
                 val viewModel: CambiarContraseniaViewModel = viewModel()
-                NuevaContraseniaScreen(navController, viewModel, oobCode)
+                NuevaContraseniaScreen(navController, viewModel, codigoOob)
             }
-
 
             composable(VoxTaskScreen.Clima.name) {
                 val viewModelClima: ClimaViewModel = viewModel()

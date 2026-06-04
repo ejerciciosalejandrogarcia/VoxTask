@@ -56,7 +56,7 @@ fun InicioSesionScreen(
     /** Variables */
     val estadoUi by viewModel.estadoUi.collectAsState()
     var contrasenaVisible by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    val estadoSnackbar = remember { SnackbarHostState() }
     val contexto = LocalContext.current
     val espaciado = LocalEspaciado.current
     val tamano = LocalTamanioPantalla.current
@@ -90,7 +90,7 @@ fun InicioSesionScreen(
     ) {
         /** SnackBar */
         SnackbarHost(
-            hostState = snackbarHostState,
+            hostState = estadoSnackbar,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = espaciado.xl)
@@ -245,9 +245,9 @@ fun InicioSesionScreen(
                     )
 
                     LaunchedEffect(estadoUi.mensajeError) {
-                        estadoUi.mensajeError?.let { resId ->
-                            snackbarHostState.showSnackbar(
-                                message = contexto.getString(resId),
+                        estadoUi.mensajeError?.let { idRecurso ->
+                            estadoSnackbar.showSnackbar(
+                                message = contexto.getString(idRecurso),
                                 duration = SnackbarDuration.Short
                             )
                             viewModel.limpiarError()

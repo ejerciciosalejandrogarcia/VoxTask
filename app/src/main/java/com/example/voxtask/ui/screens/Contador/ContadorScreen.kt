@@ -70,8 +70,8 @@ fun ContadorScreen(
     val configuracion = LocalConfiguration.current
     val usuario       = FirebaseAuth.getInstance().currentUser
     val uid           = usuario?.uid
-    val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
-    val tamanoCirculo = if (esLandscape) {
+    val esApaisado = configuracion.screenWidthDp > configuracion.screenHeightDp
+    val tamanoCirculo = if (esApaisado) {
         dimensionResource(R.dimen.contador_circulo_landscape)
     } else {
         dimensionResource(R.dimen.contador_circulo)
@@ -121,12 +121,12 @@ fun ContadorScreen(
         if (!viewModel.mostrarContador) {
             val nombre = if (uid != null) {
                 try {
-                    val doc = FirebaseFirestore.getInstance()
+                    val documento = FirebaseFirestore.getInstance()
                         .collection("usuarios")
                         .document(uid)
                         .get()
                         .await()
-                    val usuarioObj = doc.toObject(Usuario::class.java)
+                    val usuarioObj = documento.toObject(Usuario::class.java)
                     usuarioObj?.nombre ?: "Usuario"
                 } catch (e: Exception) {
                     "Usuario"
@@ -152,11 +152,11 @@ fun ContadorScreen(
         navController     = navController,
         textoInformacion  = stringResource(R.string.txt_info_contador),
         onTextoReconocido = { texto -> viewModel.onTextoRecibido(texto, contexto) }
-    ) { paddingValues ->
+    ) { valoresPadding ->
         Box(
             modifier         = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(valoresPadding),
             contentAlignment = Alignment.Center
         ) {
             AnimatedVisibility(visible = viewModel.mostrarContador) {
