@@ -47,7 +47,7 @@ class EnviarCorreoViewModel : ViewModel() {
     var necesitaVincularGoogle by mutableStateOf(false)
     var cargandoToken by mutableStateOf(false)
 
-    private val _canalError = Channel<String>(Channel.BUFFERED)
+    private val _canalError = Channel<Int>(Channel.BUFFERED)
     val flujoError = _canalError.receiveAsFlow()
 
     /**
@@ -139,7 +139,7 @@ class EnviarCorreoViewModel : ViewModel() {
             ) {
                 necesitaVincularGoogle = true
             } else {
-                _canalError.send(contexto.getString(R.string.txt_enviarcorreo_error_token, e.message))
+                _canalError.send(R.string.txt_enviarcorreo_error_token)
                 paso = PasoEnvio.ERROR
             }
         }
@@ -156,7 +156,8 @@ class EnviarCorreoViewModel : ViewModel() {
         viewModelScope.launch {
             when (paso) {
                 PasoEnvio.DESTINATARIO -> {
-                    destinatario = texto.trim()
+                    val emailLimpio = texto.trim().replace(" ", "")
+                    destinatario = emailLimpio
                     paso = PasoEnvio.ASUNTO
                     TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_pregunta_asunto))
                 }
@@ -219,44 +220,35 @@ class EnviarCorreoViewModel : ViewModel() {
     fun enviarCorreo(contexto: Context) {
         viewModelScope.launch {
             paso = PasoEnvio.ENVIANDO
-
             obtenerToken(contexto)
-
             if (paso == PasoEnvio.ERROR || necesitaVincularGoogle) return@launch
             if (tokenAcceso.isEmpty()) {
-                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_auth, "Token vacío"))
+                _canalError.send(R.string.txt_enviarcorreo_error_auth)
                 paso = PasoEnvio.ERROR
                 return@launch
             }
-
             try {
-                android.util.Log.d("TOKEN_ENVIO", "Token a enviar: ${tokenAcceso.take(30)}")
-                android.util.Log.d("TOKEN_ENVIO", "Para: $destinatario")
-
                 val prefs = contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
                 val idiomaActual = prefs.getString("idioma", "es") ?: "es"
-
                 val peticion = EnviarCorreoRequest(
-                    token  = tokenAcceso,
-                    para   = destinatario,
-                    asunto = asunto,
+                    token   = tokenAcceso,
+                    para    = destinatario,
+                    asunto  = asunto,
                     mensaje = mensaje,
-                    modo   = modo,
-                    idioma = idiomaActual
+                    modo    = modo,
+                    idioma  = idiomaActual
                 )
                 val respuesta = ClienteN8n.api.enviarCorreo(peticion)
                 if (respuesta.isSuccessful) {
                     paso = PasoEnvio.ENVIADO
                     TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_exito))
                 } else {
-                    val mensajeError = contexto.getString(R.string.txt_enviarcorreo_error_generico)
-                    _canalError.send(contexto.getString(R.string.txt_error)+mensajeError)
+                    _canalError.send(R.string.txt_enviarcorreo_error_generico)
                     paso = PasoEnvio.ERROR
-                    TextoAVoz.hablar(contexto, mensajeError)
+                    TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_error_generico))
                 }
             } catch (e: Exception) {
-                val mensajeError = e.message ?: contexto.getString(R.string.txt_error)+contexto.getString(R.string.txt_enviarcorreo_error_generico)
-                _canalError.send(mensajeError)
+                _canalError.send(R.string.txt_enviarcorreo_error_generico)
                 paso = PasoEnvio.ERROR
                 TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_error_generico))
             }
@@ -273,6 +265,15 @@ class EnviarCorreoViewModel : ViewModel() {
         paso         = PasoEnvio.DESTINATARIO
         viewModelScope.launch {
             TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_paso_destinatario_pregunta))
+        }
+    }
+    /**
+     * Permite enviar el error al snackbar
+     */
+
+    fun enviarError(resId: Int) {
+        viewModelScope.launch {
+            _canalError.send(resId)
         }
     }
 }

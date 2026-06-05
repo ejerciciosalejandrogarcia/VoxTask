@@ -33,7 +33,7 @@
     <string name="txt_correo_no_encontrado">No se encontró el correo.</string>
     <string name="txt_destinatario_para">Para</string>
     <string name="txt_destinatario_tu">tú</string>
-    <string name="error_cargar_correo">Error al cargar el correo: %1$s</string>
+    <string name="error_cargar_correo">Error al cargar el correo</string>
     <string name="txt_error_ver_correo">No se pudo visualizar el correo.\nInténtelo de nuevo.</string>
     <!-- Inicio Screen -->
     <string name="txt_inicio_bienvenida">Hola, ¿cómo estás? %1$s. ¿Qué te gustaría que hiciera por ti?</string>
@@ -147,7 +147,7 @@
     <string name="txt_title_advertencia_ver_correos">Conecta tu cuenta de Gmail para ver tus correos</string>
     <string name="txt_btn_conectar_gmail">Conectar Gmail</string>
     <string name="txt_title_no_correos">No tienes correos</string>
-    <string name="txt_btn_reintentar_cargar_correos">No se pudieron cargar los correos. Intentar de nuevo</string>
+    <string name="txt_btn_reintentar_cargar_correos">No se pudo cargar el correo. Intentar de nuevo</string>
     <string name="txt_btne_crear_correo">Crear correo</string>
     <string name="error_sin_sesion">No hay sesión activa</string>
     <string name="error_general">Se ha producido un error. Inténtalo de nuevo</string>

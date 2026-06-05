@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.VerCorreo
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -49,6 +50,7 @@ private fun quitarHtml(texto: String): String =
 /**
  * Pantalla principal
  */
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun VerCorreoScreen(
     viewModelPlantilla: PlantillaBaseViewModel,
@@ -73,9 +75,9 @@ fun VerCorreoScreen(
     /** Gestiona el SnackBar e inicia la carga de datos del correo cuando el ID está disponible*/
     LaunchedEffect(correoId) {
         launch {
-            viewModel.errorFlow.collect { mensaje ->
+            viewModel.errorFlow.collect { resId ->
                 estadoSnackbar.showSnackbar(
-                    message  = mensaje,
+                    message = contexto.getString(R.string.txt_error) + " " + contexto.getString(resId),
                     duration = SnackbarDuration.Short
                 )
             }
@@ -87,7 +89,12 @@ fun VerCorreoScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .then(
+                    if (viewModelPlantilla.fondoPersonalizadoUri == null)
+                        Modifier.background(MaterialTheme.colorScheme.background)
+                    else
+                        Modifier
+                )
                 .padding(relleno)
                 .padding(paddingContenido)
         ) {
@@ -138,7 +145,12 @@ fun VerCorreoScreen(
                     Card(
                         modifier  = modificadorContenido.verticalScroll(rememberScrollState()),
                         shape     = RoundedCornerShape(16.dp),
-                        colors    = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        colors    = CardDefaults.cardColors(
+                            containerColor = if (viewModelPlantilla.fondoPersonalizadoUri != null)
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+                            else
+                                MaterialTheme.colorScheme.surface
+                        ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         border    = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {

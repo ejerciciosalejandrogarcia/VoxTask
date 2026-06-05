@@ -54,29 +54,44 @@ class InicioSesionViewModel(
         val nombreUsuario = _estadoUi.value.nombreUsuario.trim()
         val contrasena = _estadoUi.value.contrasena.trim()
 
+        android.util.Log.d("LOGIN", "nombreUsuario: '$nombreUsuario'")
+        android.util.Log.d("LOGIN", "contrasena: '$contrasena'")
+        android.util.Log.d("LOGIN", "vacio: ${nombreUsuario.isBlank() || contrasena.isBlank()}")
+
         val regexContrasenia = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{9,}$")
         val regexNombreUsuario = Regex("^[a-zA-Z0-9]+$")
+        android.util.Log.d("LOGIN", "regex nombre: ${regexNombreUsuario.matches(nombreUsuario)}")
 
         when {
             nombreUsuario.isBlank() || contrasena.isBlank() -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_campos_vacios)
+                android.util.Log.d("LOGIN", "-> campos vacios")
+
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_campos_vacios)
                 return
             }
             !regexNombreUsuario.matches(nombreUsuario) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_nombre_usuario_invalido)
+                android.util.Log.d("LOGIN", "-> regex falla")
+
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_nombre_usuario_invalido)
                 return
             }
             !regexContrasenia.matches(contrasena) -> {
-                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_contrasenia_debil)
+                _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_contrasenia_debil)
                 return
             }
             else -> {
+                android.util.Log.d("LOGIN", "-> entra en else, llamando repositorio")
+
                 viewModelScope.launch {
                     val resultado = usuarioRepository.iniciarSesion(nombreUsuario, contrasena)
                     resultado.onSuccess {
+                        android.util.Log.d("LOGIN", "-> exito")
+
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true, mensajeError = null)
                     }.onFailure {
-                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_credenciales_incorrectas)
+                        android.util.Log.e("LOGIN", "-> fallo: ${it.message}")
+
+                        _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_credenciales_incorrectas)
                     }
                 }
             }
@@ -105,7 +120,9 @@ class InicioSesionViewModel(
                         _estadoUi.value = _estadoUi.value.copy(inicioSesionExitoso = true)
                     }
                 } else {
-                    _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_google_auth)
+                    _estadoUi.value = _estadoUi.value.copy(
+                        mensajeError = R.string.err_credenciales_incorrectas
+                    )
                 }
             }
     }
@@ -134,7 +151,7 @@ class InicioSesionViewModel(
 
                 referencia.set(nuevoUsuario)
                     .addOnSuccessListener { alTerminar() }
-                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.txt_error+R.string.err_firestore) }
+                    .addOnFailureListener { _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_firestore) }
             }
         }.addOnFailureListener {
             _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.err_conexion)

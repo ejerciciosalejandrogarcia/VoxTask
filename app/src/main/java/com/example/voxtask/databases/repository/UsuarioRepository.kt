@@ -86,6 +86,8 @@ class UsuarioRepository : UsuarioDao {
                 .get()
                 .await()
 
+
+
             if (query.isEmpty) {
                 return Result.failure(Exception("Usuario no encontrado"))
             }

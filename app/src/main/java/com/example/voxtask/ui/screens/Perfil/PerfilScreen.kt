@@ -61,13 +61,22 @@ fun PerfilScreen(
     LaunchedEffect(estadoUi.mensajeError) {
         estadoUi.mensajeError?.let { idRecurso ->
             estadoSnackbar.showSnackbar(
-                message = contexto.getString(idRecurso),
+                message = contexto.getString(R.string.txt_error) + " " + contexto.getString(idRecurso),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()
         }
     }
 
+    LaunchedEffect(estadoUi.mensajeExito) {
+        estadoUi.mensajeExito?.let { idRecurso ->
+            estadoSnackbar.showSnackbar(
+                message = contexto.getString(idRecurso),
+                duration = SnackbarDuration.Short
+            )
+            viewModel.limpiarExito()
+        }
+    }
     PlantillaBase(
         viewModel = viewModelPlantilla,
         navController = navController

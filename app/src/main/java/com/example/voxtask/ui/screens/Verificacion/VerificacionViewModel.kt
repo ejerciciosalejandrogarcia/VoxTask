@@ -19,8 +19,7 @@ data class VerificacionUiState(
     val codigoCorrecto: String = "",
     val cargando: Boolean = false,
     val mensajeError: Int? = null,
-    val errorDinamico: String = "",
-    val verificado: Boolean = false,
+        val verificado: Boolean = false,
     val errorEnvio: Boolean = false
 )
 
@@ -46,7 +45,6 @@ class VerificacionViewModel : ViewModel() {
             correo = correo,
             cargando = true,
             mensajeError = null,
-            errorDinamico = "",
             verificado = false,
             codigoCorrecto = "",
             errorEnvio = false
@@ -65,8 +63,7 @@ class VerificacionViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(
-                    errorDinamico = contexto?.getString(R.string.error_enviar_codigo, e.message ?: "")
-                        ?: "Error al enviar el código: ${e.message}",
+                    mensajeError = R.string.error_enviar_codigo,
                     cargando = false,
                     errorEnvio = true
                 )
@@ -89,6 +86,6 @@ class VerificacionViewModel : ViewModel() {
      * Permite limpiar los mensajes de error de la pantalla 'Cambiar Contrasenia'
      */
     fun limpiarError() {
-        _estadoUi.value = _estadoUi.value.copy(mensajeError = null, errorDinamico = "")
+        _estadoUi.value = _estadoUi.value.copy(mensajeError = null)
     }
 }

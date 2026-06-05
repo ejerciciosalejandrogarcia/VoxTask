@@ -37,7 +37,7 @@ class CorreoViewModel : ViewModel() {
     private val baseDatos = FirebaseFirestore.getInstance()
     private val _estadoUi = MutableStateFlow<CorreoUiState>(CorreoUiState.Cargando)
     val uiState: StateFlow<CorreoUiState> = _estadoUi
-    private val _canalError = Channel<String>(Channel.BUFFERED)
+    private val _canalError = Channel<Int>(Channel.BUFFERED)
     val errorFlow = _canalError.receiveAsFlow()
 
     /**
@@ -53,7 +53,7 @@ class CorreoViewModel : ViewModel() {
             android.util.Log.d("CORREO_DEBUG", "uid: $uid")
 
             if (uid == null) {
-                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_sin_sesion))
+                _canalError.send(R.string.error_sin_sesion)
                 return@launch
             }
 
@@ -81,7 +81,7 @@ class CorreoViewModel : ViewModel() {
                         }
                     } catch (e: Exception) {
                         android.util.Log.d("CORREO_DEBUG", "Error obteniendo token: ${e.message}")
-                        _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_general))
+                        _canalError.send(R.string.error_general)
                         return@launch
                     }
 
@@ -95,7 +95,7 @@ class CorreoViewModel : ViewModel() {
                         )
                         .await()
 
-                    cargarCorreos(contexto, tokenAcceso)
+                    cargarCorreos(tokenAcceso)
                     android.util.Log.d("CORREO_DEBUG", "cargarCorreos terminó, uiState: ${_estadoUi.value}")
 
                 } else {
@@ -105,7 +105,7 @@ class CorreoViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 android.util.Log.d("CORREO_DEBUG", "Exception general: ${e.message}")
-                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_general))
+                _canalError.send(R.string.error_cargar_correos)
             }
         }
     }
@@ -113,7 +113,7 @@ class CorreoViewModel : ViewModel() {
     /**
      * Permite solicitar la lista de correos utilizando el token de autenticación
      */
-    private suspend fun cargarCorreos(contexto: Context, token: String) {
+    private suspend fun cargarCorreos(token: String) {
         try {
             android.util.Log.d("CORREO_DEBUG", "Llamando N8nClient...")
             val correos = ClienteN8n.api.obtenerCorreos(token)
@@ -121,9 +121,9 @@ class CorreoViewModel : ViewModel() {
             _estadoUi.value = CorreoUiState.Exito(correos)
         } catch (e: Exception) {
             android.util.Log.d("CORREO_DEBUG", "Error cargando correos: ${e.message}")
-            _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_cargar_correos))
+            _canalError.send(R.string.error_cargar_correos)
             _estadoUi.value = CorreoUiState.Error(
-                mensaje = R.string.txt_error+R.string.error_cargar_correos,
+                mensaje = R.string.error_cargar_correos,
                 esErrorDeCarga = true
             )
         }
@@ -143,7 +143,7 @@ class CorreoViewModel : ViewModel() {
                     ?: throw Exception()
 
                 if (cuentaGoogle.email != emailFirebase) {
-                    _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_cuenta_google_incorrecta))
+                    _canalError.send(R.string.error_cuenta_google_incorrecta)
                     return@launch
                 }
 
@@ -169,11 +169,10 @@ class CorreoViewModel : ViewModel() {
                     )
                     .await()
 
-                cargarCorreos(contexto, tokenAcceso)
-
+                cargarCorreos(tokenAcceso)
             } catch (e: Exception) {
                 android.util.Log.d("CORREO_DEBUG", "guardarToken Exception: ${e.message}")
-                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_general))
+                _canalError.send(R.string.error_general)
             }
         }
     }

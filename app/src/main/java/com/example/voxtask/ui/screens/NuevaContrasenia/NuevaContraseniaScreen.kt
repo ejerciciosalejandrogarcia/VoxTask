@@ -77,7 +77,7 @@ fun NuevaContraseniaScreen(
     LaunchedEffect(estadoNueva.mensajeError) {
         estadoNueva.mensajeError?.let { idRecurso ->
             estadoSnackbar.showSnackbar(
-                message = contexto.getString(idRecurso),
+                message = contexto.getString(R.string.txt_error) + " " + contexto.getString(idRecurso),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarErrorNueva()

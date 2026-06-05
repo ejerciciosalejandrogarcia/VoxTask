@@ -126,16 +126,16 @@ fun ClimaScreen(
         }
     }
 
-    /** Snackbar */
+        /** Snackbar */
     LaunchedEffect(estadoUi.mensajeErrorResId, estadoUi.errorMensajeDinamico) {
         if (estadoUi.mensajeErrorResId != null) {
-            val mensajeFinal = if (estadoUi.errorMensajeDinamico != null) {
+            val detalle = if (estadoUi.errorMensajeDinamico != null) {
                 contexto.getString(estadoUi.mensajeErrorResId!!, estadoUi.errorMensajeDinamico)
             } else {
                 contexto.getString(estadoUi.mensajeErrorResId!!)
             }
             estadoSnackbar.showSnackbar(
-                message = mensajeFinal,
+                message = contexto.getString(R.string.txt_error) + " " + detalle,
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()

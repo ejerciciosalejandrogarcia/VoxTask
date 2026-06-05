@@ -33,7 +33,7 @@ class VerCorreoViewModel : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()
     private val _estadoUi = MutableStateFlow<VerCorreoUiState>(VerCorreoUiState.Cargando)
     val uiState: StateFlow<VerCorreoUiState> = _estadoUi
-    private val _canalError = Channel<String>(Channel.BUFFERED)
+    private val _canalError = Channel<Int>(Channel.BUFFERED)
     val errorFlow = _canalError.receiveAsFlow()
     private var correoId: String? = null
     /**
@@ -47,8 +47,8 @@ class VerCorreoViewModel : ViewModel() {
 
             val uid = autenticacion.currentUser?.uid
             if (uid == null) {
-                _canalError.send(contexto.getString(R.string.txt_error)+contexto.getString(R.string.error_sin_sesion))
-                return@launch
+                _canalError.send(R.string.error_sin_sesion)
+                    return@launch
             }
 
             try {
@@ -57,7 +57,7 @@ class VerCorreoViewModel : ViewModel() {
 
                 if (cuentaGoogle?.account == null || cuentaGoogle.email != correoFirebase) {
                     _estadoUi.value = VerCorreoUiState.Error(
-                        mensaje = R.string.error_general,
+                        mensaje =   R.string.error_general,
                         esErrorDeCarga = false
                     )
                     return@launch
@@ -79,7 +79,7 @@ class VerCorreoViewModel : ViewModel() {
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("VerCorreo", "Error obteniendo token: ${e.message}")
-                    _canalError.send(contexto.getString(R.string.error_general))
+                    _canalError.send(R.string.error_general)
                     return@launch
                 }
 
@@ -95,7 +95,7 @@ class VerCorreoViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 android.util.Log.e("VerCorreo", "Exception general: ${e.message}")
-                _canalError.send(contexto.getString(R.string.error_general))
+                _canalError.send(R.string.error_general)
             }
         }
     }
@@ -110,7 +110,7 @@ class VerCorreoViewModel : ViewModel() {
             _estadoUi.value = VerCorreoUiState.Exito(correo)
         } catch (e: Exception) {
             android.util.Log.e("VerCorreo", "Error cargando correo: ${e.message}")
-            _canalError.send(contexto.getString(R.string.error_cargar_correo))
+            _canalError.send(R.string.error_cargar_correo)
             _estadoUi.value = VerCorreoUiState.Error(
                 mensaje = R.string.error_cargar_correo,
                 esErrorDeCarga = true

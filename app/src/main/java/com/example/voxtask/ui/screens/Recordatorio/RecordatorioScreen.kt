@@ -117,23 +117,16 @@ fun RecordatorioScreen(
 
             if (esLayout2Columnas) {
                 Row(
-                    modifier = modificadorContenido,
+                    modifier = modificadorContenido
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
+                        .padding(espaciado.m),
                     horizontalArrangement = Arrangement.spacedBy(espaciado.l)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState())
-                    ) {
+                    Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
                         CalendarioGrid(viewModel = viewModel)
                     }
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState())
-                    ) {
+                    Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
                         EventosDia(viewModel = viewModel)
                     }
                 }
@@ -141,6 +134,9 @@ fun RecordatorioScreen(
                 Column(
                     modifier = modificadorContenido
                         .verticalScroll(rememberScrollState())
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
+                        .padding(espaciado.m)
                 ) {
                     CalendarioGrid(viewModel = viewModel)
                     EventosDia(viewModel = viewModel)

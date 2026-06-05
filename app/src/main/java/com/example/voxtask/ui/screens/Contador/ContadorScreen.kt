@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.example.voxtask.R
+import com.example.voxtask.services.ContadorService
 import com.example.voxtask.utils.anchoMaximoContenido
 /**
  * Pantalla principal
@@ -91,6 +93,23 @@ fun ContadorScreen(
         viewModel.comprobarEstadoService()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             lanzadorPermiso.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val receptor = object : android.content.BroadcastReceiver() {
+            override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+                viewModel.cancelarDesdeNotificacion()
+            }
+        }
+        val filtro = android.content.IntentFilter(ContadorService.ACCION_BROADCAST_CANCELAR)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            contexto.registerReceiver(receptor, filtro, android.content.Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            contexto.registerReceiver(receptor, filtro)
+        }
+        onDispose {
+            contexto.unregisterReceiver(receptor)
         }
     }
 

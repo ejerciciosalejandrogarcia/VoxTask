@@ -97,9 +97,9 @@ fun EnviarCorreoScreen(
 
     /** Snackbar */
     LaunchedEffect(Unit) {
-        viewModel.errorFlow.collect { mensajeError ->
+        viewModel.flujoError.collect { resId ->
             estadoSnackbar.showSnackbar(
-                message  = mensajeError,
+                message  = contexto.getString(R.string.txt_error) + " " + contexto.getString(resId),
                 duration = SnackbarDuration.Short
             )
         }
@@ -224,8 +224,15 @@ fun EnviarCorreoScreen(
                                 mensaje      = viewModel.mensaje,
                                 modo         = viewModel.modo,
                                 horizontal   = horizontal,
-                                onConfirmar  = { viewModel.confirmarEnvio(contexto) },
-                                onEditar     = { campo -> viewModel.editarCampo(campo) }
+                                onConfirmar  = {
+                                    val regexEmail = Regex("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$")
+                                    if (!regexEmail.matches(viewModel.destinatario)) {
+                                        viewModel.enviarError(R.string.error_correo_invalido)
+                                    } else {
+                                        viewModel.confirmarEnvio(contexto)
+                                    }
+                                },
+                                onEditar = { campo -> viewModel.editarCampo(campo) }
                             )
                             PasoEnvio.ENVIANDO -> {
                                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -278,15 +285,13 @@ fun EnviarCorreoScreen(
                                 }
                             }
                             PasoEnvio.ERROR -> {
-                                Button(
-                                    onClick  = { viewModel.enviarCorreo(contexto) },
-                                    modifier = Modifier.wrapContentWidth()
-                                ) {
+                                Button(onClick = { viewModel.enviarCorreo(contexto) }) {
                                     Text(
                                         stringResource(R.string.txt_enviarcorreo_btn_enviarcorreo),
                                         color = Color.White
                                     )
                                 }
+
                             }
                         }
                     }
@@ -414,11 +419,16 @@ fun ConfirmacionUI(
                         onMensajeChange      = { mensajeEdit = it;      campoEditando = null; onEditar("mensaje:$it") }
                     )
                 }
-                Button(
-                    onClick  = onConfirmar,
-                    modifier = Modifier.widthIn(min = 120.dp).align(Alignment.CenterVertically)
-                ) {
-                    Text(stringResource(R.string.txt_enviarcorreo_btn_enviar), color = Color.White)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = onConfirmar,
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Text(
+                            stringResource(R.string.txt_enviarcorreo_btn_enviar),
+                            color = Color.White
+                        )
+                    }
                 }
             }
         } else {
@@ -431,7 +441,10 @@ fun ConfirmacionUI(
                     onMensajeChange      = { mensajeEdit = it;      campoEditando = null; onEditar("mensaje:$it") }
                 )
             }
-            Button(onClick = onConfirmar, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick  = onConfirmar,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
                 Text(stringResource(R.string.txt_enviarcorreo_btn_enviar), color = Color.White)
             }
         }

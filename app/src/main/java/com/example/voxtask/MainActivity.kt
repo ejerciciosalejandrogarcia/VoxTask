@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
         val preferencias = nuevaBase.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
         val idioma = preferencias.getString("idioma", "es") ?: "es"
         val configuracionRegional = java.util.Locale(idioma)
+
         TextoAVoz.localeActual = configuracionRegional
         val configuracion = Configuration()
         configuracion.setLocale(configuracionRegional)

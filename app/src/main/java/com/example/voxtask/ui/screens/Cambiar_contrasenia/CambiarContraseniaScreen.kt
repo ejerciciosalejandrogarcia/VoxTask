@@ -64,7 +64,7 @@ fun CambiarContrasenaScreen(
     LaunchedEffect(estadoUi.mensajeError) {
         if (estadoUi.mensajeError != 0) {
             estadoSnackbar.showSnackbar(
-                message = contexto.getString(estadoUi.mensajeError),
+                message = contexto.getString(R.string.txt_error) + " " + contexto.getString(estadoUi.mensajeError),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()

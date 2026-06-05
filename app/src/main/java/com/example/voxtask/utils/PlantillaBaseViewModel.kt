@@ -1,77 +1,78 @@
-package com.example.voxtask.utils
+    package com.example.voxtask.utils
 
-import android.app.Activity
-import android.content.Context
-import android.content.res.Configuration
-import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import com.example.voxtask.ui.theme.ThemeManager
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.util.Locale
+    import android.app.Activity
+    import android.content.Context
+    import android.content.res.Configuration
+    import android.net.Uri
+    import androidx.compose.runtime.getValue
+    import androidx.compose.runtime.mutableStateOf
+    import androidx.compose.runtime.setValue
+    import androidx.lifecycle.ViewModel
+    import com.example.voxtask.ui.theme.ThemeManager
+    import com.google.android.gms.auth.api.signin.GoogleSignIn
+    import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+    import com.google.firebase.auth.FirebaseAuth
+    import com.google.firebase.firestore.FirebaseFirestore
+    import kotlinx.coroutines.flow.MutableStateFlow
+    import kotlinx.coroutines.flow.StateFlow
+    import kotlinx.coroutines.flow.asStateFlow
+    import java.util.Locale
 
-class PlantillaBaseViewModel : ViewModel() {
+    class PlantillaBaseViewModel : ViewModel() {
 
-    /** Variables */
-    private val autenticacion = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
-    var fondoPersonalizadoUri by mutableStateOf<Uri?>(null)
-    private val _fondoUri = MutableStateFlow<Uri?>(null)
-    val fondoUri: StateFlow<Uri?> = _fondoUri.asStateFlow()
+        /** Variables */
+        private val autenticacion = FirebaseAuth.getInstance()
+        private val firestore = FirebaseFirestore.getInstance()
+        var fondoPersonalizadoUri by mutableStateOf<Uri?>(null)
+        private val _fondoUri = MutableStateFlow<Uri?>(null)
+        val fondoUri: StateFlow<Uri?> = _fondoUri.asStateFlow()
 
-    fun actualizarFondo(uri: Uri?) {
-        _fondoUri.value = uri
-        fondoPersonalizadoUri = uri
-    }
-
-    /** Permite que cierra sesion del usuario logueado,borre sus preferencias y cierra la aplicacion */
-    fun cerrarSesion(
-        contexto: Context,
-        actividad: Activity,
-        alCerrar: () -> Unit
-    ) {
-        val uid = autenticacion.currentUser?.uid
-
-        if (uid != null) {
-            firestore.collection("usuarios")
-                .document(uid)
-                .update("gmailAccessToken", "")
+        /** Permite actualizar el fondo de la aplicacion */
+        fun actualizarFondo(uri: Uri?) {
+            _fondoUri.value = uri
+            fondoPersonalizadoUri = uri
         }
 
-        val clienteGoogle = GoogleSignIn.getClient(
-            contexto,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-        )
+        /** Permite que cierra sesion del usuario logueado,borre sus preferencias y cierra la aplicacion */
+        fun cerrarSesion(
+            contexto: Context,
+            actividad: Activity,
+            alCerrar: () -> Unit
+        ) {
+            val uid = autenticacion.currentUser?.uid
 
-        clienteGoogle.signOut().addOnCompleteListener {
-            autenticacion.signOut()
-            resetearIdiomaEspanol(contexto)
-            val gestorTema = ThemeManager(contexto)
-            gestorTema.resetearColores()
-            alCerrar()
-            actividad.finishAffinity()
+            if (uid != null) {
+                firestore.collection("usuarios")
+                    .document(uid)
+                    .update("gmailAccessToken", "")
+            }
+
+            val clienteGoogle = GoogleSignIn.getClient(
+                contexto,
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+            )
+
+            clienteGoogle.signOut().addOnCompleteListener {
+                autenticacion.signOut()
+                resetearIdiomaEspanol(contexto)
+                val gestorTema = ThemeManager(contexto)
+                gestorTema.resetearColores()
+                alCerrar()
+                actividad.finishAffinity()
+            }
+        }
+        /** Permite que resetee el idioma seleccionado y que pase a español */
+        fun resetearIdiomaEspanol(contexto: Context) {
+            val configuracionRegional = Locale("es")
+            Locale.setDefault(configuracionRegional)
+
+            val configuracion = Configuration(contexto.resources.configuration)
+            configuracion.setLocale(configuracionRegional)
+            contexto.resources.updateConfiguration(configuracion, contexto.resources.displayMetrics)
+
+            contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+                .edit()
+                .putString("idioma", "es")
+                .commit()
         }
     }
-    /** Permite que resetee el idioma seleccionado y que pase a español */
-    fun resetearIdiomaEspanol(contexto: Context) {
-        val configuracionRegional = Locale("es")
-        Locale.setDefault(configuracionRegional)
-
-        val configuracion = Configuration(contexto.resources.configuration)
-        configuracion.setLocale(configuracionRegional)
-        contexto.resources.updateConfiguration(configuracion, contexto.resources.displayMetrics)
-
-        contexto.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
-            .edit()
-            .putString("idioma", "es")
-            .commit()
-    }
-}

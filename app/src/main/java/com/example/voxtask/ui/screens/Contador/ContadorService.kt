@@ -26,6 +26,7 @@ class ContadorService : Service() {
         const val CHANNEL_ID              = "contador_channel"
         const val CHANNEL_ID_FINALIZADO   = "contador_channel_finalizado"
         const val NOTIF_ID                = 1
+        const val ACCION_BROADCAST_CANCELAR = "com.example.voxtask.CONTADOR_CANCELADO"
         const val EXTRA_SEGUNDOS  = "segundos"
         const val ACCION_INICIAR  = "INICIAR"
         const val ACCION_PARAR    = "PARAR"
@@ -33,6 +34,7 @@ class ContadorService : Service() {
         const val ACCION_CANCELAR = "CANCELAR"
         var estaActivo: Boolean    = false
         var estaPausado: Boolean   = false
+        var estaTerminado: Boolean = false
         var segundosRestantes: Int = 0
     }
 
@@ -88,8 +90,12 @@ class ContadorService : Service() {
                 trabajoContador?.cancel()
                 estaActivo        = false
                 estaPausado       = false
+                estaTerminado = true
                 segundosRestantes = 0
                 getSystemService(NotificationManager::class.java).cancel(NOTIF_ID)
+                val broadcast = Intent(ACCION_BROADCAST_CANCELAR)
+                broadcast.setPackage(packageName)
+                sendBroadcast(broadcast)
                 stopSelf()
             }
         }
@@ -131,6 +137,7 @@ class ContadorService : Service() {
             }
 
             estaActivo        = false
+            estaTerminado = true
             segundosRestantes = 0
         }
     }

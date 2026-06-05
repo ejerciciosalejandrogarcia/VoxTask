@@ -110,10 +110,11 @@ fun VerificacionScreen(
         }
     }
 
-    LaunchedEffect(estadoUi.errorDinamico) {
-        if (estadoUi.errorDinamico.isNotEmpty()) {
+    LaunchedEffect(estadoUi.mensajeError) {
+        val idRecurso = estadoUi.mensajeError
+        if (idRecurso != null) {
             snackbarHostState.showSnackbar(
-                message = estadoUi.errorDinamico,
+                message = contexto.getString(R.string.txt_error) + " " + contexto.getString(idRecurso),
                 duration = SnackbarDuration.Short
             )
             viewModel.limpiarError()
@@ -244,9 +245,9 @@ fun VerificacionScreen(
                         color = TextoGris
                     )
 
-                    if (estadoUi.email.isNotEmpty()) {
+                    if (estadoUi.correo.isNotEmpty()) {
                         Text(
-                            text = estadoUi.email,
+                            text = estadoUi.correo,
                             fontSize = tamano.textoBody,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary

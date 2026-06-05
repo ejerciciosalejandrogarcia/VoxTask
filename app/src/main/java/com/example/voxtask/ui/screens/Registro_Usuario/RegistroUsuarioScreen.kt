@@ -375,31 +375,38 @@ fun RegistroUsuarioScreen(
 
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
-                        OutlinedTextField(
-                            value = estadoUi.fecha_nacimiento,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.hint_fecha_nacimiento)) },
-                            trailingIcon = {
-                                IconButton(onClick = { selectorFecha.show() }) {
-                                    Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.content_desc_seleccionar_fecha))
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { selectorFecha.show() },
-                            shape = RoundedCornerShape(14.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = Color(0xFFE0E0E0),
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedLabelColor = TextoOscuro,
-                                focusedTextColor = TextoOscuro,
-                                unfocusedTextColor = TextoOscuro,
-                                cursorColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
 
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = estadoUi.fecha_nacimiento,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text(stringResource(R.string.hint_fecha_nacimiento)) },
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Default.DateRange,
+                                        contentDescription = stringResource(R.string.content_desc_seleccionar_fecha),
+                                        tint = TextoOscuro
+                                    )
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = Color(0xFFE0E0E0),
+                                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedLabelColor = TextoOscuro,
+                                    focusedTextColor = TextoOscuro,
+                                    unfocusedTextColor = TextoOscuro,
+                                    cursorColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .clickable { selectorFecha.show() }
+                            )
+                        }
                         Spacer(modifier = Modifier.height(espaciadoCampos))
 
                         OutlinedTextField(

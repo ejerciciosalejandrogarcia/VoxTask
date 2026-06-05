@@ -120,7 +120,7 @@ class CambiarContraseniaViewModel : ViewModel() {
                     } catch (e: Exception) {
                         _estadoNueva.value = _estadoNueva.value.copy(
                             cargando = false,
-                            mensajeError = R.string.txt_error+R.string.error_cambio_contrasena
+                            mensajeError = R.string.error_cambio_contrasena
                         )
                     }
                 }

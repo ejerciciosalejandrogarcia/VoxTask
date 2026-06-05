@@ -41,20 +41,28 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
      * Permite recuperar el estado del contador desde el servicio al volver a la pantalla
      */
     fun restaurarSiServicioActivo() {
-        if (ContadorService.segundosRestantes > 0) {
-            mostrarContador = true
-            if (ContadorService.estaActivo) {
+        when {
+            ContadorService.estaTerminado -> {
+                mostrarContador = true
+                corriendo       = false
+                terminado       = true
+                tiempoFormato   = "00:00:00"
+            }
+            ContadorService.estaPausado -> {
+                mostrarContador = true
+                corriendo       = false
+                val r           = ContadorService.segundosRestantes
+                val horas       = r / 3600
+                val minutos     = (r % 3600) / 60
+                val segs        = r % 60
+                tiempoFormato   = String.format("%02d:%02d:%02d", horas, minutos, segs)
+            }
+            ContadorService.estaActivo && ContadorService.segundosRestantes > 0 -> {
+                mostrarContador = true
                 if (!corriendo) iniciarContador(ContadorService.segundosRestantes)
-            } else if (ContadorService.estaPausado) {
-                corriendo = false
-                val horas   = ContadorService.segundosRestantes / 3600
-                val minutos = (ContadorService.segundosRestantes % 3600) / 60
-                val segs    = ContadorService.segundosRestantes % 60
-                tiempoFormato = String.format("%02d:%02d:%02d", horas, minutos, segs)
             }
         }
     }
-
     /** Permite recibir lo que el usuario dice y procesarlo */
     @RequiresApi(Build.VERSION_CODES.O)
     fun onTextoRecibido(texto: String, contexto: Context) {
@@ -264,6 +272,7 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
         corriendo       = false
         mostrarContador = false
         terminado       = false
+        ContadorService.estaTerminado = false
         trabajoCuentaAtras?.cancel()
         tiempoFormato   = "00:00:00"
 
@@ -315,9 +324,21 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
             }
         }
     }
-
     /**
-     * Permite traducir las palabras que representan números a su formato numérico según el idioma seleccionado.
+     * Permite cancelar el contador desde el boton 'Cancelar' de la notificacion */
+    fun cancelarDesdeNotificacion() {
+        corriendo         = false
+        mostrarContador   = false
+        terminado         = false
+        ContadorService.estaTerminado = false
+        trabajoCuentaAtras?.cancel()
+        tiempoFormato     = "00:00:00"
+        reproductorAudio?.stop()
+        reproductorAudio?.release()
+        reproductorAudio  = null
+    }
+    /**
+     * Permite traducir las palabras que representan números a su formato numérico según el idioma seleccionado
      */
     private fun normalizarNumeros(
         texto: String,

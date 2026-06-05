@@ -108,7 +108,11 @@ fun ListaCompraScreen(
                 Modifier.fillMaxSize()
             }
 
-            Column(modifier = modificadorContenido) {
+            Column(    modifier = modificadorContenido
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
+                .padding(espaciado.m)
+            ) {
                 /** Pantalla cuando no hay ningun producto registrado */
                 if (viewModel.productos.isEmpty()) {
                     Box(
@@ -119,7 +123,7 @@ fun ListaCompraScreen(
                             text = stringResource(R.string.txt_sin_producto_lista_compra),
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.Gray,
-                            fontSize = tamano.textoBody
+                            fontSize = tamano.textoBody*1.3f
                         )
                     }
                     /** Pantalla cuando hay productos registrados */

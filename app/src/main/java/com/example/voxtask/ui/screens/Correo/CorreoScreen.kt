@@ -1,5 +1,6 @@
 package com.example.voxtask.ui.screens.Correo
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +38,7 @@ import kotlinx.coroutines.launch
 /**
  * Pantalla principal
  */
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CorreoScreen(
@@ -70,10 +72,9 @@ fun CorreoScreen(
     /** SnackBar */
     LaunchedEffect(Unit) {
         launch {
-            viewModel.errorFlow.collect { mensaje ->
-                android.util.Log.d("SNACKBAR_TEST", "Error recibido: $mensaje")
+            viewModel.errorFlow.collect { resId ->
                 estadoSnackbar.showSnackbar(
-                    message = mensaje,
+                    message = contexto.getString(R.string.txt_error) + " " + contexto.getString(resId),
                     duration = SnackbarDuration.Short
                 )
             }
