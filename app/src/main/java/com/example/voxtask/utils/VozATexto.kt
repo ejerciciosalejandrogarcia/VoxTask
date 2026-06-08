@@ -21,8 +21,8 @@ class VozATextoState {
 }
 
 /**
- * Esta funcion configura y gestiona el reconocimiento de voz.
- * Retorna el estado actual de la escucha y una función para activarla
+ * Esta funcion configura y gestiona el reconocimiento de voz,
+ * retorna el estado actual de la escucha y una función para activarla
  */
 @Composable
 fun rememberVozATexto(): Pair<VozATextoState, () -> Unit> {

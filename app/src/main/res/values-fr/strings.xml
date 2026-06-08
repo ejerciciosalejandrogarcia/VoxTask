@@ -180,7 +180,6 @@
     <string name="txt_enviarcorreo_estado_enviando">Envoi de l\'e-mail...</string>
     <string name="txt_enviarcorreo_exito">E-mail envoyé</string>
     <string name="txt_enviarcorreo_btn_otro">Envoyer un autre</string>
-    <string name="txt_enviarcorreo_btn_reintentar">Réessayer</string>
     <string name="txt_enviarcorreo_resumen_para">Pour : %1$s</string>
     <string name="txt_enviarcorreo_resumen_asunto">Objet : %1$s</string>
     <string name="txt_enviarcorreo_resumen_modo">Mode : %1$s</string>

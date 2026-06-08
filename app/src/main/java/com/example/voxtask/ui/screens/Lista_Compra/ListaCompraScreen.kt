@@ -1,7 +1,6 @@
 package com.example.voxtask.ui.screens.Lista_Compra
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.LocalTamanioPantalla
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.anchoMaximoContenido
 import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.PlantillaBase

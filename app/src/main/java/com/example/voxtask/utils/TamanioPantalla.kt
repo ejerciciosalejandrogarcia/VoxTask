@@ -51,7 +51,9 @@ fun espaciadoFromDimens() = Espaciado(
 val LocalEspaciado       = compositionLocalOf { Espaciado(4.dp, 8.dp, 12.dp, 16.dp, 24.dp, 32.dp) }
 val LocalTamanioPantalla = compositionLocalOf { TamanioPantalla.COMPACTO }
 
-// Define el estilo y distribución según el dispositivo
+/**
+ * Define el estilo y distribución según el dispositivo
+ */
 val TamanioPantalla.textoBody: TextUnit get() = when (this) {
     TamanioPantalla.COMPACTO  -> 14.sp
     TamanioPantalla.MEDIO     -> 16.sp

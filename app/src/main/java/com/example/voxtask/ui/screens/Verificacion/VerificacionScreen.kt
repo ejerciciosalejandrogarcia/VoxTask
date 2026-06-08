@@ -72,8 +72,8 @@ fun VerificacionScreen(
 
     /**
      * Gestiona los siguientes efectos:
-     * navegación tras éxito, control de temporizadores de caducidad y
-     * visualización de mensajes de error mediante snackbars.
+     * navegación al inicio de la aplicacion despues de que  sea exito la verificacion, control de temporizador de caducidad y
+     * visualización de mensajes de error mediante SnackBar
      */
     LaunchedEffect(estadoUi.verificado) {
         if (estadoUi.verificado) {
@@ -120,12 +120,11 @@ fun VerificacionScreen(
             viewModel.limpiarError()
         }
     }
-
+    /** Variables */
     val minutos = segundosRestantes / 60
     val segundos = segundosRestantes % 60
     val tiempoTexto = "%02d:%02d".format(minutos, segundos)
     val colorContador = if (segundosRestantes <= 60) Color(0xFFE53935) else MaterialTheme.colorScheme.primary
-
     val focusRequesters = remember { List(5) { FocusRequester() } }
     LaunchedEffect(Unit) { focusRequesters[0].requestFocus() }
 
@@ -143,7 +142,6 @@ fun VerificacionScreen(
                 .zIndex(10f)
         )
         /** Fondo de la apicacion */
-
         if (esLandscape) {
             Box(
                 modifier = Modifier
@@ -203,6 +201,7 @@ fun VerificacionScreen(
         ) {
             Spacer(modifier = Modifier.height(espaciado.xl))
 
+            /** Variable */
             val modificadorCard = if (anchoMaximo != androidx.compose.ui.unit.Dp.Unspecified) {
                 Modifier.widthIn(max = anchoMaximo).fillMaxWidth()
             } else {

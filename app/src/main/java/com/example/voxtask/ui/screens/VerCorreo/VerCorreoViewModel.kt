@@ -78,7 +78,6 @@ class VerCorreoViewModel : ViewModel() {
                         )
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("VerCorreo", "Error obteniendo token: ${e.message}")
                     _canalError.send(R.string.error_general)
                     return@launch
                 }
@@ -94,7 +93,6 @@ class VerCorreoViewModel : ViewModel() {
                 cargarCorreo(id, tokenAcceso, contexto)
 
             } catch (e: Exception) {
-                android.util.Log.e("VerCorreo", "Exception general: ${e.message}")
                 _canalError.send(R.string.error_general)
             }
         }
@@ -105,11 +103,9 @@ class VerCorreoViewModel : ViewModel() {
      */
     private suspend fun cargarCorreo(id: String, token: String, contexto: Context) {
         try {
-            android.util.Log.d("VerCorreo", "Llamando con id: $id")
             val correo = ClienteN8n.api.obtenerCorreoPorId(id, token)
             _estadoUi.value = VerCorreoUiState.Exito(correo)
         } catch (e: Exception) {
-            android.util.Log.e("VerCorreo", "Error cargando correo: ${e.message}")
             _canalError.send(R.string.error_cargar_correo)
             _estadoUi.value = VerCorreoUiState.Error(
                 mensaje = R.string.error_cargar_correo,

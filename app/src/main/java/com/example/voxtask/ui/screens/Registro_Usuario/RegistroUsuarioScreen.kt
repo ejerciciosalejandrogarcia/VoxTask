@@ -86,7 +86,7 @@ fun RegistroUsuarioScreen(
         )
     }
 
-    /** Gestiona el SnackBar y el estado */
+    /** Gestiona el SnackBar */
     LaunchedEffect(estadoUi.mensajeError) {
         val prefijo = estadoUi.mensajeError?.let { contexto.getString(it) } ?: ""
         val detalle = estadoUi.detalleError?.let { contexto.getString(it) } ?: ""

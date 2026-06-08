@@ -84,7 +84,9 @@ fun EnviarCorreoScreen(
             }
         }
     }
-
+    /**
+     * Da intrucciones auditivas segun el idioma seleccionado
+     */
     LaunchedEffect(Unit) {
         viewModel.iniciar(contexto)
         if (!viewModel.necesitaVincularGoogle) {
@@ -95,7 +97,7 @@ fun EnviarCorreoScreen(
         }
     }
 
-    /** Snackbar */
+    /** Gestion del SnackBar */
     LaunchedEffect(Unit) {
         viewModel.flujoError.collect { resId ->
             estadoSnackbar.showSnackbar(
@@ -506,7 +508,6 @@ fun FilaConfirmacion(
     onEditar: () -> Unit,
     onGuardar: (String) -> Unit
 ) {
-    val espaciado = LocalEspaciado.current
     val tamano    = LocalTamanioPantalla.current
     var textoTemporal by remember(valor) { mutableStateOf(valor) }
 

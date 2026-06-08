@@ -1,7 +1,6 @@
 package com.example.voxtask.ui.screens.Recordatorio
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -71,7 +70,6 @@ class RecordatorioViewModel : ViewModel() {
                 repository.eliminar(usuarioId, evento.id)
                 eventos.remove(evento)
             } catch (e: Exception) {
-                Log.e("VoxTask", "Error al eliminar: ${e.message}")
             }
         }
     }
@@ -84,7 +82,6 @@ class RecordatorioViewModel : ViewModel() {
                 eventos.clear()
                 eventos.addAll(lista)
             } catch (e: Exception) {
-                Log.e("VoxTask", "Error al cargar eventos: ${e.message}")
             } finally {
                 cargando = false
             }
@@ -96,7 +93,6 @@ class RecordatorioViewModel : ViewModel() {
      * la etapa actual del flujo de conversación
      */
     fun onTextoRecibido(texto: String) {
-        Log.d("VoxTask", "onTextoRecibido → texto='$texto' | flujo=$flujoActual")
         val textoNormalizado = texto.trim().lowercase()
 
         if (esCancelacion(textoNormalizado) && flujoActual != FlujoVoz.NINGUNO) {
@@ -121,8 +117,6 @@ class RecordatorioViewModel : ViewModel() {
      * Permite clasificar el comando inicial de voz del usuario y dirigir el flujo segun la creacion o eliminacion de eventos
      */
     private fun procesarComandoInicial(texto: String) {
-        Log.d("VoxTask", "procesarComandoInicial → texto='$texto'")
-        Log.d("VoxTask", "  esCrear=${esComandoCrear(texto)} | esEliminar=${esComandoEliminar(texto)}")
 
         when {
             esComandoCrear(texto)    -> iniciarCreacion()
@@ -151,7 +145,6 @@ class RecordatorioViewModel : ViewModel() {
      */
     private fun procesarDia(texto: String, esCrear: Boolean) {
         val dia = extraerNumero(texto)
-        Log.d("VoxTask", "procesarDia → texto='$texto' | extraído=$dia")
 
         if (dia == null || dia < 1 || dia > 31) {
             hablar(mensajeNoEntendiDia())
@@ -166,7 +159,6 @@ class RecordatorioViewModel : ViewModel() {
      * Permite validar el mes introducido por voz y avanzar al paso de solicitar el año
      */
     private fun procesarMes(texto: String, esCrear: Boolean) {
-        // Intentar por nombre primero, luego por número
         val mes = nombreMesANumero(texto) ?: extraerNumero(texto)
         if (mes == null || mes < 1 || mes > 12) {
             hablar(mensajeNoEntendiMes())
@@ -244,14 +236,13 @@ class RecordatorioViewModel : ViewModel() {
                 cargarEventos()
                 hablar(mensajeEventoCreado(evento))
             } catch (e: Exception) {
-                Log.e("VoxTask", "Error al guardar: ${e.message}")
             }
         }
         resetFlujo()
     }
 
     /**
-     * Permiet eliminar todos los eventos registrados en una fecha determinada
+     * Permite eliminar todos los eventos registrados en una fecha determinada
      */
     private fun procesarEliminacionConFecha(fecha: LocalDate) {
         val eventosDia = eventos.filter {
@@ -280,7 +271,6 @@ class RecordatorioViewModel : ViewModel() {
                     hablar(mensajeTodosEliminados(fecha, eventosDia.size))
 
             } catch (e: Exception) {
-                Log.e("VoxTask", "Error al eliminar: ${e.message}")
             }
         }
     }

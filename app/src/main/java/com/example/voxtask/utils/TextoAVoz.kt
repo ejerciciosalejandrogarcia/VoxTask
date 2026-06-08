@@ -64,13 +64,4 @@ object TextoAVoz {
             motorVoz?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "id")
         }
     }
-
-    /**
-     * Permite liberar los recursos del motor TTS y limpia la memoria
-     */
-    fun liberar() {
-        motorVoz?.stop()
-        motorVoz?.shutdown()
-        motorVoz = null
-    }
 }

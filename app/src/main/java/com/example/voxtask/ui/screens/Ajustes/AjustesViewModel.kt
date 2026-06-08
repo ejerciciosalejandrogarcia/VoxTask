@@ -5,7 +5,6 @@
     import android.content.Intent
     import android.content.res.Configuration
     import android.speech.tts.Voice
-    import android.util.Log
     import android.widget.Toast
     import androidx.compose.runtime.getValue
     import androidx.compose.runtime.mutableStateOf
@@ -132,7 +131,6 @@
                 try {
                     val apkCompartido = File(contexto.cacheDir, "VoxTask.apk")
                     val archivos = contexto.assets.list("")
-                    Log.d("ASSETS", "Archivos disponibles: ${archivos?.joinToString()}")
 
                     contexto.assets.open("VoxTask.apk").use { entrada ->
                         apkCompartido.outputStream().use { salida ->

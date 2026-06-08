@@ -23,6 +23,7 @@ data class ClimaUiState(
 
 class ClimaViewModel : ViewModel() {
 
+    /** Variables */
     private val _uiState = MutableStateFlow(ClimaUiState())
     val uiState: StateFlow<ClimaUiState> = _uiState.asStateFlow()
 

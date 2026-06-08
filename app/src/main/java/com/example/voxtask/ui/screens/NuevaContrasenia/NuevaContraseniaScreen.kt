@@ -73,7 +73,7 @@ fun NuevaContraseniaScreen(
     val configuracion = LocalConfiguration.current
     val esLandscape = configuracion.screenWidthDp > configuracion.screenHeightDp
 
-    /** SnackBar */
+    /** Gestion del SnackBar */
     LaunchedEffect(estadoNueva.mensajeError) {
         estadoNueva.mensajeError?.let { idRecurso ->
             estadoSnackbar.showSnackbar(

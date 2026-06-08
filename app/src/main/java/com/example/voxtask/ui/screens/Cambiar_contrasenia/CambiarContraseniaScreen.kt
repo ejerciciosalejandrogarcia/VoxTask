@@ -60,7 +60,7 @@ fun CambiarContrasenaScreen(
     val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
     val esApaisado = configuracion.screenWidthDp > configuracion.screenHeightDp
 
-    /** SnackBar */
+    /** Gestion del SnackBar */
     LaunchedEffect(estadoUi.mensajeError) {
         if (estadoUi.mensajeError != 0) {
             estadoSnackbar.showSnackbar(
@@ -70,6 +70,7 @@ fun CambiarContrasenaScreen(
             viewModel.limpiarError()
         }
     }
+    /** Limpia el estado del ViewModel al salir de la pantalla */
     DisposableEffect(Unit) {
         onDispose {
             viewModel.reiniciar()

@@ -32,8 +32,6 @@ class ListaCompraViewModel : ViewModel() {
                 productos.addAll(listaProductos)
             } catch (e: Exception) {
                 e.printStackTrace()
-                android.util.Log.e("ListaCompra", "Error al cargar: ${e.message}", e)
-
             }
         }
     }

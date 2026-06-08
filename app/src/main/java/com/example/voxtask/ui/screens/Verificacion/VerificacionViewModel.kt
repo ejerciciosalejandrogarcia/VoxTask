@@ -55,7 +55,6 @@ class VerificacionViewModel : ViewModel() {
                 val respuesta = ClienteN8n.api.enviarCodigoVerificacion(
                     VerificacionRequest(email = correo, uid = uid)
                 )
-                android.util.Log.d("Verificacion", "Código recibido: '${respuesta.codigo}'")
                 _estadoUi.value = _estadoUi.value.copy(
                     codigoCorrecto = respuesta.codigo,
                     cargando = false,

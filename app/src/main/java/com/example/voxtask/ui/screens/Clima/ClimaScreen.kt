@@ -126,7 +126,7 @@ fun ClimaScreen(
         }
     }
 
-        /** Snackbar */
+    /** Gestion del SnackBar */
     LaunchedEffect(estadoUi.mensajeErrorResId, estadoUi.errorMensajeDinamico) {
         if (estadoUi.mensajeErrorResId != null) {
             val detalle = if (estadoUi.errorMensajeDinamico != null) {

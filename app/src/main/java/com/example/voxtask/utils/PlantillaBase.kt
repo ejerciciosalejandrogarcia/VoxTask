@@ -87,6 +87,7 @@ fun PlantillaBase(
                         titleContentColor = Color.White
                     ),
                     actions = {
+                        /** Botones (Informacion y Cerrar sesion) */
                         if (mostrarBotonInfo && !textoInformacion.isNullOrEmpty()) {
                             IconButton(onClick = {
                                 alcanceCorrutina.launch {

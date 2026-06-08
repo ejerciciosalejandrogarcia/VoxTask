@@ -243,7 +243,7 @@
                                 cursorColor = MaterialTheme.colorScheme.primary
                             )
                         )
-
+                        /** Gestion del SnackBar */
                         LaunchedEffect(estadoUi.mensajeError) {
                             val idRecurso = estadoUi.mensajeError
                             if (idRecurso != null) {

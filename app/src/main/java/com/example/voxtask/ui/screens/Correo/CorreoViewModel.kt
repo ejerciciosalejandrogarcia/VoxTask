@@ -50,7 +50,6 @@ class CorreoViewModel : ViewModel() {
             _estadoUi.value = CorreoUiState.Cargando
 
             val uid = autenticacion.currentUser?.uid
-            android.util.Log.d("CORREO_DEBUG", "uid: $uid")
 
             if (uid == null) {
                 _canalError.send(R.string.error_sin_sesion)
@@ -60,10 +59,8 @@ class CorreoViewModel : ViewModel() {
             try {
                 val cuentaGoogle = GoogleSignIn.getLastSignedInAccount(contexto)
                 val emailFirebase = autenticacion.currentUser?.email ?: ""
-                android.util.Log.d("CORREO_DEBUG", "cuentaGoogle: ${cuentaGoogle?.email}, emailFirebase: $emailFirebase, account: ${cuentaGoogle?.account}")
 
                 if (cuentaGoogle?.account != null && cuentaGoogle.email == emailFirebase) {
-                    android.util.Log.d("CORREO_DEBUG", "Entrando a obtener token")
 
                     val tokenAcceso = try {
                         withContext(Dispatchers.IO) {
@@ -80,12 +77,10 @@ class CorreoViewModel : ViewModel() {
                             )
                         }
                     } catch (e: Exception) {
-                        android.util.Log.d("CORREO_DEBUG", "Error obteniendo token: ${e.message}")
                         _canalError.send(R.string.error_general)
                         return@launch
                     }
 
-                    android.util.Log.d("CORREO_DEBUG", "Token obtenido OK, llamando cargarCorreos")
 
                     baseDatos.collection("usuarios")
                         .document(uid)
@@ -96,15 +91,12 @@ class CorreoViewModel : ViewModel() {
                         .await()
 
                     cargarCorreos(tokenAcceso)
-                    android.util.Log.d("CORREO_DEBUG", "cargarCorreos terminó, uiState: ${_estadoUi.value}")
 
                 } else {
-                    android.util.Log.d("CORREO_DEBUG", "NecesitaConectarGoogle")
                     _estadoUi.value = CorreoUiState.NecesitaConectarGoogle
                 }
 
             } catch (e: Exception) {
-                android.util.Log.d("CORREO_DEBUG", "Exception general: ${e.message}")
                 _canalError.send(R.string.error_cargar_correos)
             }
         }
@@ -115,12 +107,9 @@ class CorreoViewModel : ViewModel() {
      */
     private suspend fun cargarCorreos(token: String) {
         try {
-            android.util.Log.d("CORREO_DEBUG", "Llamando N8nClient...")
             val correos = ClienteN8n.api.obtenerCorreos(token)
-            android.util.Log.d("CORREO_DEBUG", "Correos recibidos: ${correos.size}")
             _estadoUi.value = CorreoUiState.Exito(correos)
         } catch (e: Exception) {
-            android.util.Log.d("CORREO_DEBUG", "Error cargando correos: ${e.message}")
             _canalError.send(R.string.error_cargar_correos)
             _estadoUi.value = CorreoUiState.Error(
                 mensaje = R.string.error_cargar_correos,
@@ -171,7 +160,6 @@ class CorreoViewModel : ViewModel() {
 
                 cargarCorreos(tokenAcceso)
             } catch (e: Exception) {
-                android.util.Log.d("CORREO_DEBUG", "guardarToken Exception: ${e.message}")
                 _canalError.send(R.string.error_general)
             }
         }

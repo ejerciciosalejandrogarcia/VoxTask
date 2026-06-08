@@ -69,7 +69,7 @@ fun CorreoScreen(
     }
     val estadoSnackbar = remember { SnackbarHostState() }
 
-    /** SnackBar */
+    /** Gestion del SnackBar */
     LaunchedEffect(Unit) {
         launch {
             viewModel.errorFlow.collect { resId ->

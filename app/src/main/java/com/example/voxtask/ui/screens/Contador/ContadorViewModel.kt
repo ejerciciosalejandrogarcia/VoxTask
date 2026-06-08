@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -76,12 +75,9 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
      */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun procesarComando(texto: String, contexto: Context) {
-        android.util.Log.d("CONTADOR", "Texto recibido: $texto")
 
         val textoNormalizado = normalizarNumeros(texto.lowercase().trim())
             .replace(" y ", " ")
-        android.util.Log.d("CONTADOR", "Texto normalizado: $textoNormalizado")
-
         val partes = textoNormalizado.split("\\s+".toRegex())
         var totalSegundos = 0
 
@@ -104,11 +100,9 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
                         "de" -> "sek"; "pt" -> "seg"; else -> "seg"
                     }) || unidad.startsWith("sec") -> totalSegundos += numero
                 }
-                android.util.Log.d("CONTADOR", "Número: $numero, Unidad: $unidad")
             }
         }
 
-        android.util.Log.d("CONTADOR", "Total segundos calculados: $totalSegundos")
         if (totalSegundos > 0) {
             iniciarContadorConServicio(contexto, totalSegundos)
             iniciarContador(totalSegundos)
@@ -151,9 +145,7 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
                 reproductor.setOnCompletionListener { it.release(); reproductorAudio = null }
                 reproductor.start()
                 reproductorAudio = reproductor
-                android.util.Log.d("CONTADOR", "Sonido reproducido correctamente")
             } catch (e: Exception) {
-                android.util.Log.e("CONTADOR", "Error al reproducir sonido: ${e.message}")
             }
 
             try {
@@ -173,9 +165,7 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
                         vibrador?.vibrate(patron, -1)
                     }
                 }
-                android.util.Log.d("CONTADOR", "Vibración ejecutada correctamente")
             } catch (e: Exception) {
-                android.util.Log.e("CONTADOR", "Error al vibrar: ${e.message}")
             }
         }
     }

@@ -3,7 +3,6 @@ package com.example.voxtask
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -103,7 +102,7 @@ fun VoxTaskApp(
         /**
          * Permite exponer el navController hacia el exterior una vez inicializado,
          * permitiendo que componentes externos, puedan controlar la navegación de la aplicación
-         * */
+         */
         LaunchedEffect(navController) {
             onNavControllerReady(navController)
         }
@@ -112,23 +111,17 @@ fun VoxTaskApp(
         val lanzadorGoogle = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
         ) { resultado ->
-            Log.d("Google", "ResultCode: ${resultado.resultCode}")
-            Log.d("Google", "Data: ${resultado.data}")
             if (resultado.resultCode == Activity.RESULT_OK) {
                 val tarea = GoogleSignIn.getSignedInAccountFromIntent(resultado.data)
                 try {
                     val cuenta = tarea.getResult(ApiException::class.java)
-                    Log.d("Google", "Token obtenido: ${cuenta.idToken}")
-                    Log.d("Google", "ServerAuthCode: ${cuenta.serverAuthCode}")
                     viewModelInicioSesion.autenticarConGoogle(
                         tokenGoogle = cuenta.idToken!!,
                         codigoAutorizacion = cuenta.serverAuthCode
                     )
                 } catch (e: ApiException) {
-                    Log.e("Google", "ApiException: ${e.statusCode} - ${e.message}")
                 }
             } else {
-                Log.e("Google", "El usuario canceló o hubo un error")
             }
         }
         /**
