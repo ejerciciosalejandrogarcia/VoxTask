@@ -521,7 +521,7 @@ fun FilaConfirmacion(
         Text(
             text     = etiqueta,
             style    = MaterialTheme.typography.labelSmall,
-            color    = Color.Gray,
+            color     = Color.Gray,
             fontSize = tamano.textoBody
         )
         Spacer(modifier = Modifier.height(4.dp))
