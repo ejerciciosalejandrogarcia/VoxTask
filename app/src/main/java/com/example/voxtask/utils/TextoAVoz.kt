@@ -34,7 +34,7 @@ object TextoAVoz {
 
     /**
      * Permite convertir texto a voz de forma asíncrona,
-     * inicializa el motor TTS y suspende la ejecución,hasta que la lectura del texto haya terminado.
+     * inicializa el motor TTS y suspende la ejecución,hasta que la lectura del texto haya terminado
      */
     suspend fun hablar(contexto: Context, texto: String) {
         if (motorVoz == null) {

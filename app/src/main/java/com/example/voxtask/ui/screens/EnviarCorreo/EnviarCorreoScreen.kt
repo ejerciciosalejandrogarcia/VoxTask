@@ -34,7 +34,9 @@ import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.utils.TextoAVoz
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
-
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 /**
  * Detecta si la orientación del dispositivo es horizontal y devuelve
  * el padding correspondiente ajustado al diseño actual
@@ -159,7 +161,11 @@ fun EnviarCorreoScreen(
             }
 
             Column(
-                modifier            = modificadorContenido.verticalScroll(rememberScrollState()),
+                modifier            = modificadorContenido
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
+                    .padding(espaciado.m)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

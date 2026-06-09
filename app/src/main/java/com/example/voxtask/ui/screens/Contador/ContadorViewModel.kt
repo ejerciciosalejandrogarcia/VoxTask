@@ -122,7 +122,7 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
     }
 
     /**
-     * Ejecuta una alarma sonora y vibracion para avisar al usuario cuando finaliza el contador
+     * Ejecuta una alarma sonora para avisar al usuario cuando finaliza el contador
      */
     private fun reproducirSonidoFin() {
         viewModelScope.launch(Dispatchers.Main) {
@@ -171,7 +171,7 @@ class ContadorViewModel(aplicacion: Application) : AndroidViewModel(aplicacion) 
     }
 
     /**
-     * Permite inicia la cuenta atrás visual, actualizando el formato
+     * Permite iniciar la cuenta atrás visualmente, actualizando el formato
      * del tiempo cada segundo y gestionando el evento de finalización
      */
     fun iniciarContador(totalSegundos: Int) {

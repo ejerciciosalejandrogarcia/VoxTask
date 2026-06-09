@@ -64,6 +64,10 @@ fun ClimaScreen(
     val paddingHorizontalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_horizontal)
     val paddingVerticalPantalla = dimensionResource(R.dimen.cambiar_contrasena_padding_card_vertical)
     val tamanoIconoClimaPrincipal = dimensionResource(R.dimen.cambiar_contrasena_icono_email)
+    val tamanoIconoSinUbicacion = dimensionResource(R.dimen.clima_tamano_icono_sin_ubicacion)
+    val tamanoIndicadorCarga = dimensionResource(R.dimen.clima_tamano_indicador_carga)
+    val paddingIndicadorCarga = dimensionResource(R.dimen.clima_padding_indicador_carga)
+    val redondeoBoton = dimensionResource(R.dimen.clima_redondeo_boton)
     val colorArribaPorDefecto = MaterialTheme.colorScheme.surface
     val colorAbajoPorDefecto = MaterialTheme.colorScheme.surfaceVariant
     val (colorArriba, colorAbajo, iconoClima) = if (estadoUi.datos != null) {
@@ -195,7 +199,7 @@ fun ClimaScreen(
                                     Icon(
                                         imageVector = Icons.Default.LocationOff,
                                         contentDescription = stringResource(R.string.desc_clima_sin_ubicacion),
-                                        modifier = Modifier.size(64.dp),
+                                        modifier = Modifier.size(tamanoIconoSinUbicacion),
                                         tint = colorDeContenido.copy(alpha = 0.4f)
                                     )
                                     Spacer(Modifier.height(espaciado.m))
@@ -208,7 +212,7 @@ fun ClimaScreen(
                                     Spacer(Modifier.height(espaciado.m))
                                     Button(
                                         onClick = { lanzador.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
-                                        shape = RoundedCornerShape(14.dp)
+                                        shape = RoundedCornerShape(redondeoBoton)
                                     ) {
                                         Text(text = stringResource(R.string.clima_btn_permitir), fontSize = tamano.textoBody)
                                     }
@@ -228,8 +232,8 @@ fun ClimaScreen(
                                     if (estadoUi.estaCargando) {
                                         CircularProgressIndicator(
                                             modifier = Modifier
-                                                .size(20.dp)
-                                                .padding(4.dp),
+                                                .size(tamanoIndicadorCarga)
+                                                .padding(paddingIndicadorCarga),
                                             strokeWidth = 2.dp,
                                             color = colorDeContenido
                                         )
@@ -245,7 +249,7 @@ fun ClimaScreen(
                                             containerColor = MaterialTheme.colorScheme.primary,
                                             contentColor = MaterialTheme.colorScheme.onPrimary
                                         ),
-                                        shape = RoundedCornerShape(14.dp)
+                                        shape = RoundedCornerShape(redondeoBoton)
                                     ) {
                                         Text(
                                             text = stringResource(R.string.clima_btn_reintentar),
@@ -283,6 +287,8 @@ private fun TarjetaClimaContenido(
     espaciado: com.example.voxtask.utils.Espaciado,
     tamanoIconoClima: androidx.compose.ui.unit.Dp
 ) {
+    val tamanoIconosSecundarios = dimensionResource(R.dimen.clima_tamano_iconos_secundarios)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(espaciado.m)
@@ -296,7 +302,7 @@ private fun TarjetaClimaContenido(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = stringResource(R.string.desc_clima_marcador_posicion),
                     tint = colorTexto,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier.size(tamanoIconosSecundarios)
                 )
                 Text(
                     text = datos.municipio,
@@ -354,7 +360,8 @@ private fun TarjetaClimaContenido(
                 colorTexto = colorTexto,
                 tamano = tamano,
                 descripcionIcono = stringResource(R.string.desc_clima_icono_sensacion),
-                espaciadoIntermedio = espaciado.s
+                espaciadoIntermedio = espaciado.s,
+                tamanoIcono = tamanoIconosSecundarios
             )
             DatoClimaItem(
                 icono = Icons.Default.Air,
@@ -363,7 +370,8 @@ private fun TarjetaClimaContenido(
                 colorTexto = colorTexto,
                 tamano = tamano,
                 descripcionIcono = stringResource(R.string.desc_clima_icono_viento),
-                espaciadoIntermedio = espaciado.s
+                espaciadoIntermedio = espaciado.s,
+                tamanoIcono = tamanoIconosSecundarios
             )
             DatoClimaItem(
                 icono = Icons.Default.WaterDrop,
@@ -372,7 +380,8 @@ private fun TarjetaClimaContenido(
                 colorTexto = colorTexto,
                 tamano = tamano,
                 descripcionIcono = stringResource(R.string.desc_clima_icono_humedad),
-                espaciadoIntermedio = espaciado.s
+                espaciadoIntermedio = espaciado.s,
+                tamanoIcono = tamanoIconosSecundarios
             )
         }
     }
@@ -388,7 +397,8 @@ private fun DatoClimaItem(
     colorTexto: Color,
     tamano: TamanioPantalla,
     descripcionIcono: String,
-    espaciadoIntermedio: androidx.compose.ui.unit.Dp
+    espaciadoIntermedio: androidx.compose.ui.unit.Dp,
+    tamanoIcono: androidx.compose.ui.unit.Dp
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -398,7 +408,7 @@ private fun DatoClimaItem(
             imageVector = icono,
             contentDescription = descripcionIcono,
             tint = colorTexto.copy(alpha = 0.9f),
-            modifier = Modifier.size(26.dp)
+            modifier = Modifier.size(tamanoIcono)
         )
         Text(
             text = valor,

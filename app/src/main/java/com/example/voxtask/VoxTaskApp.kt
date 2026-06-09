@@ -73,7 +73,7 @@ enum class VoxTaskScreen {
 
 /**
  * Esta funcion es el componente principal que coordina la navegación,
- * los estados de autenticación y la adaptación de la aplicación.
+ * los estados de autenticación y la adaptación de la aplicación
  */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -125,7 +125,7 @@ fun VoxTaskApp(
             }
         }
         /**
-         * Establece las rutas y las transiciones entre las distintas pantallas.
+         * Establece las rutas y las transiciones entre las distintas pantallas
          */
         NavHost(
             navController = navController,
@@ -135,7 +135,7 @@ fun VoxTaskApp(
             composable(route = VoxTaskScreen.Inicio_sesion.name) {
                 InicioSesionScreen(
                     alIniciarSesionExitosamente = {
-                        navController.navigate(VoxTaskScreen.Inicio.name) {
+                        navController.navigate(VoxTaskScreen.Verificacion.name) {
                             popUpTo(VoxTaskScreen.Inicio_sesion.name) { inclusive = true }
                         }
                     },

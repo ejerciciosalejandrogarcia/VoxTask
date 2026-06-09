@@ -36,7 +36,7 @@ class ListaCompraViewModel : ViewModel() {
         }
     }
 
-    /** Permite recibir el texto transformado por voz y lo convierte a minusculas y elimina los espacions */
+    /** Permite recibir el texto transformado por voz y lo convierte a minusculas y elimina los espacios */
     fun onTextoRecibido(texto: String) {
         procesarComando(texto.lowercase().trim())
     }

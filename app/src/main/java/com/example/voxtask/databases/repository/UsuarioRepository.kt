@@ -103,7 +103,7 @@ class UsuarioRepository : UsuarioDao {
     }
 
     /**
-     * Verifica si un correo electrónico ya está registrado en Firebase Authentication.
+     * Verifica si un correo electrónico ya está registrado en Firebase Authentication
      */
     override suspend fun correoEstaRegistrado(email: String): Boolean {
         return try {

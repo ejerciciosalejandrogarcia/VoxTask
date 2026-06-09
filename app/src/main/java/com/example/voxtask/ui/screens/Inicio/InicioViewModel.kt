@@ -16,7 +16,7 @@ class InicioViewModel : ViewModel() {
     var abrirClima: () -> Unit = {}
 
 
-    /** Permite recibir el texto transformado por voz y lo convierte a minusculas y elimina los espacions */
+    /** Permite recibir el texto transformado por voz y lo convierte a minusculas y elimina los espacios */
     fun onTextoRecibido(texto: String) {
         _textoReconocido.value = texto
         procesarComando(texto)

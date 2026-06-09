@@ -256,7 +256,7 @@
 
 
 
-
+    <!-- Clima Screen -->
     <string name="clima_info_plantilla">Mostra il meteo della tua posizione attuale</string>
     <string name="clima_sin_ubicacion">Attiva la posizione para vedere il meteo</string>
     <string name="clima_btn_permitir">Consenti posizione</string>

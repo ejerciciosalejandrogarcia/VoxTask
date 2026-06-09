@@ -278,7 +278,7 @@ class RecordatorioViewModel : ViewModel() {
 
     /**
      * Permite detectar si el comando de voz del usuario solicita la
-     * creación de evento segun el idioma seleccionado.
+     * creación de evento segun el idioma seleccionado
      */
     private fun esComandoCrear(texto: String): Boolean {
         val palabras = listOf(
@@ -298,7 +298,7 @@ class RecordatorioViewModel : ViewModel() {
 
     /**
      * Permite detectar si el comando de voz del usuario solicita la
-     * eliminacion de evento segun el idioma seleccionado.
+     * eliminacion de evento segun el idioma seleccionado
      */
     private fun esComandoEliminar(texto: String): Boolean {
         val palabras = listOf(
@@ -340,7 +340,7 @@ class RecordatorioViewModel : ViewModel() {
     }
 
 
-    /** Permite extraer el año de*/
+    /** Permite extraer el año*/
     private fun extraerAnio(texto: String): Int? {
         return Regex("""\b(20\d{2}|21\d{2})\b""").find(texto)?.value?.toIntOrNull()
     }
@@ -444,7 +444,7 @@ class RecordatorioViewModel : ViewModel() {
 
 
     /**
-     * Permite obtener el código de idioma configurado en el motor de voz.
+     * Permite obtener el código de idioma configurado en el motor de voz
      */
     private fun idioma(): String = try {
         com.example.voxtask.utils.TextoAVoz.localeActual.language
@@ -744,13 +744,13 @@ class RecordatorioViewModel : ViewModel() {
     }
 
     /**
-     * Permite envía el mensaje de texto al motor de voz mediante
+     * Permite envíar el mensaje de texto al motor de voz
      */
     private fun hablar(mensaje: String) {
         onHablar?.invoke(mensaje)
     }
     /**
-     * Permite resetear el flujo de voz y limpia los datos,
+     * Permite resetear el flujo de voz y limpia los datos
      */
     private fun resetFlujo() {
         flujoActual    = FlujoVoz.NINGUNO

@@ -105,8 +105,8 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Permite analizar y procesa los comandos de navegación recibidos,
-     * redirigiendo al usuario a la pantalla correspondiente según la acción o enlace.
+     * Permite analizar y procesar los comandos de navegación recibidos,
+     * redirigiendo al usuario a la pantalla correspondiente según la acción o enlace
      */
     private fun manejarIntent(intencion: Intent?) {
         if (intencion?.action == "ABRIR_CONTADOR") {

@@ -54,7 +54,7 @@ class ClimaViewModel : ViewModel() {
     }
 
     /**
-     * Permite limpiar los mensajes de error de la pantalla 'Clima'
+     * Permite limpiar los mensajes de error
      */
     fun limpiarError() {
         _uiState.value = _uiState.value.copy(

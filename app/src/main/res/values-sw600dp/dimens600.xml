@@ -115,4 +115,11 @@
     <dimen name="recordatorio_indicador_evento">10dp</dimen>
     <dimen name="recordatorio_icono_eliminar">22dp</dimen>
     <dimen name="recordatorio_padding_fila_evento">16dp</dimen>
+
+    <!-- Clima Screen -->
+    <dimen name="clima_tamano_icono_sin_ubicacion">68dp</dimen>
+    <dimen name="clima_tamano_indicador_carga">21dp</dimen>
+    <dimen name="clima_padding_indicador_carga">4dp</dimen>
+    <dimen name="clima_tamano_iconos_secundarios">27dp</dimen>
+    <dimen name="clima_redondeo_boton">14dp</dimen>
 </resources>

@@ -73,7 +73,7 @@ fun VerificacionScreen(
     /**
      * Gestiona los siguientes efectos:
      * navegación al inicio de la aplicacion despues de que  sea exito la verificacion, control de temporizador de caducidad y
-     * visualización de mensajes de error mediante SnackBar
+     * visualización y gestion de mensajes de error mediante SnackBar
      */
     LaunchedEffect(estadoUi.verificado) {
         if (estadoUi.verificado) {
@@ -97,16 +97,6 @@ fun VerificacionScreen(
                 segundosRestantes--
             }
             expirado = true
-        }
-    }
-
-    LaunchedEffect(estadoUi.mensajeError) {
-        estadoUi.mensajeError?.let { resId ->
-            snackbarHostState.showSnackbar(
-                message = contexto.getString(resId),
-                duration = SnackbarDuration.Short
-            )
-            viewModel.limpiarError()
         }
     }
 
@@ -315,7 +305,6 @@ fun VerificacionScreen(
                                     .onKeyEvent { evento ->
                                         if (evento.key == Key.Backspace && evento.type == KeyEventType.KeyDown) {
                                             if (codigo[i].isEmpty() && i > 0) {
-                                                // Campo vacío → borra el anterior y retrocede
                                                 val lista = codigo.toMutableList()
                                                 lista[i - 1] = ""
                                                 codigo = lista

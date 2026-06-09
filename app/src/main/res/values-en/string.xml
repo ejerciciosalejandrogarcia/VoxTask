@@ -195,7 +195,6 @@
 
     <!-- Inicio de Sesión Screen -->
     <string name="desc_logo_google">Google logo</string>
-
     <string name="campo_nombre_usuario">Username</string>
     <string name="campo_contrasenia">Password</string>
     <string name="btn_iniciar_sesion">Log in</string>
@@ -256,7 +255,7 @@
     <string name="error_codigo_incorrecto">Incorrect code, please try again</string>
     <string name="txt_error_envio_codigo">Error sending code. Try again.</string>
 
-
+    <!-- Clima Screen -->
     <string name="clima_info_plantilla">Shows the weather of your current location</string>
     <string name="clima_sin_ubicacion">Enable location to view the weather</string>
     <string name="clima_btn_permitir">Allow location</string>

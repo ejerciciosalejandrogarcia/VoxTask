@@ -254,7 +254,7 @@
     <string name="error_codigo_incorrecto">Código incorreto, tente novamente</string>
     <string name="txt_error_envio_codigo">Erro ao enviar o código. Tente novamente.</string>
 
-
+    <!-- Clima Screen -->
     <string name="clima_info_plantilla">Mostra o clima da sua localização atual</string>
     <string name="clima_sin_ubicacion">Ative a localização para ver o clima</string>
     <string name="clima_btn_permitir">Permitir localização</string>

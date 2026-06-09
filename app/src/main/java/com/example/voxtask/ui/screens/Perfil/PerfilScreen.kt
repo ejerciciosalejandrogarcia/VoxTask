@@ -28,12 +28,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.voxtask.utils.LocalEspaciado
 import com.example.voxtask.utils.LocalTamanioPantalla
-import com.example.voxtask.utils.TamanioPantalla
 import com.example.voxtask.utils.anchoMaximoContenido
-import com.example.voxtask.utils.textoBody
 import com.example.voxtask.utils.PlantillaBase
 import com.example.voxtask.utils.PlantillaBaseViewModel
 import com.example.voxtask.R
+import androidx.compose.foundation.background
 
 /**
  * Pantalla principal
@@ -101,7 +100,10 @@ fun PerfilScreen(
                 }
 
                 Column(
-                    modifier = modificadorContenido,
+                    modifier = modificadorContenido
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
+                        .padding(espaciado.m),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     /** Avatar */

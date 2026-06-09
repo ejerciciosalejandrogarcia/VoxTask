@@ -146,7 +146,7 @@ class InicioSesionViewModel(
     }
 
     /**
-     * Permite limpiar los mensajes de error de la pantalla 'Cambiar Contrasenia'
+     * Permite limpiar los mensajes de error
      */
     fun limpiarError() { _estadoUi.value = _estadoUi.value.copy(mensajeError = null) }
     /**

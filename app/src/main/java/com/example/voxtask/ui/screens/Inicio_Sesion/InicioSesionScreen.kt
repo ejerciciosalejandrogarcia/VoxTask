@@ -73,7 +73,7 @@
 
         /**
          * Gestiona el estado y la navegacion del inicio de sesion. Si el usuario se pudo loguear,
-         * se le redirije a la pantall de 'Verificacion' y restablece el estado
+         * se le redirije a la pantalla de 'Verificacion' y restablece el estado
          * de inicio de sesión
          */
         LaunchedEffect(estadoUi.inicioSesionExitoso) {

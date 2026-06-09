@@ -148,7 +148,7 @@ class PerfilViewModel : ViewModel() {
                         _estadoUi.value = _estadoUi.value.copy(
                             operacionExitosa = true,
                             modoEdicion = false,
-                            mensajeExito = R.string.msg_perfil_actualizado  // ← antes era mensajeError
+                            mensajeExito = R.string.msg_perfil_actualizado
                         )
 
                     } catch (e: Exception) {
@@ -172,7 +172,7 @@ class PerfilViewModel : ViewModel() {
                 val idUsuario = auth.currentUser?.uid ?: return@launch
                 firestore.collection("usuarios").document(idUsuario)
                     .update("avatar", nombreAvatar).await()
-                _estadoUi.value = _estadoUi.value.copy(mensajeExito = R.string.msg_avatar_actualizado)  // ← antes era mensajeError
+                _estadoUi.value = _estadoUi.value.copy(mensajeExito = R.string.msg_avatar_actualizado)
             } catch (e: Exception) {
                 _estadoUi.value = _estadoUi.value.copy(mensajeError = R.string.error_actualizar_avatar)
             }

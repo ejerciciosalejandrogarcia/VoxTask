@@ -43,7 +43,7 @@ class CorreoViewModel : ViewModel() {
     /**
      * Permite validar la cuenta de Google,
      * obtiene el token de acceso, lo almacena en Firestore
-     * y dispara la carga de los correos electrónicos.
+     * y dispara la carga de los correos electrónicos
      */
     fun iniciar(contexto: Context) {
         viewModelScope.launch {
@@ -119,7 +119,7 @@ class CorreoViewModel : ViewModel() {
     }
 
     /**
-     * Obtiene el token de acceso de Google, lo guarda en Firestore y dispara la carga inicial de los correos.
+     * Obtiene el token de acceso de Google, lo guarda en Firestore y dispara la carga inicial de los correos
      */
     fun guardarTokenYCargarCorreos(contexto: Context, codigoAutorizacion: String?) {
         viewModelScope.launch {

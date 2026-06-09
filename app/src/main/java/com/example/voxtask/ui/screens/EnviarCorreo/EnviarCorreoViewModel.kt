@@ -32,7 +32,7 @@ enum class PasoEnvio {
 class EnviarCorreoViewModel : ViewModel() {
 
     /**
-     * Permite autenticar la aplicación ante los servicios de Google Cloud Platform.
+     * Permite autenticar la aplicación ante los servicios de Google Cloud Platform
      */
     companion object {
         const val ID_CLIENTE_WEB = "820155883821-7trt2n6ghi9hlk6m039rl376reh5vjsj.apps.googleusercontent.com"
@@ -52,7 +52,7 @@ class EnviarCorreoViewModel : ViewModel() {
 
     /**
      * Permite devolver el cliente de inicio de sesión configurado para leer y enviar
-     * correos electrónicos mediante la API de Gmail.
+     * correos electrónicos mediante la API de Gmail
      */
     fun obtenerClienteGoogle(contexto: Context): GoogleSignInClient {
         return GoogleSignIn.getClient(
@@ -100,7 +100,7 @@ class EnviarCorreoViewModel : ViewModel() {
 
     /**
      * Permite gestionar el flujo de vinculación con Google, controlando los estados de carga
-     * y avisarle al usuario tras completar el proceso.
+     * y avisarle al usuario tras completar el proceso
      */
     fun guardarToken(contexto: Context) {
         viewModelScope.launch {
@@ -115,7 +115,7 @@ class EnviarCorreoViewModel : ViewModel() {
     }
 
     /**
-     * Permite obtener un token de acceso fresco para la API de Gmail.
+     * Permite obtener un token de acceso fresco para la API de Gmail
      */
     private suspend fun obtenerToken(contexto: Context) {
         try {
@@ -194,7 +194,7 @@ class EnviarCorreoViewModel : ViewModel() {
     }
 
     /**
-     * Permite enviar el correo configurado tras la confirmación del usuario.
+     * Permite enviar el correo configurado tras la confirmación del usuario
      */
     fun confirmarEnvio(contexto: Context) {
         enviarCorreo(contexto)
@@ -267,10 +267,10 @@ class EnviarCorreoViewModel : ViewModel() {
             TextoAVoz.hablar(contexto, contexto.getString(R.string.txt_enviarcorreo_paso_destinatario_pregunta))
         }
     }
+
     /**
      * Permite enviar el error al snackbar
      */
-
     fun enviarError(resId: Int) {
         viewModelScope.launch {
             _canalError.send(resId)

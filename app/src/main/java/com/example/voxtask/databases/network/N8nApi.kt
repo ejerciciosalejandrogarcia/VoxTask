@@ -12,7 +12,7 @@ import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
 /**
- * Cuerpo de la petición para enviar un correo a través del flujo de n8n
+ * Cuerpo de la petición para enviar un correo
  */
 data class EnviarCorreoRequest(
     val token: String,
@@ -59,7 +59,7 @@ data class BienvenidaRequest(
 )
 
 /**
- * Respuesta del webhook de verificación.
+ * Respuesta del webhook de verificación
  */
 data class VerificacionResponse(
     val success: Boolean,
@@ -110,8 +110,8 @@ interface ServicioN8n {
 }
 
 /**
- * Configura el cliente de red para comunicarse con n8n,
- * gestionando tiempos de espera y la conversión de datos JSON.
+ * Configuracion del cliente de red para comunicarse con n8n,
+ * gestionando tiempos de espera y la conversión de datos
  */
 object ClienteN8n {
     const val URL = "http://192.168.1.49:5678/"

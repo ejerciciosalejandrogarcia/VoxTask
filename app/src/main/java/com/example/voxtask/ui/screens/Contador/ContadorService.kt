@@ -264,7 +264,7 @@ class ContadorService : Service() {
     }
 
     /**
-     * Indica que el servicio no permite la vinculación (binding) con componentes de la interfaz
+     * Indica que el servicio no permite la vinculación con componentes de la interfaz
      */
     override fun onBind(intento: Intent?): IBinder? = null
 

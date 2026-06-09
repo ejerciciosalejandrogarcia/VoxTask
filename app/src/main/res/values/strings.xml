@@ -2,7 +2,6 @@
     <string name="app_name">VoxTask</string>
     <string name="cerrar_sesion">Cerrar sesión</string>
     <string name="desc_boton_informacion">Información</string>
-
     <string name="txt_error">Error: </string>
 
     <!-- Registro Usuario Screen -->
