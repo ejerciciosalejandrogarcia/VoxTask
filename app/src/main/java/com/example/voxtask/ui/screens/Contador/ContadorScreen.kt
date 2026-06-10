@@ -38,10 +38,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.navigation.NavController
 import com.example.voxtask.databases.model.Usuario
 import com.example.voxtask.ui.theme.VerdePrimario
@@ -56,6 +58,7 @@ import kotlinx.coroutines.tasks.await
 import com.example.voxtask.R
 import com.example.voxtask.services.ContadorService
 import com.example.voxtask.utils.anchoMaximoContenido
+
 /**
  * Pantalla principal
  */
@@ -71,14 +74,18 @@ fun ContadorScreen(
     val espaciado     = LocalEspaciado.current
     val tamano        = LocalTamanioPantalla.current
     val configuracion = LocalConfiguration.current
+    val density       = LocalDensity.current
     val usuario       = FirebaseAuth.getInstance().currentUser
     val uid           = usuario?.uid
-    val esApaisado = configuracion.screenWidthDp > configuracion.screenHeightDp
+    val esApaisado    = configuracion.screenWidthDp > configuracion.screenHeightDp
+
+    val anchoEnDp = with(density) { configuracion.screenWidthDp.dp }
     val tamanoCirculo = if (esApaisado) {
         dimensionResource(R.dimen.contador_circulo_landscape)
     } else {
-        dimensionResource(R.dimen.contador_circulo)
+        (anchoEnDp * 0.65f).coerceAtMost(260.dp)
     }
+
     val tamanoBoton      = dimensionResource(R.dimen.contador_boton)
     val tamanoIconoBoton = dimensionResource(R.dimen.contador_icono_boton)
     val anchoMaximoContenido = tamano.anchoMaximoContenido
@@ -96,6 +103,7 @@ fun ContadorScreen(
             lanzadorPermiso.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
+
     /**
      * Escucha si el usuario cancela el contador desde la notificación
      * y actualiza la pantalla en consecuencia
@@ -183,7 +191,8 @@ fun ContadorScreen(
         Box(
             modifier         = Modifier
                 .fillMaxSize()
-                .padding(valoresPadding),
+                .padding(valoresPadding)
+                .verticalScroll(rememberScrollState()),
             contentAlignment = Alignment.Center
         ) {
             AnimatedVisibility(visible = viewModel.mostrarContador) {
@@ -199,7 +208,6 @@ fun ContadorScreen(
                     modifier = modificadorContenido
                         .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
-                        .verticalScroll(rememberScrollState())
                         .padding(espaciado.xl),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -216,9 +224,14 @@ fun ContadorScreen(
                     ) {
                         Text(
                             text       = viewModel.tiempoFormato,
-                            style      = MaterialTheme.typography.displayMedium,
+                            style      = if (esApaisado)
+                                MaterialTheme.typography.displayMedium
+                            else
+                                MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
-                            color      = MaterialTheme.colorScheme.primary
+                            color      = MaterialTheme.colorScheme.primary,
+                            maxLines   = 1,
+                            softWrap   = false
                         )
                     }
 
